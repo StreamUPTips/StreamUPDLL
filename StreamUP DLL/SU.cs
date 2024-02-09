@@ -41,7 +41,7 @@ namespace StreamUPDLL {
             }
 
             using (StreamWriter file = new StreamWriter(todayPath, true)) {
-                string formattedLogMessage = $"[{today.ToString("yyyy-MM-dd HH:mm:ss:ff")}] [{productName}] :: {logMessage}";
+                string formattedLogMessage = $"[{today.ToString("yyyy-MM-dd HH:mm:ss:fff")}] [{productName}] :: {logMessage}";
                 file.Write($"\r\n{formattedLogMessage}");
             }
         }
