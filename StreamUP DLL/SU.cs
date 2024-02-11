@@ -26,7 +26,7 @@ namespace StreamUP {
 
         // PULL SCENE ITEM TRANSFORM
         #region
-        public static JObject ObsPullSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsInstance, int parentSourceType, string parentSource, string childSource) {
+        public static JObject SUObsPullSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsInstance, int parentSourceType, string parentSource, string childSource) {
             string logName = $"{productName}-ObsPullSceneItemTransform";
             CPH.SUWriteLog("Method Started", logName);
 
