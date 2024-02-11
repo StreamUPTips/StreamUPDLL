@@ -7,12 +7,15 @@
     <ProjectGuid>{38806BCB-0167-4A7E-AC8E-EDE4E72F380C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StreamUPDLL</RootNamespace>
+    <RootNamespace>StreamUP</RootNamespace>
     <AssemblyName>StreamUP</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>S:\Tools\StreamerBot\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Streamer.bot.Plugin.Interface">
       <HintPath>S:\Tools\StreamerBot\Streamer.bot.Plugin.Interface.dll</HintPath>
     </Reference>
