@@ -21,12 +21,14 @@ namespace StreamUP {
             string jsonResponse = CPH.ObsSendRaw("GetVideoSettings", "{}", obsInstance);
             if (jsonResponse == null) {
                 CPH.SUWriteLog("Scene Item ID not found", logName);
+                CPH.SUWriteLog($"Method complete", logName);
                 return null;
             }
 
             // Parse as JObject and return
             JObject obsResponse = JObject.Parse(jsonResponse);
             CPH.SUWriteLog($"Returning obsResponse: {obsResponse.ToString()}", logName);
+            CPH.SUWriteLog($"Method complete", logName);
             return obsResponse;
         }
         #endregion
@@ -39,16 +41,17 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull sceneItemId
-            CPH.SUWriteLog($"Pulling scene item ID for {parentSource}", logName);
+            CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
             int sceneItemId = CPH.SUObsPullSceneItemId(productName, obsInstance, parentSourceType, parentSource, childSource);
             if (sceneItemId == -1) {
                 // Log an error if the Scene Item ID is not found
                 CPH.SUWriteLog("Scene Item ID not found", logName);
+                CPH.SUWriteLog($"Method complete", logName);
                 return null;
             }
 
             // Extract the transformation data of the source
-            CPH.SUWriteLog($"Sending request to get scene item transform for (sceneItemId: {sceneItemId}) on (parentSource: {parentSource})", logName);
+            CPH.SUWriteLog($"Sending request to get scene item transform for (sceneItemId: [{sceneItemId}]) on (parentSource: [{parentSource}])", logName);
             string jsonResponse = CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsInstance);
 
             // Parse the JSON response
@@ -56,12 +59,14 @@ namespace StreamUP {
             // Check if the obsResponse data is not null
             if (obsResponse == null) {
                 CPH.SUWriteLog($"No transform data found in jsonResponse", logName);
+                CPH.SUWriteLog($"Method complete", logName);
                 return null;
             }
 
             // Return sceneItemTransform from obsResponse
             JObject transform = obsResponse["sceneItemTransform"] as JObject;
             CPH.SUWriteLog($"Returning obsResponse: {transform.ToString()}", logName);
+            CPH.SUWriteLog($"Method complete", logName);
             return transform;
         }
         #endregion
@@ -84,6 +89,7 @@ namespace StreamUP {
                     break;
                 default:
                     CPH.SUWriteLog($"parentSourceType is incorrectly set to '{parentSourceType}'. 0=Scene, 1=Group", logName);
+                    CPH.SUWriteLog($"Method complete", logName);
                     return -1;
             }
             CPH.SUWriteLog("Received JSON response from OBS", logName);
@@ -100,7 +106,8 @@ namespace StreamUP {
 
             // Pull sceneItemId and return
             int sceneItemId = CPH.SUFindSceneItemId(productName, sceneItems, childSource);
-            CPH.SUWriteLog($"Returning sceneItemId for '{childSource}': {sceneItemId}", logName);
+            CPH.SUWriteLog($"Returning sceneItemId: childSource=[{childSource}], sceneItemId=[{sceneItemId}]", logName);
+            CPH.SUWriteLog($"Method complete", logName);
             return sceneItemId;
         }
 
@@ -110,17 +117,19 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
 
             // Find sceneItemId from all sources on scene
-            CPH.SUWriteLog($"Starting search for sceneItemId for source: {childSource}", logName);
+            CPH.SUWriteLog($"Searching for sceneItemId: childSource=[{childSource}]", logName);
             foreach (var item in sceneItems) {
                 string currentItemName = item["sourceName"].ToString();
                 if (currentItemName == childSource) {
                     int sceneItemId = int.Parse(item["sceneItemId"].ToString());
-                    CPH.SUWriteLog($"Found sceneItemId for {childSource}: {sceneItemId}", logName);
+                    CPH.SUWriteLog($"Found sceneItemId: childSource=[{childSource}], sceneItemId=[{sceneItemId}]", logName);
+                    CPH.SUWriteLog($"Method complete", logName);
                     return sceneItemId;
                 }
             }
             // If sceneItemId couldn't be found
             CPH.SUWriteLog($"Couldn't find sceneItemId for {childSource}. The source might not exist on the scene", logName);
+            CPH.SUWriteLog($"Method complete", logName);
             return -1;
         }
         #endregion
@@ -143,7 +152,8 @@ namespace StreamUP {
             """, obsInstance);
 
             // Log setting change
-            CPH.SUWriteLog($"Set source filter settings: sourceName={sourceName}, filterName={filterName}, filterSettings={filterSettings}", logName);
+            CPH.SUWriteLog($"Set source filter settings: sourceName=[{sourceName}], filterName=[{filterName}], filterSettings=[{filterSettings}]", logName);
+            CPH.SUWriteLog($"Method complete", logName);
         }
         #endregion
 
@@ -164,7 +174,8 @@ namespace StreamUP {
             """, obsInstance);
 
             // Log setting change
-            CPH.SUWriteLog($"Set source (input) settings: inputName={inputName}, inputSettings={inputSettings}", logName);
+            CPH.SUWriteLog($"Set source (input) settings: inputName=[{inputName}], inputSettings=[{inputSettings}]", logName);
+            CPH.SUWriteLog($"Method complete", logName);
         }
         #endregion
 
@@ -185,7 +196,8 @@ namespace StreamUP {
             """, obsInstance);
 
             // Log scene transition override change
-            CPH.SUWriteLog($"Set scene transition override: sceneName={sceneName}, transitionName={transitionName}, transitionDuration={transitionDuration}", logName);
+            CPH.SUWriteLog($"Set scene transition override: sceneName=[{sceneName}], transitionName=[{transitionName}], transitionDuration=[{transitionDuration}]", logName);
+            CPH.SUWriteLog($"Method complete", logName);
         }
         #endregion
 
@@ -202,13 +214,18 @@ namespace StreamUP {
             // Check if the data is null
             if (obsResponse == null) {
                 CPH.SUWriteLog($"No data found in obsResponse", logName);
+                CPH.SUWriteLog($"Method complete", logName);
                 return null;
             }
 
             // Return obsResponse
             CPH.SUWriteLog($"Returning obsResponse: {obsResponse.ToString()}", logName);
+            CPH.SUWriteLog($"Method complete", logName);
             return obsResponse;
         }
         #endregion
+    
+    
+    
     }
 }
