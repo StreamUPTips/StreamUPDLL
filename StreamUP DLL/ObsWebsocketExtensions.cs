@@ -105,13 +105,13 @@ namespace StreamUP {
         #region
         public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, int obsInstance, string sourceName, string filterName, string filterSettings) {
             CPH.ObsSendRaw("SetSourceFilterSettings", $$"""
-{
-    "sourceName": "{{sourceName}}",
-    "filterName": "{{filterName}}",
-    "filterSettings": {{{filterSettings}}},
-    "overlay": true
-}
-""", obsInstance);
+            {
+                "sourceName": "{{sourceName}}",
+                "filterName": "{{filterName}}",
+                "filterSettings": {{{filterSettings}}},
+                "overlay": true
+            }
+            """, obsInstance);
         }
         #endregion
 
@@ -119,12 +119,12 @@ namespace StreamUP {
         #region 
         public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, int obsInstance, string inputName, string inputSettings) {
             CPH.ObsSendRaw("SetInputSettings", $$"""
-{
-    "inputName": "{{inputName}}",
-    "inputSettings": {{{inputSettings}}},
-    "overlay": true
-}
-""", obsInstance);
+            {
+                "inputName": "{{inputName}}",
+                "inputSettings": {{{inputSettings}}},
+                "overlay": true
+            }
+            """, obsInstance);
         }
         #endregion
 
@@ -132,12 +132,12 @@ namespace StreamUP {
         #region 
         public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, int obsInstance, string sceneName, string transitionName, int transitionDuration) {
             CPH.ObsSendRaw("SetSceneSceneTransitionOverride", $$"""
-{
-    "sceneName": "{{sceneName}}",
-    "transitionName": {{transitionName}},
-    "transitionDuration": {{transitionDuration}}
-}
-""", obsInstance);
+            {
+                "sceneName": "{{sceneName}}",
+                "transitionName": {{transitionName}},
+                "transitionDuration": {{transitionDuration}}
+            }
+            """, obsInstance);
         }
         #endregion
 

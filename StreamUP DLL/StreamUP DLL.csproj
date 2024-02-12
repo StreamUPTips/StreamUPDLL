@@ -15,7 +15,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,10 +37,10 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>S:\Tools\StreamerBot\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\StreamUP DLL\dlls\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Streamer.bot.Plugin.Interface">
-      <HintPath>S:\Tools\StreamerBot\Streamer.bot.Plugin.Interface.dll</HintPath>
+      <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Plugin.Interface.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
