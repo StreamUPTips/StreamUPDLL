@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,12 +8,7 @@ using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP {
-
-    public static class SU {
-
-        public static string SUGetStreamerBotFolder(this IInlineInvokeProxy CPH) {
-            return AppDomain.CurrentDomain.BaseDirectory;
-        }
+    public static class ObsWebsocketExtensions {
 
         // GET VIDEO SETTINGS
         #region 
@@ -75,7 +70,6 @@ namespace StreamUP {
                 default:
                     CPH.SUWriteLog($"parentSourceType is incorrectly set to '{parentSourceType}'. 0=Scene, 1=Group", logName);
                     return -1;
-                    break;
             }
             CPH.SUWriteLog("Received JSON response from OBS", logName);
 
@@ -111,13 +105,13 @@ namespace StreamUP {
         #region
         public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, int obsInstance, string sourceName, string filterName, string filterSettings) {
             CPH.ObsSendRaw("SetSourceFilterSettings", $$"""
-    {
-        "sourceName": "{{sourceName}}",
-        "filterName": "{{filterName}}",
-        "filterSettings": {{{filterSettings}}},
-        "overlay": true
-    }
-    """, obsInstance);
+{
+    "sourceName": "{{sourceName}}",
+    "filterName": "{{filterName}}",
+    "filterSettings": {{{filterSettings}}},
+    "overlay": true
+}
+""", obsInstance);
         }
         #endregion
 
@@ -125,12 +119,12 @@ namespace StreamUP {
         #region 
         public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, int obsInstance, string inputName, string inputSettings) {
             CPH.ObsSendRaw("SetInputSettings", $$"""
-    {
-        "inputName": "{{inputName}}",
-        "inputSettings": {{{inputSettings}}},
-        "overlay": true
-    }
-    """, obsInstance);
+{
+    "inputName": "{{inputName}}",
+    "inputSettings": {{{inputSettings}}},
+    "overlay": true
+}
+""", obsInstance);
         }
         #endregion
 
@@ -138,12 +132,12 @@ namespace StreamUP {
         #region 
         public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, int obsInstance, string sceneName, string transitionName, int transitionDuration) {
             CPH.ObsSendRaw("SetSceneSceneTransitionOverride", $$"""
-    {
-        "sceneName": "{{sceneName}}",
-        "transitionName": {{transitionName}},
-        "transitionDuration": {{transitionDuration}}
-    }
-    """, obsInstance);
+{
+    "sceneName": "{{sceneName}}",
+    "transitionName": {{transitionName}},
+    "transitionDuration": {{transitionDuration}}
+}
+""", obsInstance);
         }
         #endregion
 
@@ -163,37 +157,5 @@ namespace StreamUP {
             return obsResponse;
         }
         #endregion
-
-        public static void SUWriteLog(this IInlineInvokeProxy CPH, string logMessage, string productName = "General") {
-            string sbFolder = CPH.SUGetStreamerBotFolder();
-            string suFolder = Path.Combine(sbFolder, "StreamUP");
-            string suLogFolder = Path.Combine(suFolder, "logs");
-
-            if (!Directory.Exists(suFolder)) {
-                Directory.CreateDirectory(suFolder);
-            }
-
-            if (!Directory.Exists(suLogFolder)) { 
-                Directory.CreateDirectory(suLogFolder);
-            }
-
-            DateTime today = DateTime.Now;
-
-            string todayFileName = $"{today.ToString("yyyyMMdd")} - StreamUP.log";
-
-            string todayPath = Path.Combine(suLogFolder, todayFileName);
-
-            if (!File.Exists(todayPath)) {
-                using (FileStream fs = File.Create(todayPath)) {
-                    byte[] info = new UTF8Encoding(true).GetBytes("Heyo duckies! New Day!");
-                    fs.Write(info, 0, info.Length);
-                }
-            }
-
-            using (StreamWriter file = new StreamWriter(todayPath, true)) {
-                string formattedLogMessage = $"[{today.ToString("yyyy-MM-dd HH:mm:ss:fff")}] [{productName}] :: {logMessage}";
-                file.Write($"\r\n{formattedLogMessage}");
-            }
-        }
     }
 }
