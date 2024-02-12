@@ -12,9 +12,21 @@ namespace StreamUP {
 
         // GET VIDEO SETTINGS
         #region 
-        public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, int obsInstance) {
+        public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance) {
+            // Load log string
+            string logName = $"{productName}-SUObsGetVideoSettings";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Pull obs video settings
             string jsonResponse = CPH.ObsSendRaw("GetVideoSettings", "{}", obsInstance);
+            if (jsonResponse == null) {
+                CPH.SUWriteLog("Scene Item ID not found", logName);
+                return null;
+            }
+
+            // Parse as JObject and return
             JObject obsResponse = JObject.Parse(jsonResponse);
+            CPH.SUWriteLog($"Returning obsResponse: {obsResponse.ToString()}", logName);
             return obsResponse;
         }
         #endregion
@@ -22,10 +34,11 @@ namespace StreamUP {
         // PULL SCENE ITEM TRANSFORM
         #region
         public static JObject SUObsPullSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsInstance, int parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productName}-ObsPullSceneItemTransform";
+            // Load log string
+            string logName = $"{productName}-SUObsPullSceneItemTransform";
             CPH.SUWriteLog("Method Started", logName);
 
-            // Pull sceneItemID
+            // Pull sceneItemId
             CPH.SUWriteLog($"Pulling scene item ID for {parentSource}", logName);
             int sceneItemId = CPH.SUObsPullSceneItemId(productName, obsInstance, parentSourceType, parentSource, childSource);
             if (sceneItemId == -1) {
@@ -34,20 +47,21 @@ namespace StreamUP {
                 return null;
             }
 
-            // Initialise a variable to store the JSON response
-            string jsonResponse = "";
             // Extract the transformation data of the source
             CPH.SUWriteLog($"Sending request to get scene item transform for (sceneItemId: {sceneItemId}) on (parentSource: {parentSource})", logName);
-            jsonResponse = CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsInstance);
+            string jsonResponse = CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsInstance);
+
             // Parse the JSON response
-            var json = JObject.Parse(jsonResponse);
-            var transform = json["sceneItemTransform"] as JObject;
-            // Check if the transform data is not null
-            if (transform == null) {
+            var obsResponse = JObject.Parse(jsonResponse);
+            // Check if the obsResponse data is not null
+            if (obsResponse == null) {
                 CPH.SUWriteLog($"No transform data found in jsonResponse", logName);
                 return null;
             }
-            CPH.SUWriteLog($"{transform.ToString()}", logName);
+
+            // Return sceneItemTransform from obsResponse
+            JObject transform = obsResponse["sceneItemTransform"] as JObject;
+            CPH.SUWriteLog($"Returning obsResponse: {transform.ToString()}", logName);
             return transform;
         }
         #endregion
@@ -55,7 +69,8 @@ namespace StreamUP {
         // PULL SCENE ITEM ID
         #region 
         public static int SUObsPullSceneItemId(this IInlineInvokeProxy CPH, string productName, int obsInstance, int parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productName}-ObsPullSceneItemId";
+            // Load log string
+            string logName = $"{productName}-SUObsPullSceneItemId";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull sceneItemLists (Group or Scene)
@@ -83,27 +98,41 @@ namespace StreamUP {
                 CPH.SUWriteLog($"Found {sceneItems.Count} scene item(s) in jsonResponse", logName);
             }
 
-            // Pull sceneItemId
-            int sceneItemId = CPH.SUFindSceneItemId(sceneItems, childSource);
+            // Pull sceneItemId and return
+            int sceneItemId = CPH.SUFindSceneItemId(productName, sceneItems, childSource);
             CPH.SUWriteLog($"Returning sceneItemId for '{childSource}': {sceneItemId}", logName);
-
             return sceneItemId;
         }
 
-        private static int SUFindSceneItemId(this IInlineInvokeProxy CPH, JArray sceneItems, string childSource) {
+        private static int SUFindSceneItemId(this IInlineInvokeProxy CPH, string productName, JArray sceneItems, string childSource) {
+            // Load log string
+            string logName = $"{productName}-SUFindSceneItemId";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Find sceneItemId from all sources on scene
+            CPH.SUWriteLog($"Starting search for sceneItemId for source: {childSource}", logName);
             foreach (var item in sceneItems) {
                 string currentItemName = item["sourceName"].ToString();
                 if (currentItemName == childSource) {
-                    return int.Parse(item["sceneItemId"].ToString());
+                    int sceneItemId = int.Parse(item["sceneItemId"].ToString());
+                    CPH.SUWriteLog($"Found sceneItemId for {childSource}: {sceneItemId}", logName);
+                    return sceneItemId;
                 }
             }
+            // If sceneItemId couldn't be found
+            CPH.SUWriteLog($"Couldn't find sceneItemId for {childSource}. The source might not exist on the scene", logName);
             return -1;
         }
         #endregion
 
         // SET SOURCE FILTER SETTINGS
         #region
-        public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, int obsInstance, string sourceName, string filterName, string filterSettings) {
+        public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName, string filterName, string filterSettings) {
+            // Load log string
+            string logName = $"{productName}-SUObsSetSourceFilterSettings";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Set source filter settings
             CPH.ObsSendRaw("SetSourceFilterSettings", $$"""
             {
                 "sourceName": "{{sourceName}}",
@@ -112,12 +141,20 @@ namespace StreamUP {
                 "overlay": true
             }
             """, obsInstance);
+
+            // Log setting change
+            CPH.SUWriteLog($"Set source filter settings: sourceName={sourceName}, filterName={filterName}, filterSettings={filterSettings}", logName);
         }
         #endregion
 
         // SET SOURCE (INPUT) SETTINGS
         #region 
-        public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, int obsInstance, string inputName, string inputSettings) {
+        public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance, string inputName, string inputSettings) {
+            // Load log string
+            string logName = $"{productName}-SUObsSetInputSettings";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Set source (input) settings
             CPH.ObsSendRaw("SetInputSettings", $$"""
             {
                 "inputName": "{{inputName}}",
@@ -125,12 +162,20 @@ namespace StreamUP {
                 "overlay": true
             }
             """, obsInstance);
+
+            // Log setting change
+            CPH.SUWriteLog($"Set source (input) settings: inputName={inputName}, inputSettings={inputSettings}", logName);
         }
         #endregion
 
         // SET SCENE TRANSITION FOR SCENE
         #region 
-        public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, int obsInstance, string sceneName, string transitionName, int transitionDuration) {
+        public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sceneName, string transitionName, int transitionDuration) {
+            // Load log string
+            string logName = $"{productName}-SUObsSetSceneSceneTransitionOverride";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Set scene transition override
             CPH.ObsSendRaw("SetSceneSceneTransitionOverride", $$"""
             {
                 "sceneName": "{{sceneName}}",
@@ -138,15 +183,20 @@ namespace StreamUP {
                 "transitionDuration": {{transitionDuration}}
             }
             """, obsInstance);
+
+            // Log scene transition override change
+            CPH.SUWriteLog($"Set scene transition override: sceneName={sceneName}, transitionName={transitionName}, transitionDuration={transitionDuration}", logName);
         }
         #endregion
 
         // GET SOURCE FILTER
         #region 
         public static JObject SUObsGetSourceFilter(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName, string filterName) {
+            // Load log string
             string logName = $"{productName}-ObsGetSourceFilter";
             CPH.SUWriteLog("Method Started", logName);
 
+            // Pull source filter
             string jsonResponse = CPH.ObsSendRaw("GetSourceFilter", "{\"sourceName\":\"" + sourceName + "\",\"filterName\":\"" + filterName + "\"}", obsInstance);
             var obsResponse = JObject.Parse(jsonResponse);
             // Check if the data is null
@@ -154,6 +204,9 @@ namespace StreamUP {
                 CPH.SUWriteLog($"No data found in obsResponse", logName);
                 return null;
             }
+
+            // Return obsResponse
+            CPH.SUWriteLog($"Returning obsResponse: {obsResponse.ToString()}", logName);
             return obsResponse;
         }
         #endregion
