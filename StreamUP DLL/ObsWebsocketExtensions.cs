@@ -225,7 +225,22 @@ namespace StreamUP {
         }
         #endregion
     
-    
+        // GET SOURCE FILTER LIST
+        #region 
+        public static JArray SUObsGetSourceFilterList(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName)
+        {
+            // Load log string
+            string logName = $"{productName}-ObsGetSourceFilter";
+            CPH.SUWriteLog("Method Started", logName);
+            
+            string jsonResponse = CPH.ObsSendRaw("GetSourceFilterList", $"{{\"sourceName\":\"{sourceName}\"}}", obsInstance);
+            JObject responseObj = JObject.Parse(jsonResponse);
+            JArray filters = (JArray)responseObj["filters"];
+            CPH.SUWriteLog($"Method complete", logName);
+            return filters;
+        }
+
+        #endregion
     
     }
 }
