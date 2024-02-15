@@ -56,6 +56,8 @@
     <Compile Include="GenericExtensions.cs" />
     <Compile Include="ObsWebSocketExtensions.cs" />
     <Compile Include="ValidationExtensions.cs" />
+    <Compile Include="UIExtensions.cs" />
+    <Compile Include="CheckObsPlugins.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

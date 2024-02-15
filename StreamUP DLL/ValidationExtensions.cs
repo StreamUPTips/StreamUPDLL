@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
@@ -12,22 +8,30 @@ namespace StreamUP {
 
     public static class ValidationExtensions {
 
-        public static bool SUInitialiseProduct(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsInstance, string sceneName)
+        public static bool SUInitialiseProduct(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, string settingsAction)
         {
             // Load log string
             string logName = $"{productName}-SUInitialiseProduct";
             CPH.SUWriteLog("Method Started", logName);
 
+            // Check product settings have been run
+            if (!CPH.SUCheckProductSettingsLoaded(productNumber, productName, settingsAction))
+            {
+                CPH.SUWriteLog("Settings action has not been run. Initialisation aborted.", logName);
+                return false; // Stop execution since OBS is not connected
+            }     
+
             // Check if obs is connected
+            int obsInstance = CPH.GetGlobalVar<int>($"{productNumber}_obsInstance", true);
             if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsInstance))
             {
-                CPH.SUWriteLog("OBS is not connected. Initialization aborted.", logName);
+                CPH.SUWriteLog("OBS is not connected. Initialisation aborted.", logName);
                 return false; // Stop execution since OBS is not connected
             }
             // Check if products scene exists
             if (!CPH.SUCheckStreamUPSceneExists(productNumber, productName, sceneName, obsInstance))
             {
-                CPH.SUWriteLog($"Scene '{sceneName}' does not exist. Initialization aborted.", logName);
+                CPH.SUWriteLog($"Scene '{sceneName}' does not exist. Initialisation aborted.", logName);
                 return false; // Stop execution since the scene does not exist
             }
 
@@ -36,6 +40,30 @@ namespace StreamUP {
             return true;
         }
 
+        public static bool SUCheckProductSettingsLoaded(this IInlineInvokeProxy CPH, string productNumber, string productName, string settingsAction)
+        {
+            // Load log string
+            string logName = $"{productName}-SUCheckProductSettingsLoaded";
+            CPH.SUWriteLog("Method Started", logName);
+            if (CPH.GetGlobalVar<string>($"{productNumber}_obsInstance", true) == null)
+            {
+                string error1 = $"There are no {productName} settings found.";
+                string error2 = $"Please run the '{productName} • Settings' Action first.";
+                string error3 = "Press 'Yes' to open these settings automatically.";
+
+                CPH.SUWriteLog(error1, logName);
+                var errorOutput = MessageBox.Show($"{error1}\n\n{error2}\n\n{error3}", $"StreamUP • {productName} Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                if (errorOutput == DialogResult.Yes)
+                {
+                    CPH.RunAction(settingsAction, false);
+                }
+                CPH.SUWriteLog($"Method complete", logName);
+                return false;    
+            }
+            CPH.SUWriteLog($"Method complete", logName);
+            return true;
+        }
+        
         public static bool SUCheckObsIsConnected(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsInstance)
         {
             // Load log string
@@ -148,5 +176,9 @@ namespace StreamUP {
                 return false;
             }
         }
+    
+
+    
+
     }
 }

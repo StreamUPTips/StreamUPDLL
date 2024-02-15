@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP {
@@ -14,6 +15,7 @@ namespace StreamUP {
         public static string SUGetStreamerBotFolder(this IInlineInvokeProxy CPH) {
             return AppDomain.CurrentDomain.BaseDirectory;
         }
+        
         public static void SUWriteLog(this IInlineInvokeProxy CPH, string logMessage, string productName = "General") {
             string sbFolder = CPH.SUGetStreamerBotFolder();
             string suFolder = Path.Combine(sbFolder, "StreamUP");
@@ -56,5 +58,6 @@ namespace StreamUP {
             CPH.SUObsSetInputSettings("GeneralExtensions", obsInstance, inputName, inputSettings);
             CPH.SUWriteLog("Method complete", logName);
         }
+
     }
 }
