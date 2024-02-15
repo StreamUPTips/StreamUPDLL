@@ -99,14 +99,14 @@ namespace StreamUP {
             return true;
         }
     
-        public static bool SUCheckProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsInstance, string sceneName, string sourceName)
+        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsInstance, string sceneName, string sourceName)
         {
             // Load log string
-            string logName = $"{productName}-SUCheckProductObsVersion";
+            string logName = $"{productName}-SUGetProductObsVersion";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull product version from source settings
-            JObject filters = CPH.SUObsGetSourceSettings(productName, obsInstance, sourceName);
+            JObject filters = CPH.SUObsGetInputSettings(productName, obsInstance, sourceName);
 
             // Check if filter names contain the word 'Version'
             string foundVersion = null;
