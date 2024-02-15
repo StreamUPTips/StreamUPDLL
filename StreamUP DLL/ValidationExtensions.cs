@@ -32,6 +32,7 @@ namespace StreamUP {
             }
 
             CPH.SetGlobalVar($"{productNumber}_Initialised", true, false);
+            CPH.SUWriteLog($"Method complete", logName);
             return true;
         }
 
@@ -48,7 +49,8 @@ namespace StreamUP {
                             "1. Check your OBS settings in the 'Stream Apps' tab.\n" +
                             $"2. Set the correct OBS number in the '{productName} • Settings' Action.\n";
                 CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
-                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);           
+                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error); 
+                CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }
             else
@@ -68,9 +70,11 @@ namespace StreamUP {
                                 "1. Check your OBS settings in the 'Stream Apps' tab.\n";
                     CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
                     var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);           
+                    CPH.SUWriteLog($"Method complete", logName);          
                     return false;
                 }
             }
+            CPH.SUWriteLog($"Method complete", logName);          
             return true;
         }
         
@@ -87,51 +91,39 @@ namespace StreamUP {
                 var errorMessage = $"The scene '{sceneName}' does not exist in OBS.\n\n" +
                                     "Please reinstall it into OBS using the products '.StreamUP' file.";
                 CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
-                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);           		
+                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);    
+                CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }
+            CPH.SUWriteLog($"Method complete", logName);          
             return true;
         }
     
-        public static bool SUCheckProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsInstance, string sceneName)
+        public static bool SUCheckProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsInstance, string sceneName, string sourceName)
         {
             // Load log string
             string logName = $"{productName}-SUCheckProductObsVersion";
             CPH.SUWriteLog("Method Started", logName);
 
-            // Pull scenes filters
-            JArray filters = CPH.SUObsGetSourceFilterList(productName, obsInstance, sceneName);
+            // Pull product version from source settings
+            JObject filters = CPH.SUObsGetSourceSettings(productName, obsInstance, sourceName);
 
             // Check if filter names contain the word 'Version'
             string foundVersion = null;
-            int versionFilterCount = 0;
-            foreach (var filter in filters)
+            JToken versionToken;
+            if (filters.TryGetValue("product_version", out versionToken))
             {
-                string filterName = filter["filterName"].ToString();
-                if (filterName.Contains("Version"))
-                {
-                    versionFilterCount++;
-                    if (versionFilterCount == 1)
-                    {
-                        foundVersion = filterName.Replace("Version ", "").Trim();
-                    }
-                }
-            }
+                foundVersion = versionToken.ToString();
+                CPH.SUWriteLog($"Found product version: {foundVersion}", logName);
+            }          
 
-            if (versionFilterCount > 1)
-            {
-                string error1 = $"Multiple version numbers have been found in OBS for '{productName}'.";
-                string error2 = $"Please remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
-                CPH.SUWriteLog($"ERROR: {error1}", logName);
-                var error = MessageBox.Show($"{error1}\n\n{error2}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
-                return false;
-            }
-            else if (versionFilterCount == 0)
+            if (foundVersion == null)
             {
                 string error1 = $"No version number has been found in OBS for'{productName}'.";
                 string error2 = $"Please remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
                 var error = MessageBox.Show($"{error1}\n\n{error2}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
+                CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }
 
@@ -142,6 +134,7 @@ namespace StreamUP {
             if (foundVer >= targetVer)
             {
                 CPH.SUWriteLog($"Current version {foundVersion} is up to date with target version {targetVersion}.", logName);
+                CPH.SUWriteLog($"Method complete", logName);          
                 return true;
             }
             else
@@ -151,6 +144,7 @@ namespace StreamUP {
                 string error3 = $"Then remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
                 var error = MessageBox.Show($"{error1}\n\n{error2}\n{error3}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
+                CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }
         }
