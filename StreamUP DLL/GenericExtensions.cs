@@ -45,5 +45,16 @@ namespace StreamUP {
                 file.Write($"\r\n{formattedLogMessage}");
             }
         }
+   
+        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsInstance, string inputName, string versionNumber)
+        {
+            // Load log string
+            string logName = "GeneralExtensions-SUSetProductObsVersion";
+            CPH.SUWriteLog("Method Started", logName);
+
+            string inputSettings = $"\"product_version\": \"{versionNumber}\"";
+            CPH.SUObsSetInputSettings("GeneralExtensions", obsInstance, inputName, inputSettings);
+            CPH.SUWriteLog("Method complete", logName);
+        }
     }
 }
