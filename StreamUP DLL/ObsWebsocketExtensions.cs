@@ -149,7 +149,7 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);
         }
 
-        // SET SOURCE (INPUT) SETTINGS
+        // SET INPUT (SOURCE) SETTINGS
         public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance, string inputName, string inputSettings) {
             // Load log string
             string logName = $"{productName}-SUObsSetInputSettings";
@@ -215,7 +215,7 @@ namespace StreamUP {
         public static JArray SUObsGetSourceFilterList(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName)
         {
             // Load log string
-            string logName = $"{productName}-ObsGetSourceFilter";
+            string logName = $"{productName}-SUObsGetSourceFilterList";
             CPH.SUWriteLog("Method Started", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetSourceFilterList", $"{{\"sourceName\":\"{sourceName}\"}}", obsInstance);
@@ -225,11 +225,11 @@ namespace StreamUP {
             return filters;
         }
     
-        // GET SOURCE SETTINGS
-        public static JObject SUObsGetSourceSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName)
+        // GET INPUT (SOURCE) SETTINGS
+        public static JObject SUObsGetInputSettings(this IInlineInvokeProxy CPH, string productName, int obsInstance, string sourceName)
         {
             // Load log string
-            string logName = $"{productName}-SUObsGetSourceSettings";
+            string logName = $"{productName}-SUObsGetInputSettings";
             CPH.SUWriteLog("Method Started", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetInputSettings", "{\"inputName\":\""+sourceName+"\"}", obsInstance);
