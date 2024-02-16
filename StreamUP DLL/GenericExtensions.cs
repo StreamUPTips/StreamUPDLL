@@ -59,5 +59,25 @@ namespace StreamUP {
             CPH.SUWriteLog("Method complete", logName);
         }
 
+        public static double SUGetObsCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsInstance)
+        {
+            // Load log string
+            string logName = "GeneralExtensions-SUGetObsCanvasScaleFactor";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Pull obs canvas width
+            JObject videoSettings = CPH.SUObsGetVideoSettings(productName, obsInstance);
+            double canvasWidth = (double)videoSettings["baseWidth"];
+            CPH.SUWriteLog($"Pulled base canvas width from obs: canvasWidth=[{canvasWidth}]", logName);
+
+            // Work out scale difference based on 1920x1080
+            double canvasScaleFactor = (canvasWidth / 1920);
+            CPH.SUWriteLog($"Worked out canvas scale factor: canvasScaleFactor=[{canvasScaleFactor}]", logName);
+
+            // Save canvasScaleFactor to sb global var
+            CPH.SetGlobalVar($"{productNumber}_CanvasScaleFactor", canvasScaleFactor); 
+            CPH.SUWriteLog("Method completed", logName);
+            return canvasScaleFactor;
+        }
     }
 }
