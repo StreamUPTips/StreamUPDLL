@@ -177,8 +177,82 @@ namespace StreamUP {
             }
         }
     
+        public static bool SUCheckObsPlugins(this IInlineInvokeProxy CPH)
+        {
+            // Load log string
+            string logName = $"ValidationExtensions-SUCheckObsPlugins";
+            CPH.SUWriteLog("Method Started", logName);
 
+            int obsInstance = 0;
+	        string versionNumberString = null;
+            while (obsInstance <= 20)
+            {
+                if (CPH.ObsIsConnected(obsInstance))
+                {
+                    string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsInstance);
+                    JObject obsDataJson = (JObject)obsData;                
+                    if (obsDataJson.TryGetValue("obsWebSocketVersion", out var versionToken) ||
+                        obsDataJson.TryGetValue("obs-websocket-version", out versionToken))
+                    {
+                        versionNumberString = versionToken.ToString();
+                    }                
+                    if (CPH.CheckWebsocketVersionCompatible(versionNumberString))
+                    {
+                        break;
+                    }
+                }
+
+                obsInstance++;
+            }
+
+            if (!CPH.ObsIsConnected(obsInstance))
+            {
+                if (versionNumberString == null)
+                {
+                    string error1 = "OBS is not connected to Streamer.Bot";
+                    string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
+                    CPH.SUWriteLog(error1, logName);
+                    CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                }
+                else
+                {
+                    string error1 = $"Your OBS is connected to Streamer.Bot via websocket {versionNumberString}";
+                    string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
+                    CPH.SUWriteLog(error1, logName);
+                    CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                }
+                return false;
+            }
+
+            var obsPluginResult = CPH.FindOBSLogFile(obsInstance);
+            if (!obsPluginResult.Success)
+            {
+                CPH.SUWriteLog(obsPluginResult.Message, logName);
+                CPH.SUShowErrorMessage(obsPluginResult.Message);
+                return false;
+            }
+            string error3 = "StreamUP plugin is installed and loaded correctly";   
+            string error4 = "Initiating StreamUP product settings menu..."; 
+            CPH.SUWriteLog(error3 + error4, logName);
+
+            //----------------------------- CHECK IF UPDATE CHECKER IS INSTALLED ------------------------------
+            if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
+            {
+                var errorMessage = $"You do not have the StreamUP Update Checker for Streamer.Bot installed.\n" +
+                                    "You can download it from the StreamUP website.\n\n" +
+                                    "Would you like to open the link now?";
+                CPH.LogWarn($"\n\n----------------------------------------\n" +
+                            $"{errorMessage}" +
+                            "\n----------------------------------------\n");
+                var error = MessageBox.Show($"{errorMessage}", $"StreamUP Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);           
+                
+                if (error == DialogResult.Yes) {
+                    Process.Start("https://streamup.tips/product/update-checker");
+                }      
+                return true;
+            }
+            return true;
+        }
     
-
     }
 }
