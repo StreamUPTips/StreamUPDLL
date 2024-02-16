@@ -20,7 +20,17 @@ namespace StreamUP {
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error
             );
-        }    
+        }  
 
+        public static DialogResult SUShowYesNoWarningMessage(this IInlineInvokeProxy CPH, string message)
+        {
+            DialogResult result = MessageBox.Show(
+                message, 
+                $"StreamUP Warning", 
+                MessageBoxButtons.YesNo, 
+                MessageBoxIcon.Warning
+                );
+            return result;
+        }
     }
 }

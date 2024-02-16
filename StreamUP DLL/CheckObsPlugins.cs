@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP {
@@ -15,8 +16,8 @@ namespace StreamUP {
             string logName = $"ValidationExtensions-CheckWebsocketVersionCompatible";
             CPH.SUWriteLog("Method Started", logName);
 
+            CPH.SUWriteLog("Deconstructing versionNumberString", logName);
             string[] parts = versionNumberString.Split('.');
-
             if (parts.Length >= 3)
             {
                 if (int.TryParse(parts[0], out int major) &&
@@ -27,10 +28,14 @@ namespace StreamUP {
                     (major == 5 && minor > 0) ||
                     (major == 5 && minor == 0 && patch >= 0))
                     {
+                        CPH.SUWriteLog($"Websocket Version is compatible: major=[{major}], minor=[{minor}], patch=[{patch}]", logName);
+                        CPH.SUWriteLog($"Method complete", logName);          
                         return true;
                     }
                 }
             }
+            CPH.SUWriteLog($"Websocket Version is incompatible: versionNumberString=[{versionNumberString}]", logName);
+            CPH.SUWriteLog($"Method complete", logName);          
             return false;
         }
     
@@ -40,27 +45,35 @@ namespace StreamUP {
             string logName = $"ValidationExtensions-FindOBSLogFile";
             CPH.SUWriteLog("Method Started", logName);
 
+            CPH.SUWriteLog("Searching for portable obs instance", logName);
             string portableFolder = CPH.GetPortableOBS();
+
             if (!string.IsNullOrEmpty(portableFolder))
             {
+                CPH.SUWriteLog($"Portable instance found: portableFolder[{portableFolder}]", logName);
+                CPH.SUWriteLog($"Method complete", logName);          
                 return CPH.OBSPluginVerification(portableFolder, obsInstance);
             }
             else
             {
+                CPH.SUWriteLog($"Portable instance not found. Searching for main obs installed", logName);
                 string appDataFolder = Environment.GetFolderPath(
                     Environment.SpecialFolder.ApplicationData
                 );
                 string folderPath = Path.Combine(appDataFolder, "obs-studio", "logs");
                 if (Directory.Exists(folderPath))
                 {
+                    CPH.SUWriteLog($"Obs install found: folderPath=[{folderPath}]", logName);
+                    CPH.SUWriteLog($"Method complete", logName);          
                     return CPH.OBSPluginVerification(folderPath, obsInstance);
                 }
                 else
                 {
-                    return (
-                        false,
-                        "Cannot find OBS logs directory.\n\nMake sure OBS is running then try again."
-                    );
+                    string error1 = "Cannot find OBS logs directory.";
+                    string error2 = "Make sure OBS is running then try again.";
+                    CPH.SUWriteLog(error1, logName);          
+                    CPH.SUWriteLog($"Method complete", logName);          
+                    return (false, $"{error1}\n\n{error2}");
                 }
             }
         }
@@ -71,6 +84,7 @@ namespace StreamUP {
             string logName = $"ValidationExtensions-GetPortableOBS";
             CPH.SUWriteLog("Method Started", logName);
 
+            // Search for obs process running
             Process process = Process.GetProcessesByName("obs64").FirstOrDefault();
             if (process != null)
             {
@@ -84,10 +98,12 @@ namespace StreamUP {
                     );
                     if (File.Exists(replacedPath) || Directory.Exists(replacedPath))
                     {
+                        CPH.SUWriteLog($"Method complete", logName);          
                         return replacedPath;
                     }
                     else
                     {
+                        CPH.SUWriteLog($"Method complete", logName);          
                         return null;
                     }
                 }
@@ -96,13 +112,13 @@ namespace StreamUP {
                     error1 = "Permission denied accessing the OBS process";
                     error2 = "Please close Streamer.Bot and run it as Administrator.";
                     string error3 = e.Message;
-
                     CPH.SUWriteLog($"{error1} - {error3}", logName);
                 }
 
                 CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
             }
 
+            CPH.SUWriteLog($"Method complete", logName);          
             return null;
         }
 
@@ -119,10 +135,11 @@ namespace StreamUP {
             }
             catch (Exception e)
             {
-                string error1 = "Permission denied accessing the OBS file directory";
-                string error2 = "Please close Streamer.Bot and run it as Administrator.";
+                string e6 = "Permission denied accessing the OBS file directory";
+                string e7 = "Please close Streamer.Bot and run it as Administrator.";
                 CPH.SUWriteLog("Exception while accessing directory: " + e.Message, logName);
-                return (false, $"{error1}\n\n{error2}");
+                CPH.SUWriteLog($"Method complete", logName);          
+                return (false, $"{e6}\n\n{e7}");
             }
 
             string mostRecentFile = files
@@ -130,9 +147,10 @@ namespace StreamUP {
                 .FirstOrDefault();
             if (!File.Exists(mostRecentFile))
             {
-                string error1 = "No log files found in the OBS logs directory.";
-                CPH.SUWriteLog(error1, logName);
-                return (false, error1);
+                string e5 = "No log files found in the OBS logs directory.";
+                CPH.SUWriteLog(e5, logName);
+                CPH.SUWriteLog($"Method complete", logName);          
+                return (false, e5);
             }
 
             string fileContent;
@@ -153,10 +171,11 @@ namespace StreamUP {
             }
             catch (Exception e)
             {
-                string error1 = "Permission denied accessing the OBS log file";
-                string error2 = "Please close Streamer.Bot and run it as Administrator.";
-                CPH.LogWarn("Exception while reading file: " + e.Message);
-                return (false, $"{error1}\n\n{error2}");
+                string e3 = "Permission denied accessing the OBS log file";
+                string e4 = "Please close Streamer.Bot and run it as Administrator.";
+                CPH.SUWriteLog("Exception while reading file: " + e.Message, logName);          
+                CPH.SUWriteLog($"Method complete", logName);          
+                return (false, $"{e3}\n\n{e4}");
             }
 
             if (fileContent.Contains("[StreamUP] loaded version"))
@@ -166,35 +185,45 @@ namespace StreamUP {
                 if (match.Success)
                 {
                     string pluginVersion = match.Groups[1].Value;
-                    CPH.LogInfo($"StreamUP plugin loaded correctly (version {pluginVersion}).");
+                    CPH.SUWriteLog($"StreamUP plugin loaded correctly (version {pluginVersion}).", logName);          
                     switch (pluginVersion)
                     {
                         case string v when ObsIsVersionLessThan(v, "0.0.9"):
-                            return (
-                                false,
-                                "Your StreamUP OBS plugin needs updating. Please download it with the StreamUP Pluginstaller: https://streamup.tips/product/plugin-installer"
-                            );
+                            string e1 = "StreamUP OBS plugin needs updating.";
+                            string e2 = "Please download it with the StreamUP Pluginstaller: https://streamup.tips/product/plugin-installer";
+                            CPH.SUWriteLog(e1, logName);          
+                            CPH.SUWriteLog($"Method complete", logName);          
+                            return (false, $"{e1}\n\n{e2}");
+
                         case string v when ObsIsVersionInRange(v, "0.0.9", "1.1.3"):
-                            return (
-                                false,
-                                "Please update your OBS plugins by going to 'Tools\\StreamUP\\Check for OBS Plugin Updates' in OBS."
-                            );
+                            string error3 = "Please update your OBS plugins.";
+                            string error4 = "Go to 'Tools\\StreamUP\\Check for OBS Plugin Updates' in OBS.";
+                            CPH.SUWriteLog(error3, logName);          
+                            CPH.SUWriteLog($"Method complete", logName);          
+                            return (false, $"{error3}\n\n{error4}");
+
                         case string v when ObsIsVersionGreaterOrEqualTo(v, "1.1.4"):
                             var json = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"check_plugins\",\"requestData\":null}", obsInstance);
                             if (!HandleJSON(json))
                             {
-                                return (
-                                    false,
-                                    "1 or more OBS plugins are missing or need updating.\n\nA window should appear in OBS showing you which need downloading.\n\nIf it doesn't appear you can manually click 'Tools\\StreamUP\\Check Product Requirements'"
-                                );
+                                string error5 = "1 or more OBS plugins are missing or need updating.";
+                                string error6 = "A window should appear in OBS showing you which need downloading.";
+                                string error7 = "If it doesn't appear you can manually click 'Tools\\StreamUP\\Check Product Requirements'";
+                                CPH.SUWriteLog($"Method complete", logName);          
+                                return (false, $"{error5}\n\n{error6}\n\n{error7}");
                             }
-
-                            return (true, "Everything is up to date in OBS.");
+                        CPH.SUWriteLog("All Obs plugins are up to date.", logName);          
+                        CPH.SUWriteLog($"Method complete", logName);          
+                        return (true, "Everything is up to date in OBS.");
                     }
                 }
             }
 
-            return (false, "You are missing the StreamUP plugin in OBS. Please download it with the StreamUP Pluginstaller: https://streamup.tips/product/plugin-installer");
+            string error1 = "You are missing the StreamUP plugin in OBS.";
+            string error2 = "Please download it with the StreamUP Pluginstaller: https://streamup.tips/product/plugin-installer";
+            CPH.SUWriteLog(error1, logName);          
+            CPH.SUWriteLog($"Method complete", logName);          
+            return (false, $"{error1}\n\n{error2}");
         }
 
         public static bool ObsIsVersionLessThan(string version1, string version2)
@@ -221,7 +250,7 @@ namespace StreamUP {
     
         public static bool HandleJSON(string json)
         {
-            dynamic response = (dynamic)json;
+            dynamic response = JsonConvert.DeserializeObject<dynamic>(json);
             if (response != null && response.requestType == "check_plugins")
             {
                 return response.responseData?.success ?? false;
@@ -230,9 +259,5 @@ namespace StreamUP {
             return false;
         }
     
-    
-
-    
-
     }
 }
