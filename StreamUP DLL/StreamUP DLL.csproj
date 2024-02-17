@@ -51,13 +51,15 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GenericExtensions.cs" />
     <Compile Include="ObsWebSocketExtensions.cs" />
     <Compile Include="ValidationExtensions.cs" />
     <Compile Include="UIExtensions.cs" />
-    <Compile Include="CheckObsPlugins.cs" />
+    <Compile Include="CheckObsPluginsExtensions.cs" />
+    <Compile Include="ProductSettingsUIExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
