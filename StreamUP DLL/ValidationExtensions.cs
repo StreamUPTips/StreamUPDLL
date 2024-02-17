@@ -30,7 +30,7 @@ namespace StreamUP {
             }     
 
             // Check if obs is connected
-            int obsConnection = CPH.GetGlobalVar<int>($"{productNumber}_obsConnection", true);
+            int obsConnection = CPH.GetGlobalVar<int>($"{productNumber}_ObsConnection", true);
             if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsConnection))
             {
                 CPH.SUWriteLog("OBS is not connected. Initialisation aborted.", logName);
@@ -53,7 +53,7 @@ namespace StreamUP {
             // Load log string
             string logName = $"{productName}-SUCheckProductSettingsLoaded";
             CPH.SUWriteLog("Method Started", logName);
-            if (CPH.GetGlobalVar<string>($"{productNumber}_obsConnection", true) == null)
+            if (CPH.GetGlobalVar<string>($"{productNumber}_ObsConnection", true) == null)
             {
                 string error1 = $"There are no {productName} settings found.";
                 string error2 = $"Please run the '{productName} • Settings' Action first.";
