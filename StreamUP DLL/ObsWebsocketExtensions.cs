@@ -238,5 +238,29 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);
             return settings;
         }
+
+        // SET INPUT (SOURCE) VOLUME
+        public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productName, string inputName, int volumeType, double volumeLevel, int obsInstance)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsGetInputSettings";
+            CPH.SUWriteLog("Method Started", logName);
+
+            switch (volumeType)
+            {
+                case 0:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel+"}", obsInstance); 
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[0 (Db)], volumeLevel=[{volumeLevel}]", logName);
+                    break;
+                case 1:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel+"}", obsInstance); 
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[1 (Multiplier)], volumeLevel=[{volumeLevel}]", logName);
+                    break;
+                default:
+                    CPH.SUWriteLog($"Cannot set obs inputVolume. Please make sure the type is either [0](Db) or [1](Multiplier). You set this to [{volumeType}]", logName);
+                    break;
+            }
+            CPH.SUWriteLog("Method complete", logName);
+        }
     }
 }
