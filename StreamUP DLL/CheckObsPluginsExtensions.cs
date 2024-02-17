@@ -39,7 +39,7 @@ namespace StreamUP {
             return false;
         }
     
-        public static (bool Success, string Message) FindOBSLogFile(this IInlineInvokeProxy CPH, int obsInstance)
+        public static (bool Success, string Message) FindOBSLogFile(this IInlineInvokeProxy CPH, int obsConnection)
         {
             // Load log string
             string logName = $"ValidationExtensions-FindOBSLogFile";
@@ -52,7 +52,7 @@ namespace StreamUP {
             {
                 CPH.SUWriteLog($"Portable instance found: portableFolder[{portableFolder}]", logName);
                 CPH.SUWriteLog($"Method complete", logName);          
-                return CPH.OBSPluginVerification(portableFolder, obsInstance);
+                return CPH.OBSPluginVerification(portableFolder, obsConnection);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace StreamUP {
                 {
                     CPH.SUWriteLog($"Obs install found: folderPath=[{folderPath}]", logName);
                     CPH.SUWriteLog($"Method complete", logName);          
-                    return CPH.OBSPluginVerification(folderPath, obsInstance);
+                    return CPH.OBSPluginVerification(folderPath, obsConnection);
                 }
                 else
                 {
@@ -122,7 +122,7 @@ namespace StreamUP {
             return null;
         }
 
-        public static (bool Success, string Message) OBSPluginVerification(this IInlineInvokeProxy CPH, string folderPath, int obsInstance)
+        public static (bool Success, string Message) OBSPluginVerification(this IInlineInvokeProxy CPH, string folderPath, int obsConnection)
         {
             // Load log string
             string logName = $"ValidationExtensions-OBSPluginVerification";
@@ -203,7 +203,7 @@ namespace StreamUP {
                             return (false, $"{error3}\n\n{error4}");
 
                         case string v when ObsIsVersionGreaterOrEqualTo(v, "1.1.4"):
-                            var json = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"check_plugins\",\"requestData\":null}", obsInstance);
+                            var json = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"check_plugins\",\"requestData\":null}", obsConnection);
                             if (!HandleJSON(json))
                             {
                                 string error5 = "1 or more OBS plugins are missing or need updating.";

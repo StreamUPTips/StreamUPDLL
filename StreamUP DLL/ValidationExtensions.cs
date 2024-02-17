@@ -30,14 +30,14 @@ namespace StreamUP {
             }     
 
             // Check if obs is connected
-            int obsInstance = CPH.GetGlobalVar<int>($"{productNumber}_obsInstance", true);
-            if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsInstance))
+            int obsConnection = CPH.GetGlobalVar<int>($"{productNumber}_obsConnection", true);
+            if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsConnection))
             {
                 CPH.SUWriteLog("OBS is not connected. Initialisation aborted.", logName);
                 return false; // Stop execution since OBS is not connected
             }
             // Check if products scene exists
-            if (!CPH.SUCheckStreamUPSceneExists(productNumber, productName, sceneName, obsInstance))
+            if (!CPH.SUCheckStreamUPSceneExists(productNumber, productName, sceneName, obsConnection))
             {
                 CPH.SUWriteLog($"Scene '{sceneName}' does not exist. Initialisation aborted.", logName);
                 return false; // Stop execution since the scene does not exist
@@ -53,7 +53,7 @@ namespace StreamUP {
             // Load log string
             string logName = $"{productName}-SUCheckProductSettingsLoaded";
             CPH.SUWriteLog("Method Started", logName);
-            if (CPH.GetGlobalVar<string>($"{productNumber}_ObsInstance", true) == null)
+            if (CPH.GetGlobalVar<string>($"{productNumber}_obsConnection", true) == null)
             {
                 string error1 = $"There are no {productName} settings found.";
                 string error2 = $"Please run the '{productName} • Settings' Action first.";
@@ -72,16 +72,16 @@ namespace StreamUP {
             return true;
         }
         
-        public static bool SUCheckObsIsConnected(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsInstance)
+        public static bool SUCheckObsIsConnected(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
         {
             // Load log string
             string logName = $"{productName}-SUCheckObsIsConnected";
             CPH.SUWriteLog("Method Started", logName);
 
-            // Check obs instance is connected
-            if (!CPH.ObsIsConnected(obsInstance))
+            // Check obs connection is connected
+            if (!CPH.ObsIsConnected(obsConnection))
             {
-                var errorMessage = $"There is no OBS connection on connection number '{obsInstance}'.\n\n" +
+                var errorMessage = $"There is no OBS connection on connection number '{obsConnection}'.\n\n" +
                             "1. Check your OBS settings in the 'Stream Apps' tab.\n" +
                             $"2. Set the correct OBS number in the '{productName} • Settings' Action.\n";
                 CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
@@ -93,7 +93,7 @@ namespace StreamUP {
             {
                 // Pull Obs websocket version number
                 string versionNumberString = null;
-                string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsInstance);
+                string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsConnection);
                 JObject obsDataJson = JObject.Parse(obsData);
                 if (obsDataJson.TryGetValue("obsWebSocketVersion", out var versionToken))
                 {
@@ -102,7 +102,7 @@ namespace StreamUP {
                 // If version isn't v5 and above
                 if (versionNumberString == null)
                 {
-                    var errorMessage = $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsInstance}'.\n\n" +
+                    var errorMessage = $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.\n\n" +
                                 "1. Check your OBS settings in the 'Stream Apps' tab.\n";
                     CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
                     var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);           
@@ -114,14 +114,14 @@ namespace StreamUP {
             return true;
         }
         
-        public static bool SUCheckStreamUPSceneExists(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, int obsInstance)
+        public static bool SUCheckStreamUPSceneExists(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, int obsConnection)
         {
             // Load log string
             string logName = $"{productName}-SUCheckStreamUPSceneExists";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull Obs scene list and see if sceneName exists
-            var sceneList = CPH.ObsSendRaw("GetSceneList", "{}", obsInstance);
+            var sceneList = CPH.ObsSendRaw("GetSceneList", "{}", obsConnection);
             if (!sceneList.Contains($"{sceneName}"))
             {
                 var errorMessage = $"The scene '{sceneName}' does not exist in OBS.\n\n" +
@@ -135,14 +135,14 @@ namespace StreamUP {
             return true;
         }
     
-        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsInstance, string sceneName, string sourceName)
+        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsConnection, string sceneName, string sourceName)
         {
             // Load log string
             string logName = $"{productName}-SUGetProductObsVersion";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull product version from source settings
-            JObject inputSettings = CPH.SUObsGetInputSettings(productName, obsInstance, sourceName);
+            JObject inputSettings = CPH.SUObsGetInputSettings(productName, obsConnection, sourceName);
             CPH.SUWriteLog($"Pulled inputSettings: inputSettings=[{inputSettings.ToString()}]", logName);
 
             // Check if filter names contain the word 'Version'
@@ -193,16 +193,16 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
 
             // Search for obs connection
-            int obsInstance = 0;
+            int obsConnection = 0;
 	        string versionNumberString = null;
-            while (obsInstance <= 20)
+            while (obsConnection <= 20)
             {
-                if (CPH.ObsIsConnected(obsInstance))
+                if (CPH.ObsIsConnected(obsConnection))
                 {
-                    CPH.SUWriteLog($"Obs instance found connected on connection [{obsInstance}]", logName);
+                    CPH.SUWriteLog($"Obs connection found connected on connection [{obsConnection}]", logName);
 
                     // Pull obs version data
-                    string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsInstance);
+                    string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsConnection);
                     JObject obsDataJson = JsonConvert.DeserializeObject<JObject>(obsData);                
                     CPH.SUWriteLog($"Pulled Obs GetVersion data: GetVersion=[{obsDataJson.ToString()}]", logName);
 
@@ -219,10 +219,10 @@ namespace StreamUP {
                     }
                 }
                 // Increase obs connection number
-                obsInstance++;
+                obsConnection++;
             }
 
-            if (!CPH.ObsIsConnected(obsInstance))
+            if (!CPH.ObsIsConnected(obsConnection))
             {
                 if (versionNumberString == null)
                 {
@@ -244,7 +244,7 @@ namespace StreamUP {
 
             // Search for obs log file
             CPH.SUWriteLog("Beginning search for OBS log file", logName);
-            var obsPluginResult = CPH.FindOBSLogFile(obsInstance);
+            var obsPluginResult = CPH.FindOBSLogFile(obsConnection);
             if (!obsPluginResult.Success)
             {
                 CPH.SUShowErrorMessage(obsPluginResult.Message);

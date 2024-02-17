@@ -48,25 +48,25 @@ namespace StreamUP {
             }
         }
    
-        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsInstance, string inputName, string versionNumber)
+        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsConnection, string inputName, string versionNumber)
         {
             // Load log string
             string logName = "GeneralExtensions-SUSetProductObsVersion";
             CPH.SUWriteLog("Method Started", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
-            CPH.SUObsSetInputSettings("GeneralExtensions", obsInstance, inputName, inputSettings);
+            CPH.SUObsSetInputSettings("GeneralExtensions", obsConnection, inputName, inputSettings);
             CPH.SUWriteLog("Method complete", logName);
         }
 
-        public static double SUGetObsCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsInstance)
+        public static double SUGetObsCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
         {
             // Load log string
             string logName = "GeneralExtensions-SUGetObsCanvasScaleFactor";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull obs canvas width
-            JObject videoSettings = CPH.SUObsGetVideoSettings(productName, obsInstance);
+            JObject videoSettings = CPH.SUObsGetVideoSettings(productName, obsConnection);
             double canvasWidth = (double)videoSettings["baseWidth"];
             CPH.SUWriteLog($"Pulled base canvas width from obs: canvasWidth=[{canvasWidth}]", logName);
 
