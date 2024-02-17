@@ -8,7 +8,7 @@ using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP {
 
-    public static class CheckObsPlugins {
+    public static class CheckObsPluginsExtensions {
 
         public static bool CheckWebsocketVersionCompatible(this IInlineInvokeProxy CPH, string versionNumberString)
         {

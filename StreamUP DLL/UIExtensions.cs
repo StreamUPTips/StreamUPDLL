@@ -26,7 +26,7 @@ namespace StreamUP {
         {
             DialogResult result = MessageBox.Show(
                 message, 
-                $"StreamUP Warning", 
+                "StreamUP Warning", 
                 MessageBoxButtons.YesNo, 
                 MessageBoxIcon.Warning
                 );
