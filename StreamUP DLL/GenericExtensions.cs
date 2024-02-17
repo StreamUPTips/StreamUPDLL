@@ -48,14 +48,25 @@ namespace StreamUP {
             }
         }
    
-        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsConnection, string inputName, string versionNumber)
+        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsConnection, string sceneName, string versionNumber)
         {
             // Load log string
             string logName = "GeneralExtensions-SUSetProductObsVersion";
             CPH.SUWriteLog("Method Started", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
-            CPH.SUObsSetInputSettings("GeneralExtensions", obsConnection, inputName, inputSettings);
+            CPH.SUWriteLog($"Loaded version settings to set: inputSettings=[{inputSettings}]", logName);
+
+            // Create sceneItem list
+            List<string> sceneItemNames = new List<string>();
+            CPH.SUGetSceneItemNames(productName, obsConnection, 0, sceneName, sceneItemNames);
+            CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
+
+            // Set the version number on each source in that scene
+            foreach (string currentItemName in sceneItemNames)
+            {
+                CPH.SUObsSetInputSettings("GeneralExtensions", obsConnection, currentItemName, inputSettings);
+            }
             CPH.SUWriteLog("Method complete", logName);
         }
 

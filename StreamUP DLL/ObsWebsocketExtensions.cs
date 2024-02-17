@@ -262,5 +262,81 @@ namespace StreamUP {
             }
             CPH.SUWriteLog("Method complete", logName);
         }
-    }
+    
+        // GET SCENE ITEM LIST
+        public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productName, int obsConnection, string sceneName)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsGetSceneItemList";
+            CPH.SUWriteLog("Method Started", logName);
+
+            string jsonResponse = CPH.ObsSendRaw("GetSceneItemList", $"{{\"sceneName\":\"{sceneName}\"}}", obsConnection);
+            JObject responseObj = JObject.Parse(jsonResponse);
+            JArray sceneItems = (JArray)responseObj["sceneItems"];
+            CPH.SUWriteLog($"Method complete", logName);
+            return sceneItems;
+        }
+        
+        // GET GROUP SCENE ITEM LIST
+        public static JArray SUGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productName, int obsConnection, string groupName)
+        {
+            // Load log string
+            string logName = $"{productName}-SUGetGroupSceneItemList";
+            CPH.SUWriteLog("Method Started", logName);
+
+            string jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", $"{{\"sceneName\":\"{groupName}\"}}", obsConnection);
+            JObject responseObj = JObject.Parse(jsonResponse);
+            JArray sceneItems = (JArray)responseObj["sceneItems"];
+            CPH.SUWriteLog($"Method complete", logName);
+            return sceneItems;
+        }
+
+        // GET SCENE ITEM NAMES
+        public static void SUGetSceneItemNames(this IInlineInvokeProxy CPH, string productName, int obsConnection, int sceneType, string sceneName, List<string> sceneItemNames)
+        {
+            // Load log string
+            string logName = $"{productName}-SUGetSceneItemNames";
+            CPH.SUWriteLog("Method Started", logName);
+
+            JArray sceneItems = new JArray();
+            switch (sceneType)
+            {
+                case 0:
+                    sceneItems = CPH.SUObsGetSceneItemList(productName, obsConnection, sceneName);
+                    CPH.SUWriteLog($"Created sceneItemList of sceneName [{sceneName}]", logName);
+                    break;
+                case 1:
+                    sceneItems = CPH.SUGetGroupSceneItemList(productName, obsConnection, sceneName);
+                    CPH.SUWriteLog($"Created sceneItemList of sceneName (group) [{sceneName}]", logName);
+                    break;
+                default:
+                    CPH.SUWriteLog($"You have chosen sceneType=[{sceneType}]. Please set either [0]=Scene, [1]=Group", logName);
+                    break;
+            }
+            CPH.SUWriteLog($"sceneItems=[{sceneItems.ToString()}]", logName);
+            foreach (JObject item in sceneItems)
+            {
+                bool? isGroup = (bool?)item["isGroup"];
+                string sourceName = (string)item["sourceName"];
+
+                // Check if isGroup has a value and is true
+                if (isGroup.HasValue && isGroup.Value)
+                {
+                    // If the item is a group, recursively fetch its scene items
+                    CPH.SUWriteLog($"Source is a group, running sceneItemNames for that group: sourceName=[{sourceName}]", logName);
+                    CPH.SUGetSceneItemNames(productName, obsConnection, 1, sourceName, sceneItemNames);
+                }
+                else
+                {
+                    // If it's not a group or isGroup is null, add its source name to the list
+                    CPH.SUWriteLog($"Source is not a group, adding sourceName to sceneItemNames list: sourceName=[{sourceName}]", logName);
+                    sceneItemNames.Add(sourceName);
+                }
+            }
+            
+        }    
+
+            
+           
+            }
 }
