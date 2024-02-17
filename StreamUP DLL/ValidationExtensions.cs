@@ -15,6 +15,13 @@ namespace StreamUP {
             string logName = $"{productName}-SUInitialiseProduct";
             CPH.SUWriteLog("Method Started", logName);
 
+            if (CPH.GetGlobalVar<bool>($"{productNumber}_Initialised", false))
+            {
+                CPH.SUWriteLog($"{productName} is already initialised. Skipping checks.", logName);
+                CPH.SUWriteLog("Method complete", logName);
+                return true;
+            }
+
             // Check product settings have been run
             if (!CPH.SUCheckProductSettingsLoaded(productNumber, productName, settingsAction))
             {
@@ -46,7 +53,7 @@ namespace StreamUP {
             // Load log string
             string logName = $"{productName}-SUCheckProductSettingsLoaded";
             CPH.SUWriteLog("Method Started", logName);
-            if (CPH.GetGlobalVar<string>($"{productNumber}_obsInstance", true) == null)
+            if (CPH.GetGlobalVar<string>($"{productNumber}_ObsInstance", true) == null)
             {
                 string error1 = $"There are no {productName} settings found.";
                 string error2 = $"Please run the '{productName} • Settings' Action first.";
@@ -135,12 +142,13 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull product version from source settings
-            JObject filters = CPH.SUObsGetInputSettings(productName, obsInstance, sourceName);
+            JObject inputSettings = CPH.SUObsGetInputSettings(productName, obsInstance, sourceName);
+            CPH.SUWriteLog($"Pulled inputSettings: inputSettings=[{inputSettings.ToString()}]", logName);
 
             // Check if filter names contain the word 'Version'
             string foundVersion = null;
             JToken versionToken;
-            if (filters.TryGetValue("product_version", out versionToken))
+            if (inputSettings.TryGetValue("product_version", out versionToken))
             {
                 foundVersion = versionToken.ToString();
                 CPH.SUWriteLog($"Found product version: {foundVersion}", logName);
@@ -148,7 +156,7 @@ namespace StreamUP {
 
             if (foundVersion == null)
             {
-                string error1 = $"No version number has been found in OBS for'{productName}'.";
+                string error1 = $"No version number has been found in OBS for '{productName}'.";
                 string error2 = $"Please remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
                 var error = MessageBox.Show($"{error1}\n\n{error2}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
@@ -239,7 +247,6 @@ namespace StreamUP {
             var obsPluginResult = CPH.FindOBSLogFile(obsInstance);
             if (!obsPluginResult.Success)
             {
-                CPH.SUWriteLog(obsPluginResult.Message, logName);
                 CPH.SUShowErrorMessage(obsPluginResult.Message);
                 CPH.SUWriteLog($"Method complete", logName);          
                 return false;

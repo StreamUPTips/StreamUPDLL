@@ -209,6 +209,7 @@ namespace StreamUP {
                                 string error5 = "1 or more OBS plugins are missing or need updating.";
                                 string error6 = "A window should appear in OBS showing you which need downloading.";
                                 string error7 = "If it doesn't appear you can manually click 'Tools\\StreamUP\\Check Product Requirements'";
+                                CPH.SUWriteLog(error5, logName);          
                                 CPH.SUWriteLog($"Method complete", logName);          
                                 return (false, $"{error5}\n\n{error6}\n\n{error7}");
                             }
