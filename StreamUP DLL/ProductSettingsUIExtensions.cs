@@ -408,7 +408,7 @@ namespace StreamUP {
             button.AutoSize = true;
             button.Name = withSetting.Name;
             var currentValue = CPH.GetGlobalVar<long>(withSetting.Name);
-            if (currentValue != null && currentValue != 0) {
+            if (currentValue != 0) {
                 byte a = (byte)((currentValue & 0xff000000) >> 24);
                 byte b = (byte)((currentValue & 0x00ff0000) >> 16);
                 byte g = (byte)((currentValue & 0x0000ff00) >> 8);
@@ -677,57 +677,182 @@ namespace StreamUP {
 
    public static class ProductSettingsBuilder
     {
-        public static StreamUpSetting SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description)
+        public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Action, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Action, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateBoolean(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateBoolean(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Boolean, Default = defaultValue,};
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Boolean, Default = defaultValue }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
+        }    
+        public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Colour, Default = defaultValue,}
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateDouble(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Colour, Default = defaultValue,};
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Double, Default = defaultValue,}
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateDouble(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateDropdown(this IInlineInvokeProxy CPH, string name, string description, string[] data, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Double, Default = defaultValue,};
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Dropdown, Data = data, Default = defaultValue}
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateDropdown(this IInlineInvokeProxy CPH, string name, string description, string[] data, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateHeading(this IInlineInvokeProxy CPH, string description, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Dropdown, Data = data, Default = defaultValue};
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading,}           
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateHeading(this IInlineInvokeProxy CPH, string description)
+        public static List<StreamUpSetting> SUSettingsCreateInteger(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateInteger(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateLabel(this IInlineInvokeProxy CPH, string description, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Label, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateLabel(this IInlineInvokeProxy CPH, string description)
+        public static List<StreamUpSetting> SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description, bool addSpacer = false)
         {
-            return new StreamUpSetting { Description = description, Type = StreamUpSettingType.Label, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Reward, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description)
+        public static List<StreamUpSetting> SUSettingsCreateRuler(this IInlineInvokeProxy CPH, bool addSpacer = false)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Reward, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting {Type = StreamUpSettingType.Ruler, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateRuler(this IInlineInvokeProxy CPH)
+        public static List<StreamUpSetting> SUSettingsCreateSecret(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting {Type = StreamUpSettingType.Ruler, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Secret, Default = defaultValue, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateSecret(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
+        public static List<StreamUpSetting> SUSettingsCreateSpacer(this IInlineInvokeProxy CPH)
         {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Secret, Default = defaultValue, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Type = StreamUpSettingType.Spacer, }
+            };
+
+            return settings;
         }
-        public static StreamUpSetting SUSettingsCreateSpacer(this IInlineInvokeProxy CPH)
+        public static List<StreamUpSetting> SUSettingsCreateString(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
         {
-            return new StreamUpSetting { Type = StreamUpSettingType.Spacer, };
-        }
-        public static StreamUpSetting SUSettingsCreateString(this IInlineInvokeProxy CPH, string name, string description, string defaultValue)
-        {
-            return new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.String, Default = defaultValue, };
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.String, Default = defaultValue, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+            }
+
+            return settings;
         }
         
     }
