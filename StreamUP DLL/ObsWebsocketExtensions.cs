@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -249,12 +250,12 @@ namespace StreamUP {
             switch (volumeType)
             {
                 case 0:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[0 (Db)], volumeLevel=[{volumeLevel}]", logName);
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[0 (Db)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
                 case 1:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[1 (Multiplier)], volumeLevel=[{volumeLevel}]", logName);
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[1 (Multiplier)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
                 default:
                     CPH.SUWriteLog($"Cannot set obs inputVolume. Please make sure the type is either [0](Db) or [1](Multiplier). You set this to [{volumeType}]", logName);
@@ -336,7 +337,50 @@ namespace StreamUP {
             
         }    
 
+        // AUTOSIZE ADVANCED MASK
+        public static void SUAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
+        {
+            // Load log string
+            string logName = $"{productName}-SUAutosizeAdvancedMask";
+            CPH.SUWriteLog("Method Started", logName);
+
+            double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
+            CPH.SUWriteLog($"Pulled product scaleFactor: scaleFactor=[{scaleFactor}]", logName);
+
+            double newHeight = sourceHeight + (padHeight * scaleFactor);
+            double newWidth = sourceWidth + (padWidth * scaleFactor);
+            CPH.SUWriteLog($"Pulled size to change Advanced Mask: newHeight=[{newHeight}], newWidth=[{newWidth}]", logName);
+
+            CPH.SUObsSetSourceFilterSettings(productName, obsConnection, sourceName, filterName, $"rectangle_width: {newWidth.ToString()}, rectangle_height: {newHeight}");
             
+            CPH.SUWriteLog($"Method complete", logName);
+        }
+
+        public static void SUAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, int padX, int padY)
+        {
+            // Load log string
+            string logName = $"{productName}-SUAutoposAdvancedMask";
+            CPH.SUWriteLog("Method Started", logName);
+    
+            // Pull advanced mask
+            JObject amFilter = CPH.SUObsGetSourceFilter(productName, obsConnection, sourceName, filterName);
+            JObject filterSettings = (JObject)amFilter["filterSettings"];
+            double amHeight = (double)filterSettings["rectangle_height"];
+            double amWidth = (double)filterSettings["rectangle_width"];
+            CPH.SUWriteLog($"Pulled size of Advanced Mask: amHeight=[{amHeight}], amWidth=[{amWidth}]", logName);
+            
+            // Pull canvas scaleFactor
+            double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
+            CPH.SUWriteLog($"Pulled product scaleFactor: scaleFactor=[{scaleFactor}]", logName);
+            
+            double xPos = (amWidth / 2) + (padX * scaleFactor);
+            double yPos = (amHeight / 2) + (padY * scaleFactor);
+            CPH.SUWriteLog($"Worked out new positions for Advanced Mask: xPos=[{xPos}], yPos=[{yPos}]", logName);
+
+            CPH.SUObsSetSourceFilterSettings(productName, obsConnection, sourceName, filterName, $"position_x: {xPos.ToString(CultureInfo.InvariantCulture)}, position_y: {yPos.ToString(CultureInfo.InvariantCulture)}");
+
+            CPH.SUWriteLog($"Method complete", logName);
+        }
            
     }
 }
