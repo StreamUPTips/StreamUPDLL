@@ -37,4 +37,4 @@ jobs:
       with:
         tag_name: v${{ steps.version.outputs.VERSION }}
         files: |
-          ${{ github.workspace }}\StreamUP DLL\bin\Release\StreamUP.dll
+          ${{ github.workspace }}/StreamUP DLL/bin/Release/StreamUP.dll
