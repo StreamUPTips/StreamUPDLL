@@ -17,16 +17,24 @@ jobs:
     - name: Build Library
       run: msbuild "StreamUP DLL.sln" -t:rebuild -verbosity:diag -property:Configuration=Release
 
+    - name: Extract Version Number
+      id: version
+      run: |
+        $version = [System.IO.File]::ReadAllText("${{ github.workspace }}\StreamUP DLL\Properties\AssemblyInfo.cs") -match 'AssemblyVersion\("([^"]+)"\)' | Out-Null
+        $versionNumber = $matches[1]
+        echo "Extracted version: $versionNumber"
+        echo "::set-output name=VERSION::$versionNumber"
+
     - name: Upload Library Artifact
       uses: actions/upload-artifact@v4
       with:
         name: StreamUP Library
-        path: D:\a\StreamUPDLL\StreamUPDLL\StreamUP DLL\bin\Release\StreamUP.dll
-    
+        path: ${{ github.workspace }}\StreamUP DLL\bin\Release\StreamUP.dll
+
     - name: Release Library
       if: github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: Master
+        tag_name: v${{ steps.version.outputs.VERSION }}
         files: |
-          D:/a/StreamUPDLL/StreamUPDLL/StreamUP DLL/bin/Release/StreamUP.dll
+          ${{ github.workspace }}\StreamUP DLL\bin\Release\StreamUP.dll
