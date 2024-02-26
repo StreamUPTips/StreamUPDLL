@@ -1,0 +1,32 @@
+name: Build StreamUP Library
+ 
+on: [push]
+ 
+jobs:
+  build:
+ 
+    runs-on: windows-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+      name: Checkout Code
+     
+    - name: Setup MSBuild Path
+      uses: microsoft/setup-msbuild@v2
+ 
+    - name: Build Library
+      run: msbuild "StreamUP DLL.sln" -t:rebuild -verbosity:diag -property:Configuration=Release
+
+    - name: Upload Library Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: StreamUP Library
+        path: D:\a\StreamUPDLL\StreamUPDLL\StreamUP DLL\bin\Release\StreamUP.dll
+    
+    - name: Release Library
+      if: github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: Master
+        files: |
+          D:/a/StreamUPDLL/StreamUPDLL/StreamUP DLL/bin/Release/StreamUP.dll
