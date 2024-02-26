@@ -1,0 +1,73 @@
+name: Check Assembly Version Update
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Base Branch
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.base_ref }}
+
+    - name: Extract Version from Base Branch
+      id: base_version
+      run: |
+        echo "::set-output name=VERSION::$(grep -Po '(?<=AssemblyVersion\(")[^"]*' 'StreamUP DLL/Properties/AssemblyInfo.cs')"
+
+    - name: Checkout Head Branch
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Extract Version from Head Branch
+      id: head_version
+      run: |
+        echo "::set-output name=VERSION::$(grep -Po '(?<=AssemblyVersion\(")[^"]*' 'StreamUP DLL/Properties/AssemblyInfo.cs')"
+
+    - name: Compare Versions
+      id: compare_versions
+      run: |
+        if [ "${{ steps.base_version.outputs.VERSION }}" == "${{ steps.head_version.outputs.VERSION }}" ]; then
+          echo "Version number has not been updated in AssemblyInfo.cs"
+          echo "VERSION_UPDATED=false" >> $GITHUB_ENV
+        else
+          echo "Version number has been updated."
+          echo "VERSION_UPDATED=true" >> $GITHUB_ENV
+        fi
+
+    - name: Post Failure Comment
+      if: env.VERSION_UPDATED == 'false'
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const issue_number = context.payload.pull_request.number;
+          const message = "🚨 Version number has not been updated in AssemblyInfo.cs. Please update the version number to proceed.";
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number,
+            body: message
+          });
+
+    - name: Post Success Comment
+      if: env.VERSION_UPDATED == 'true'
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number,
+            body: '✅ Version number has been successfully updated in AssemblyInfo.cs.'
+          })
+
+    - name: Fail Workflow if Version Not Updated
+      if: env.VERSION_UPDATED == 'false'
+      run: exit 1
