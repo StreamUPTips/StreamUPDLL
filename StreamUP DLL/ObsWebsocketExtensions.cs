@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -382,5 +383,18 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);
         }
            
+        public static int SUGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName)
+        {
+            // Load log string
+            string logName = $"{productName}-SUGetMoveFilterDuration";
+            CPH.SUWriteLog("Method Started", logName);
+
+            JObject filter = CPH.SUObsGetSourceFilter(productName, obsConnection, sourceName, filterName);
+            int duration = (int)filter["filterSettings"]["duration"];
+
+            CPH.SUWriteLog($"Method complete", logName);
+            return duration;
+        }
+    
     }
 }
