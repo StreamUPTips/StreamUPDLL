@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +10,7 @@ namespace StreamUP {
 
     public static class ValidationExtensions {
 
-        public static bool SUInitialiseProduct(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, string settingsAction)
+        public static bool SUInitialiseProduct(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, string settingsAction, Version requiredLibraryVersion)
         {
             // Load log string
             string logName = $"{productName}-SUInitialiseProduct";
@@ -26,7 +27,7 @@ namespace StreamUP {
             if (!CPH.SUCheckProductSettingsLoaded(productNumber, productName, settingsAction))
             {
                 CPH.SUWriteLog("Settings action has not been run. Initialisation aborted.", logName);
-                return false; // Stop execution since OBS is not connected
+                return false;
             }     
 
             // Check if obs is connected
@@ -34,13 +35,22 @@ namespace StreamUP {
             if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsConnection))
             {
                 CPH.SUWriteLog("OBS is not connected. Initialisation aborted.", logName);
-                return false; // Stop execution since OBS is not connected
+                return false;
             }
+
             // Check if products scene exists
             if (!CPH.SUCheckStreamUPSceneExists(productNumber, productName, sceneName, obsConnection))
             {
                 CPH.SUWriteLog($"Scene '{sceneName}' does not exist. Initialisation aborted.", logName);
-                return false; // Stop execution since the scene does not exist
+                return false;
+            }
+
+            // Check dll version
+            CPH.SUWriteLog("Checking if dll is the required version or newer", logName);
+            if (!CPH.SUCheckLibraryVersion(requiredLibraryVersion))
+            {
+                CPH.SUWriteLog($"Method complete", logName);
+                return false;
             }
 
             CPH.SetGlobalVar($"{productNumber}_Initialised", true, false);
@@ -283,6 +293,30 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);          
             return true;
         }
-    }
 
+        public static bool SUCheckLibraryVersion(this IInlineInvokeProxy CPH, Version minimumRequiredVersion)
+        {
+            // Load log string
+            string logName = $"ValidationExtensions-SUCheckLibraryVersion";
+            CPH.SUWriteLog("Method Started", logName);
+
+            Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            CPH.SUWriteLog($"currentVersion=[{currentVersion}], minimumRequiredVersion=[{minimumRequiredVersion}]");
+
+            if (currentVersion < minimumRequiredVersion)
+            {       
+                string error1 = "The StreamUP .dll file is not the required version.";
+                string error2 = "Please install the latest version.";
+                CPH.SUWriteLog(error1, logName);
+                CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                CPH.SUWriteLog($"Method complete", logName);          
+                return false;
+            }
+
+            CPH.SUWriteLog($"Current version is fine.", logName);          
+            CPH.SUWriteLog($"Method complete", logName);         
+            return true;
+        }
+    
+    }
 }
