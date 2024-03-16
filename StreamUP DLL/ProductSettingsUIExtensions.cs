@@ -547,7 +547,30 @@ namespace StreamUP {
                 if (result == DialogResult.Yes) {
                     foreach (var setting in streamUpSettings) {
                         if (!string.IsNullOrEmpty(setting.Name)) {
-                            CPH.UnsetGlobalVar(setting.Name);
+                            if (string.IsNullOrEmpty(setting.Default)){
+                                CPH.UnsetGlobalVar(setting.Name);
+                                continue;
+                            }
+                            switch (setting.Type)
+                            {
+                                case StreamUpSettingType.Boolean:
+                                    CPH.SetGlobalVar(setting.Name, bool.Parse(setting.Default), true);
+                                    break;
+                                case StreamUpSettingType.Double:
+                                    CPH.SetGlobalVar(setting.Name, double.Parse(setting.Default), true);
+                                    break;
+                                case StreamUpSettingType.Integer:
+                                    CPH.SetGlobalVar(setting.Name, int.Parse(setting.Default), true);
+                                    break;
+                                case StreamUpSettingType.Colour:
+                                    var colour = ColorTranslator.FromHtml(setting.Default);
+                                    long colourValue = ((long)colour.A << 24) | ((long)colour.B << 16) | ((long)colour.G << 8) | (long)colour.R;
+                                    CPH.SetGlobalVar(setting.Name, colourValue, true);
+                                    break;
+                                default:
+                                    CPH.SetGlobalVar(setting.Name, setting.Default.ToString(), true);
+                                    break;
+                            }
                         }
                     }
                     withParent.Close();
@@ -765,7 +788,7 @@ namespace StreamUP {
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, Default = defaultValue, }
             };
 
             if (addSpacer)
