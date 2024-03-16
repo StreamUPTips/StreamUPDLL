@@ -396,5 +396,163 @@ namespace StreamUP {
             return duration;
         }
     
+        // EFFICIENT GET OBS SCENE TRANSFORM
+        public static JObject SUObsPullSceneItemTransformFast(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource)
+        {
+            // Pull sceneItemLists (Group or Scene)
+            string jsonResponse = "";
+            switch (parentSourceType) {
+                case 0:
+                    jsonResponse = CPH.ObsSendRaw("GetSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
+                    break;
+                case 1:
+                    jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
+                    break;
+                default:
+                    CPH.SUWriteLog($"parentSourceType is incorrectly set to '{parentSourceType}'. 0=Scene, 1=Group");
+                    CPH.SUWriteLog($"Method complete");
+                    return null;
+            }
+
+            // Save and parse jsonResponse
+            var json = JObject.Parse(jsonResponse);
+            var sceneItems = json["sceneItems"] as JArray;
+            if (sceneItems == null || sceneItems.Count == 0) {
+                CPH.SUWriteLog("No scene items found in the response");
+                CPH.SUWriteLog($"Method complete");
+                return null;
+            }
+
+            // Find sceneItemId from all sources on scene
+            int sceneItemId = -1;
+            foreach (var item in sceneItems) {
+                string currentItemName = item["sourceName"].ToString();
+                if (currentItemName == childSource) {
+                    sceneItemId = int.Parse(item["sceneItemId"].ToString());
+                    break;
+                }
+            }
+
+            if (sceneItemId == -1) {
+                // Log an error if the Scene Item ID is not found
+                CPH.SUWriteLog("Scene Item ID not found");
+                CPH.SUWriteLog($"Method complete");
+                return null;
+            }
+
+            jsonResponse = CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsConnection);
+
+            // Parse the JSON response
+            var obsResponse = JObject.Parse(jsonResponse);
+            // Check if the obsResponse data is not null
+            if (obsResponse == null) {
+                CPH.SUWriteLog($"No transform data found in jsonResponse");
+                CPH.SUWriteLog($"Method complete");
+                return null;
+            }
+
+            // Return sceneItemTransform from obsResponse
+            JObject transform = obsResponse["sceneItemTransform"] as JObject;
+            return transform;
+        }
+    
+        // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
+        public static string SUSplitTextOnWidth(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string sceneName, string sourceName, string text, int maxWidth, int maxHeight)
+        {
+            // Load log string
+            string logName = $"{productName}-SUSplitTextOnWidth";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Set initial text
+            CPH.ObsSetGdiText(sceneName, sourceName, text, obsConnection);
+            CPH.SUWriteLog($"Text source updated: sourceName=[{sourceName}] text=[{text}]", logName);
+            CPH.Wait(20);
+
+            // Check current text width
+            JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+            int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+            CPH.SUWriteLog($"Max widget width = [{maxWidth}], current text width=[{textWidth}]", logName);
+
+            string newMessage = text;
+
+            // If text is too wide
+            if (textWidth > maxWidth)
+            {
+                CPH.SUWriteLog($"Obs text source width is longer than maxWidth", logName);
+                // Text is too wide; break it down into lines
+                List<string> lines = SplitTextIntoLines(CPH, maxWidth, text, sceneName, sourceName, obsConnection, productName);
+                
+                // Combine lines back to a single string with line breaks
+                newMessage = string.Join("\n", lines);
+                
+                // Set new text source
+                CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+            }
+            else
+            {
+                CPH.SUWriteLog($"Obs text source width is shorter than maxWidth", logName);
+            }
+
+            // Check against max width and height
+            CPH.Wait(20);
+            JObject finalTransform = CPH.SUObsPullSceneItemTransform(productName, obsConnection, 0, sceneName, sourceName);
+            int finalWidth = (int)Math.Round(decimal.Parse(finalTransform["width"].ToString()));
+            int finalHeight = (int)Math.Round(decimal.Parse(finalTransform["height"].ToString()));
+            if (finalWidth > maxWidth || finalHeight > maxHeight)
+            {
+                return null;
+            }
+
+            CPH.SUWriteLog($"Method complete", logName);
+            return newMessage;
+        }
+
+        private static List<string> SplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, string sceneName, string sourceName, int obsConnection, string productName)
+        {
+            // Load log string
+            string logName = $"{productName}-SplitTextIntoLines";
+            CPH.SUWriteLog("Method Started", logName);
+            
+            List<string> lines = new List<string>();
+            string[] words = message.Split(' ');
+            string currentLine = "";
+
+            foreach (string word in words)
+            {
+                string testLine = currentLine + (currentLine.Length > 0 ? " " : "") + word;
+                CPH.SUWriteLog($"test: {testLine}", logName);
+                CPH.ObsSetGdiText(sceneName, sourceName, testLine, obsConnection);
+                CPH.Wait(20);
+                JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, 0, sceneName, sourceName);
+                int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+                CPH.SUWriteLog($"textWidth: {textWidth}", logName);
+
+                if (textWidth <= maxWidth)
+                {
+                    currentLine = testLine;
+                }
+                else
+                {
+                    if (currentLine.Length > 0)
+                    {
+                        lines.Add(currentLine);
+                        currentLine = word;
+                    }
+                    else
+                    {
+                        lines.Add(word); // Case for a very long word
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(currentLine))
+            {
+                lines.Add(currentLine);
+            }
+
+            CPH.SUWriteLog($"Method complete", logName);
+            return lines;
+        }
+        
     }
 }
