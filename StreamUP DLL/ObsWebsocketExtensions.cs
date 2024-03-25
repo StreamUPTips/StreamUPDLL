@@ -463,51 +463,124 @@ namespace StreamUP {
             string logName = $"{productName}-SUSplitTextOnWidth";
             CPH.SUWriteLog("Method Started", logName);
 
-            // Set initial text
+            // Check current text width by setting initial text
             CPH.ObsSetGdiText(sceneName, sourceName, text, obsConnection);
             CPH.SUWriteLog($"Text source updated: sourceName=[{sourceName}] text=[{text}]", logName);
-            CPH.Wait(20);
+            CPH.Wait(20); // Allow OBS to update
 
-            // Check current text width
             JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
             int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
             CPH.SUWriteLog($"Max widget width = [{maxWidth}], current text width=[{textWidth}]", logName);
 
-            string newMessage = text;
+            string newMessage = "";
 
-            // If text is too wide
+            // If text is too wide, split into lines
             if (textWidth > maxWidth)
             {
                 CPH.SUWriteLog($"Obs text source width is longer than maxWidth", logName);
-                // Text is too wide; break it down into lines
-                List<string> lines = SplitTextIntoLines(CPH, maxWidth, text, sceneName, sourceName, obsConnection, productName);
+                List<string> lines = SplitTextIntoLines(CPH, maxWidth, text, parentSourceType, sceneName, sourceName, obsConnection, productName);
                 
-                // Combine lines back to a single string with line breaks
-                newMessage = string.Join("\n", lines);
-                
-                // Set new text source
-                CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+                int currentHeight = 0;
+
+                string previousMessage = ""; // Store the message from the previous iteration
+
+                foreach (var line in lines)
+                {
+                    // Build the test message by adding the new line
+                    string testMessage = (newMessage == "" ? line : newMessage + "\n" + line);
+                    CPH.ObsSetGdiText(sceneName, sourceName, testMessage, obsConnection);
+                    CPH.Wait(20); // Allow OBS to update
+
+                    // Fetch and parse the new height
+                    textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+                    currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
+
+                    if (currentHeight > maxHeight)
+                    {
+                        // If the height exceeds the max height, use the previous message and append '...'
+                        newMessage = previousMessage == "" ? "..." : previousMessage + "...";
+                        CPH.SUWriteLog($"Height exceeded after adding line. New message set: {newMessage}", logName);
+                        break; // Exit the loop as we've reached the limit
+                    }
+                    else
+                    {
+                        // If the height is within bounds, update newMessage and keep this as previousMessage
+                        newMessage = testMessage;
+                        previousMessage = newMessage; // Update previousMessage to this newMessage for next iteration
+                        CPH.SUWriteLog($"Message within height limit:\n{newMessage}", logName);
+                    }
+                }
+
+                if (newMessage.EndsWith("..."))
+                {
+                    CPH.SUWriteLog("Starting final adjustment to fit within max width and height.", logName);
+                    bool fitsWithinBounds = false;
+                    while (!fitsWithinBounds)
+                    {
+                        CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+                        CPH.Wait(20); // Allow OBS to update
+
+                        // Fetch and parse the current dimensions
+                        textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+                        currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
+                        int currentWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+                        CPH.SUWriteLog($"Current dimensions after adjustments: Width = {currentWidth}, Height = {currentHeight}", logName);
+
+                        if (currentHeight > maxHeight || currentWidth > maxWidth)
+                        {
+                            // Remove the last word along with '...' then add '...' back
+                            int lastSpaceIndex = newMessage.LastIndexOf(' ', newMessage.Length - 4); // -4 to ignore the '...'
+                            
+                            if (lastSpaceIndex > 0) // Ensure there is a space to find, indicating another word exists
+                            {
+                                // Update newMessage by removing the last word
+                                newMessage = newMessage.Substring(0, lastSpaceIndex) + "...";
+                                CPH.SUWriteLog($"Text adjusted to fit within constraints: {newMessage}", logName);
+                            }
+                            else
+                            {
+                                // No more spaces found, which means no more words left to remove
+                                fitsWithinBounds = true; // Exit the loop as we can't reduce the text further
+                                CPH.SUWriteLog("No more words left to remove, the text may still exceed maximum dimensions.", logName);
+                            }
+                        }
+                        else
+                        {
+                            // Text fits within the height and width, exit the loop
+                            fitsWithinBounds = true;
+                            CPH.SUWriteLog("Text now fits within maximum width and height.", logName);
+                        }
+                    }
+                }
             }
             else
             {
-                CPH.SUWriteLog($"Obs text source width is shorter than maxWidth", logName);
+                // If the text is within the width limit, use the original text
+                newMessage = text;
             }
 
-            // Check against max width and height
-            CPH.Wait(20);
-            JObject finalTransform = CPH.SUObsPullSceneItemTransform(productName, obsConnection, 0, sceneName, sourceName);
-            int finalWidth = (int)Math.Round(decimal.Parse(finalTransform["width"].ToString()));
-            int finalHeight = (int)Math.Round(decimal.Parse(finalTransform["height"].ToString()));
+            CPH.SUWriteLog($"Final message before checking dimensions: {newMessage}", logName);
+
+            // Set final text in OBS and log final dimensions
+            CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+            CPH.Wait(20); // Allow OBS to update for the last time
+            textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+            int finalWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+            int finalHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
+            CPH.SUWriteLog($"Final text dimensions: width=[{finalWidth}], height=[{finalHeight}]", logName);
+
             if (finalWidth > maxWidth || finalHeight > maxHeight)
             {
+                CPH.SUWriteLog($"Exceeds constraints - Final dimensions: width={finalWidth}, height={finalHeight}", logName);
                 return null;
             }
 
-            CPH.SUWriteLog($"Method complete", logName);
+            CPH.SUWriteLog($"Within constraints - Final dimensions: width={finalWidth}, height={finalHeight}", logName);
+            CPH.SUWriteLog("Method complete", logName);
             return newMessage;
         }
 
-        private static List<string> SplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, string sceneName, string sourceName, int obsConnection, string productName)
+        private static List<string> SplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName, int obsConnection, string productName)
         {
             // Load log string
             string logName = $"{productName}-SplitTextIntoLines";
@@ -520,12 +593,10 @@ namespace StreamUP {
             foreach (string word in words)
             {
                 string testLine = currentLine + (currentLine.Length > 0 ? " " : "") + word;
-                CPH.SUWriteLog($"test: {testLine}", logName);
                 CPH.ObsSetGdiText(sceneName, sourceName, testLine, obsConnection);
                 CPH.Wait(20);
-                JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, 0, sceneName, sourceName);
+                JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
                 int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
-                CPH.SUWriteLog($"textWidth: {textWidth}", logName);
 
                 if (textWidth <= maxWidth)
                 {
@@ -550,9 +621,80 @@ namespace StreamUP {
                 lines.Add(currentLine);
             }
 
+            CPH.SUWriteLog($"Returning lines:\n{String.Join("\n", lines)}", logName);
             CPH.SUWriteLog($"Method complete", logName);
             return lines;
         }
         
+        // SET SCENE ITEM TRANSFORM
+        public static void SUObsSetSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource, string transformSettings) {
+            // Load log string
+            string logName = $"{productName}-SUObsSetSceneItemTransform";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Pull sceneItemId
+            CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
+            int sceneItemId = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+            if (sceneItemId == -1) {
+                // Log an error if the Scene Item ID is not found
+                CPH.SUWriteLog("Scene Item ID not found", logName);
+                CPH.SUWriteLog($"Method complete", logName);
+                return;
+            }
+
+            // Set scene item transform using the provided JSON settings
+            string jsonCommand = $$"""
+            {
+                "sceneName": "{{parentSource}}",
+                "sceneItemId": {{sceneItemId}},
+                "sceneItemTransform": {{{transformSettings}}}
+            }
+            """;
+            CPH.ObsSendRaw("SetSceneItemTransform", jsonCommand, obsConnection);
+
+            CPH.SUWriteLog($"Set scene item transform for (sceneItemId: [{sceneItemId}]) on (parentSource: [{parentSource}]) to (json: {transformSettings})", logName);
+            CPH.SUWriteLog($"Method complete", logName);
+            return;
+        }
+    
+        // SET SCENE ITEM ENABLED
+        public static void SUObsSetSceneItemEnabled(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource, bool visibilityState)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsSetSceneItemEnabled";
+            CPH.SUWriteLog("Method Started", logName);
+                		
+            // Pull scene Item ID
+            int id = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+
+            // Set scene item enabled/disabled
+            CPH.SUWriteLog($"Setting scene item visiblity 'sourcename=[{childSource}]': parentSource=[{parentSource}], sceneItemId=[{id}], sceneItemEnabled=[{visibilityState.ToString().ToLower()}]", logName);
+            CPH.ObsSendRaw("SetSceneItemEnabled", "{\"sceneName\":\""+parentSource+"\",\"sceneItemId\":"+id+",\"sceneItemEnabled\":"+visibilityState.ToString().ToLower()+"}", obsConnection);
+
+            CPH.SUWriteLog($"Method complete", logName);
+        }
+    
+        public static bool SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsGetSceneItemEnabled";
+            CPH.SUWriteLog("Method Started", logName);
+                		
+            // Pull scene Item ID
+            int id = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+
+            // Set scene item enabled/disabled
+            string visibilityState = CPH.ObsSendRaw("GetSceneItemEnabled", "{\"sceneName\":\""+parentSource+"\",\"sceneItemId\":"+id+"}", obsConnection);
+            // Parse the JSON string
+            var jsonObject = JObject.Parse(visibilityState);
+
+            // Extract the 'sceneItemEnabled' value as a boolean
+            bool sceneItemEnabled = jsonObject["sceneItemEnabled"].Value<bool>();
+            CPH.SUWriteLog($"Got scene item visiblity 'sourcename=[{childSource}]': parentSource=[{parentSource}], sceneItemId=[{id}], sceneItemEnabled=[{sceneItemEnabled.ToString().ToLower()}]", logName);
+
+            CPH.SUWriteLog($"Method complete", logName);
+            return sceneItemEnabled;
+        }
+    
     }
 }
