@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
+using System.Globalization;
+using System.Net;
 
 namespace StreamUP {
 
@@ -87,8 +89,70 @@ namespace StreamUP {
 
             // Save canvasScaleFactor to sb global var
             CPH.SetGlobalVar($"{productNumber}_CanvasScaleFactor", canvasScaleFactor); 
-            CPH.SUWriteLog("Method completed", logName);
             return canvasScaleFactor;
         }
+    
+        public static string SUCurrencyConverter(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency)
+        {
+            // Load log string
+            string logName = "GeneralExtensions-SUCurrencyConverter";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Get the exchange rate
+            decimal exchangeRate = GetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
+            CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]");
+
+            // Convert the amount
+            decimal convertedAmount = amount / exchangeRate;
+            CPH.SUWriteLog($"convertedAmount=[{convertedAmount}]");
+
+            // Get the currency symbol
+            string currencySymbol = CPH.SUGetCurrencySymbol(toCurrency);
+            CPH.SUWriteLog($"currencySymbol=[{currencySymbol}]", logName);
+
+            // Format the converted amount with the currency symbol
+            string formattedAmount = $"{currencySymbol}{convertedAmount:N2}";
+            CPH.SUWriteLog($"formattedAmount=[{formattedAmount}]", logName);
+
+            CPH.SUWriteLog("Method completed", logName);
+            return formattedAmount;
+        }
+
+        private static decimal GetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency)
+        {
+            // Load log string
+            string logName = "GeneralExtensions-GetExchangeRate";
+            CPH.SUWriteLog("Method Started", logName);
+
+            string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
+            CPH.SUWriteLog(url, logName);
+
+            string rawJson;
+            using (WebClient client = new WebClient())
+            {
+                client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                rawJson = client.DownloadString(url);
+                CPH.SUWriteLog(rawJson, logName);
+            }
+
+            JObject json = JObject.Parse(rawJson);
+            CPH.SUWriteLog(json.ToString(), logName);
+
+            decimal exRate = (decimal)json[toCurrency][fromCurrency];
+            CPH.SUWriteLog($"exRate=[{exRate}]");
+
+            CPH.SUWriteLog("Method completed", logName);
+            return exRate;
+        }
+
+        public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode)
+        {
+            RegionInfo region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                .Select(ci => new RegionInfo(ci.LCID))
+                .FirstOrDefault(ri => ri.ISOCurrencySymbol.Equals(currencyCode, StringComparison.OrdinalIgnoreCase));
+
+            return region != null ? region.CurrencySymbol : currencyCode;
+        }      
+
     }
 }
