@@ -42,6 +42,9 @@
     <Reference Include="Streamer.bot.Plugin.Interface">
       <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Plugin.Interface.dll</HintPath>
     </Reference>
+    <Reference Include="Streamer.bot.Common">
+      <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -60,6 +63,7 @@
     <Compile Include="UIExtensions.cs" />
     <Compile Include="CheckObsPluginsExtensions.cs" />
     <Compile Include="ProductSettingsUIExtensions.cs" />
+    <Compile Include="EventTriggerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
