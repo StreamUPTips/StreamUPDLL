@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 using Streamer.bot.Common.Events;
-using System.Collections;
 using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace StreamUP {
 
@@ -55,7 +48,7 @@ namespace StreamUP {
             return image;
         }
     
-        public static TriggerData SUProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber) {
+        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber) {
             // Load baseInfo var
             var baseInfo = new TriggerData();
 
@@ -80,7 +73,7 @@ namespace StreamUP {
                             baseInfo.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productNumber, 0);
                             break;
                         case "youtube":
-                            baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                            baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                             break;
                     }
                     break;
@@ -170,20 +163,20 @@ namespace StreamUP {
                     baseInfo.Receiver = sbArgs["user"].ToString();
                     baseInfo.Tier = sbArgs["tier"].ToString();
                     baseInfo.User = sbArgs["gifterUser"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);         
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);         
                     break;
                 case EventType.YouTubeMembershipGift:
                     baseInfo.Amount = int.Parse(sbArgs["count"].ToString());
                     baseInfo.Tier = sbArgs["tier"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 case EventType.YouTubeMemberMileStone:
                     baseInfo.Message = sbArgs["message"].ToString();
                     baseInfo.MonthsTotal = int.Parse(sbArgs["months"].ToString());
                     baseInfo.Tier = sbArgs["levelName"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 case EventType.YouTubeMessage:
                     baseInfo.Message = sbArgs["message"].ToString();
@@ -193,11 +186,11 @@ namespace StreamUP {
                 case EventType.YouTubeNewSponsor:
                     baseInfo.Tier = sbArgs["levelName"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 case EventType.YouTubeNewSubscriber:
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 case EventType.YouTubeSuperChat:
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
@@ -206,7 +199,7 @@ namespace StreamUP {
                     baseInfo.AmountCurrency = CPH.SUCurrencyConverter(amount, currency, localCurrency);
                     baseInfo.Message = sbArgs["message"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 case EventType.YouTubeSuperSticker:
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
@@ -214,7 +207,7 @@ namespace StreamUP {
                     localCurrency = CPH.GetGlobalVar<string>("sup000_LocalCurrencyCode", true);
                     baseInfo.AmountCurrency = CPH.SUCurrencyConverter(amount, currency, localCurrency);
                     baseInfo.User = sbArgs["user"].ToString();
-                    baseInfo.UserImage = CheckYouTubeProfileImageArgs(CPH);                
+                    baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
                 default:
                     CPH.SUWriteLog($"The trigger method [{CPH.GetEventType().ToString()}] is not supported. Feel free to open a ticket and the StreamUP team will try and add it.");
@@ -231,7 +224,7 @@ namespace StreamUP {
             return baseInfo;
         }
 
-        private static string CheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH)
+        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH)
         {
             if (!CPH.TryGetArg("userProfileUrl", out string profileImage))
             {
