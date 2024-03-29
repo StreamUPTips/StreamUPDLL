@@ -61,7 +61,7 @@ namespace StreamUP {
 
             // Create sceneItem list
             List<string> sceneItemNames = new List<string>();
-            CPH.SUGetSceneItemNames(productName, obsConnection, 0, sceneName, sceneItemNames);
+            CPH.SUObsGetSceneItemNames(productName, obsConnection, 0, sceneName, sceneItemNames);
             CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
 
             // Set the version number on each source in that scene
