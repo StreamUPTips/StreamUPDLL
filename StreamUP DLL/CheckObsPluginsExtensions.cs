@@ -115,7 +115,7 @@ namespace StreamUP {
                     CPH.SUWriteLog($"{error1} - {error3}", logName);
                 }
 
-                CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
             }
 
             CPH.SUWriteLog($"Method complete", logName);          
