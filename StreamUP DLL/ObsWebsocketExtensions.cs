@@ -1,11 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 
@@ -34,14 +29,14 @@ namespace StreamUP {
         }
 
         // PULL SCENE ITEM TRANSFORM
-        public static JObject SUObsPullSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource) {
+        public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource) {
             // Load log string
-            string logName = $"{productName}-SUObsPullSceneItemTransform";
+            string logName = $"{productName}-SUObsGetSceneItemTransform";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull sceneItemId
             CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
-            int sceneItemId = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+            int sceneItemId = CPH.SUObsGetSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
             if (sceneItemId == -1) {
                 // Log an error if the Scene Item ID is not found
                 CPH.SUWriteLog("Scene Item ID not found", logName);
@@ -70,9 +65,9 @@ namespace StreamUP {
         }
 
         // PULL SCENE ITEM ID
-        public static int SUObsPullSceneItemId(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource) {
+        public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource) {
             // Load log string
-            string logName = $"{productName}-SUObsPullSceneItemId";
+            string logName = $"{productName}-SUObsGetSceneItemId";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull sceneItemLists (Group or Scene)
@@ -102,15 +97,15 @@ namespace StreamUP {
             }
 
             // Pull sceneItemId and return
-            int sceneItemId = CPH.SUFindSceneItemId(productName, sceneItems, childSource);
+            int sceneItemId = CPH.SUObsFindSceneItemId(productName, sceneItems, childSource);
             CPH.SUWriteLog($"Returning sceneItemId: childSource=[{childSource}], sceneItemId=[{sceneItemId}]", logName);
             CPH.SUWriteLog($"Method complete", logName);
             return sceneItemId;
         }
 
-        private static int SUFindSceneItemId(this IInlineInvokeProxy CPH, string productName, JArray sceneItems, string childSource) {
+        private static int SUObsFindSceneItemId(this IInlineInvokeProxy CPH, string productName, JArray sceneItems, string childSource) {
             // Load log string
-            string logName = $"{productName}-SUFindSceneItemId";
+            string logName = $"{productName}-SUObsFindSceneItemId";
             CPH.SUWriteLog("Method Started", logName);
 
             // Find sceneItemId from all sources on scene
@@ -280,10 +275,10 @@ namespace StreamUP {
         }
         
         // GET GROUP SCENE ITEM LIST
-        public static JArray SUGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productName, int obsConnection, string groupName)
+        public static JArray SUObsGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productName, int obsConnection, string groupName)
         {
             // Load log string
-            string logName = $"{productName}-SUGetGroupSceneItemList";
+            string logName = $"{productName}-SUObsGetGroupSceneItemList";
             CPH.SUWriteLog("Method Started", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", $"{{\"sceneName\":\"{groupName}\"}}", obsConnection);
@@ -294,10 +289,10 @@ namespace StreamUP {
         }
 
         // GET SCENE ITEM NAMES
-        public static void SUGetSceneItemNames(this IInlineInvokeProxy CPH, string productName, int obsConnection, int sceneType, string sceneName, List<string> sceneItemNames)
+        public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productName, int obsConnection, int sceneType, string sceneName, List<string> sceneItemNames)
         {
             // Load log string
-            string logName = $"{productName}-SUGetSceneItemNames";
+            string logName = $"{productName}-SUObsGetSceneItemNames";
             CPH.SUWriteLog("Method Started", logName);
 
             JArray sceneItems = new JArray();
@@ -308,7 +303,7 @@ namespace StreamUP {
                     CPH.SUWriteLog($"Created sceneItemList of sceneName [{sceneName}]", logName);
                     break;
                 case 1:
-                    sceneItems = CPH.SUGetGroupSceneItemList(productName, obsConnection, sceneName);
+                    sceneItems = CPH.SUObsGetGroupSceneItemList(productName, obsConnection, sceneName);
                     CPH.SUWriteLog($"Created sceneItemList of sceneName (group) [{sceneName}]", logName);
                     break;
                 default:
@@ -326,7 +321,7 @@ namespace StreamUP {
                 {
                     // If the item is a group, recursively fetch its scene items
                     CPH.SUWriteLog($"Source is a group, running sceneItemNames for that group: sourceName=[{sourceName}]", logName);
-                    CPH.SUGetSceneItemNames(productName, obsConnection, 1, sourceName, sceneItemNames);
+                    CPH.SUObsGetSceneItemNames(productName, obsConnection, 1, sourceName, sceneItemNames);
                 }
                 else
                 {
@@ -339,10 +334,10 @@ namespace StreamUP {
         }    
 
         // AUTOSIZE ADVANCED MASK
-        public static void SUAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
+        public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
         {
             // Load log string
-            string logName = $"{productName}-SUAutosizeAdvancedMask";
+            string logName = $"{productName}-SUObsAutosizeAdvancedMask";
             CPH.SUWriteLog("Method Started", logName);
 
             double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
@@ -357,10 +352,10 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);
         }
 
-        public static void SUAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, int padX, int padY)
+        public static void SUObsAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName, int padX, int padY)
         {
             // Load log string
-            string logName = $"{productName}-SUAutoposAdvancedMask";
+            string logName = $"{productName}-SUObsAutoposAdvancedMask";
             CPH.SUWriteLog("Method Started", logName);
     
             // Pull advanced mask
@@ -383,10 +378,10 @@ namespace StreamUP {
             CPH.SUWriteLog($"Method complete", logName);
         }
            
-        public static int SUGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName)
+        public static int SUObsGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productName, string productNumber, int obsConnection, string sourceName, string filterName)
         {
             // Load log string
-            string logName = $"{productName}-SUGetMoveFilterDuration";
+            string logName = $"{productName}-SUObsGetMoveFilterDuration";
             CPH.SUWriteLog("Method Started", logName);
 
             JObject filter = CPH.SUObsGetSourceFilter(productName, obsConnection, sourceName, filterName);
@@ -397,7 +392,7 @@ namespace StreamUP {
         }
     
         // EFFICIENT GET OBS SCENE TRANSFORM
-        public static JObject SUObsPullSceneItemTransformFast(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource)
+        public static JObject SUObsGetSceneItemTransformFast(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource)
         {
             // Pull sceneItemLists (Group or Scene)
             string jsonResponse = "";
@@ -457,10 +452,10 @@ namespace StreamUP {
         }
     
         // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
-        public static string SUSplitTextOnWidth(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string sceneName, string sourceName, string text, int maxWidth, int maxHeight)
+        public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string sceneName, string sourceName, string text, int maxWidth, int maxHeight)
         {
             // Load log string
-            string logName = $"{productName}-SUSplitTextOnWidth";
+            string logName = $"{productName}-SUObsSplitTextOnWidth";
             CPH.SUWriteLog("Method Started", logName);
 
             // Check current text width by setting initial text
@@ -468,7 +463,7 @@ namespace StreamUP {
             CPH.SUWriteLog($"Text source updated: sourceName=[{sourceName}] text=[{text}]", logName);
             CPH.Wait(20); // Allow OBS to update
 
-            JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+            JObject textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
             int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
             CPH.SUWriteLog($"Max widget width = [{maxWidth}], current text width=[{textWidth}]", logName);
 
@@ -478,7 +473,7 @@ namespace StreamUP {
             if (textWidth > maxWidth)
             {
                 CPH.SUWriteLog($"Obs text source width is longer than maxWidth", logName);
-                List<string> lines = SplitTextIntoLines(CPH, maxWidth, text, parentSourceType, sceneName, sourceName, obsConnection, productName);
+                List<string> lines = SUObsSplitTextIntoLines(CPH, maxWidth, text, parentSourceType, sceneName, sourceName, obsConnection, productName);
                 
                 int currentHeight = 0;
 
@@ -492,7 +487,7 @@ namespace StreamUP {
                     CPH.Wait(20); // Allow OBS to update
 
                     // Fetch and parse the new height
-                    textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+                    textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
                     currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
 
                     if (currentHeight > maxHeight)
@@ -521,7 +516,7 @@ namespace StreamUP {
                         CPH.Wait(20); // Allow OBS to update
 
                         // Fetch and parse the current dimensions
-                        textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+                        textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
                         currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
                         int currentWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
                         CPH.SUWriteLog($"Current dimensions after adjustments: Width = {currentWidth}, Height = {currentHeight}", logName);
@@ -564,7 +559,7 @@ namespace StreamUP {
             // Set final text in OBS and log final dimensions
             CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
             CPH.Wait(20); // Allow OBS to update for the last time
-            textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+            textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
             int finalWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
             int finalHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
             CPH.SUWriteLog($"Final text dimensions: width=[{finalWidth}], height=[{finalHeight}]", logName);
@@ -580,10 +575,10 @@ namespace StreamUP {
             return newMessage;
         }
 
-        private static List<string> SplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName, int obsConnection, string productName)
+        private static List<string> SUObsSplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName, int obsConnection, string productName)
         {
             // Load log string
-            string logName = $"{productName}-SplitTextIntoLines";
+            string logName = $"{productName}-SUObsSplitTextIntoLines";
             CPH.SUWriteLog("Method Started", logName);
             
             List<string> lines = new List<string>();
@@ -595,7 +590,7 @@ namespace StreamUP {
                 string testLine = currentLine + (currentLine.Length > 0 ? " " : "") + word;
                 CPH.ObsSetGdiText(sceneName, sourceName, testLine, obsConnection);
                 CPH.Wait(20);
-                JObject textTransform = CPH.SUObsPullSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
+                JObject textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
                 int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
 
                 if (textWidth <= maxWidth)
@@ -634,7 +629,7 @@ namespace StreamUP {
 
             // Pull sceneItemId
             CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
-            int sceneItemId = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+            int sceneItemId = CPH.SUObsGetSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
             if (sceneItemId == -1) {
                 // Log an error if the Scene Item ID is not found
                 CPH.SUWriteLog("Scene Item ID not found", logName);
@@ -665,7 +660,7 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
                 		
             // Pull scene Item ID
-            int id = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+            int id = CPH.SUObsGetSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
 
             // Set scene item enabled/disabled
             CPH.SUWriteLog($"Setting scene item visiblity 'sourcename=[{childSource}]': parentSource=[{parentSource}], sceneItemId=[{id}], sceneItemEnabled=[{visibilityState.ToString().ToLower()}]", logName);
@@ -681,7 +676,7 @@ namespace StreamUP {
             CPH.SUWriteLog("Method Started", logName);
                 		
             // Pull scene Item ID
-            int id = CPH.SUObsPullSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
+            int id = CPH.SUObsGetSceneItemId(productName, obsConnection, parentSourceType, parentSource, childSource);
 
             // Set scene item enabled/disabled
             string visibilityState = CPH.ObsSendRaw("GetSceneItemEnabled", "{\"sceneName\":\""+parentSource+"\",\"sceneItemId\":"+id+"}", obsConnection);
