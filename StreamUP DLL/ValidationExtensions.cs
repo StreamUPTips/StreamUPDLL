@@ -239,14 +239,14 @@ namespace StreamUP {
                     string error1 = "OBS is not connected to Streamer.Bot";
                     string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
                     CPH.SUWriteLog(error1, logName);
-                    CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                    CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
                 }
                 else
                 {
                     string error1 = $"Your OBS is connected to Streamer.Bot via websocket {versionNumberString}";
                     string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
                     CPH.SUWriteLog(error1, logName);
-                    CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                    CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
                 }
                 CPH.SUWriteLog($"Method complete", logName);          
                 return false;
@@ -257,7 +257,7 @@ namespace StreamUP {
             var obsPluginResult = CPH.FindOBSLogFile(obsConnection);
             if (!obsPluginResult.Success)
             {
-                CPH.SUShowErrorMessage(obsPluginResult.Message);
+                CPH.SUUIShowErrorMessage(obsPluginResult.Message);
                 CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }
@@ -284,7 +284,7 @@ namespace StreamUP {
                 string error2 = "You can download it from the StreamUP website.";
                 string error3 = "Would you like to open the link now?";
                 CPH.SUWriteLog(error1, logName);
-                DialogResult errorOutput = CPH.SUShowYesNoWarningMessage($"{error1}\n{error2}\n\n{error3}");           
+                DialogResult errorOutput = CPH.SUUIShowYesNoWarningMessage($"{error1}\n{error2}\n\n{error3}");           
                 
                 if (errorOutput == DialogResult.Yes) {
                     Process.Start("https://streamup.tips/product/update-checker");
@@ -308,7 +308,7 @@ namespace StreamUP {
                 string error1 = "The StreamUP .dll file is not the required version.";
                 string error2 = "Please install the latest version.";
                 CPH.SUWriteLog(error1, logName);
-                CPH.SUShowErrorMessage($"{error1}\n\n{error2}");
+                CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
                 CPH.SUWriteLog($"Method complete", logName);          
                 return false;
             }

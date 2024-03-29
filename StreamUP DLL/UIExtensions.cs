@@ -12,7 +12,7 @@ namespace StreamUP {
 
     public static class UIExtensions {
 
-        public static void SUShowErrorMessage(this IInlineInvokeProxy CPH, string message)
+        public static void SUUIShowErrorMessage(this IInlineInvokeProxy CPH, string message)
         {
             MessageBox.Show(
                 message,
@@ -22,7 +22,7 @@ namespace StreamUP {
             );
         }  
 
-        public static DialogResult SUShowYesNoWarningMessage(this IInlineInvokeProxy CPH, string message)
+        public static DialogResult SUUIShowYesNoWarningMessage(this IInlineInvokeProxy CPH, string message)
         {
             DialogResult result = MessageBox.Show(
                 message, 
