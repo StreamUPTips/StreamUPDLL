@@ -92,14 +92,14 @@ namespace StreamUP {
             return canvasScaleFactor;
         }
     
-        public static string SUCurrencyConverter(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency)
+        public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency)
         {
             // Load log string
-            string logName = "GeneralExtensions-SUCurrencyConverter";
+            string logName = "GeneralExtensions-SUConvertCurrency";
             CPH.SUWriteLog("Method Started", logName);
 
             // Get the exchange rate
-            decimal exchangeRate = GetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
+            decimal exchangeRate = SUGetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
             CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]");
 
             // Convert the amount
@@ -118,10 +118,10 @@ namespace StreamUP {
             return formattedAmount;
         }
 
-        private static decimal GetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency)
+        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency)
         {
             // Load log string
-            string logName = "GeneralExtensions-GetExchangeRate";
+            string logName = "GeneralExtensions-SUGetExchangeRate";
             CPH.SUWriteLog("Method Started", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
