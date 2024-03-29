@@ -196,7 +196,7 @@ namespace StreamUP {
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = CPH.GetGlobalVar<string>("sup000_LocalCurrencyCode", true);
-                    baseInfo.AmountCurrency = CPH.SUCurrencyConverter(amount, currency, localCurrency);
+                    baseInfo.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                     baseInfo.Message = sbArgs["message"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
                     baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
@@ -205,7 +205,7 @@ namespace StreamUP {
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = CPH.GetGlobalVar<string>("sup000_LocalCurrencyCode", true);
-                    baseInfo.AmountCurrency = CPH.SUCurrencyConverter(amount, currency, localCurrency);
+                    baseInfo.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                     baseInfo.User = sbArgs["user"].ToString();
                     baseInfo.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
                     break;
@@ -232,9 +232,7 @@ namespace StreamUP {
             }
             return profileImage;
         }
-
     }
-
         public class TriggerData 
         {
             public int Amount { get; set; }
