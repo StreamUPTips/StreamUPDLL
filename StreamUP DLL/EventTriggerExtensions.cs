@@ -128,6 +128,7 @@ namespace StreamUP {
                     baseInfo.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productNumber, 0);
                     break;
                 case EventType.TwitchReSub:
+                    baseInfo.Message = sbArgs["rawInput"].ToString();
                     baseInfo.MonthsTotal = int.Parse(sbArgs["cumulative"].ToString());
                     baseInfo.MonthsStreak = int.Parse(sbArgs["monthStreak"].ToString());
                     baseInfo.Tier = sbArgs["tier"].ToString();
