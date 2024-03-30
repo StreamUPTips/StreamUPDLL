@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 
@@ -452,11 +453,15 @@ namespace StreamUP {
         }
     
         // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
-        public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string sceneName, string sourceName, string text, int maxWidth, int maxHeight)
+        public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
             // Load log string
             string logName = $"{productName}-SUObsSplitTextOnWidth";
             CPH.SUWriteLog("Method Started", logName);
+
+            // Remove URLs from the text
+            string text = SURemoveUrls(rawText, "[URL Removed]");
+            CPH.SUWriteLog($"Text after removing URLs: {text}", logName);
 
             // Check current text width by setting initial text
             CPH.ObsSetGdiText(sceneName, sourceName, text, obsConnection);
@@ -577,19 +582,15 @@ namespace StreamUP {
 
         private static List<string> SUObsSplitTextIntoLines(this IInlineInvokeProxy CPH, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName, int obsConnection, string productName)
         {
-            // Load log string
-            string logName = $"{productName}-SUObsSplitTextIntoLines";
-            CPH.SUWriteLog("Method Started", logName);
-            
             List<string> lines = new List<string>();
             string[] words = message.Split(' ');
             string currentLine = "";
 
             foreach (string word in words)
             {
-                string testLine = currentLine + (currentLine.Length > 0 ? " " : "") + word;
+                string testLine = (currentLine.Length > 0 ? currentLine + " " : "") + word;
                 CPH.ObsSetGdiText(sceneName, sourceName, testLine, obsConnection);
-                CPH.Wait(20);
+                CPH.Wait(20); // Allow OBS to update
                 JObject textTransform = CPH.SUObsGetSceneItemTransformFast(productName, obsConnection, parentSourceType, sceneName, sourceName);
                 int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
 
@@ -599,28 +600,32 @@ namespace StreamUP {
                 }
                 else
                 {
-                    if (currentLine.Length > 0)
+                    if (!string.IsNullOrEmpty(currentLine))
                     {
-                        lines.Add(currentLine);
-                        currentLine = word;
+                        lines.Add(currentLine); // Add the current line to the list of lines
                     }
-                    else
-                    {
-                        lines.Add(word); // Case for a very long word
-                    }
+                    currentLine = word; // Start a new line with the current word
                 }
             }
 
             if (!string.IsNullOrEmpty(currentLine))
             {
-                lines.Add(currentLine);
+                lines.Add(currentLine); // Add the remaining line to the list
             }
 
-            CPH.SUWriteLog($"Returning lines:\n{String.Join("\n", lines)}", logName);
-            CPH.SUWriteLog($"Method complete", logName);
             return lines;
         }
-        
+
+        public static string SURemoveUrls(string text, string replacementText)
+        {
+            // This pattern matches URLs starting with http://, https://, or ftp:// followed by any characters until a space is encountered
+            string urlPattern = @"\b(http|https|ftp)://\S+";
+            Regex urlRegex = new Regex(urlPattern, RegexOptions.IgnoreCase);
+
+            // Replace URLs with replacementText
+            return urlRegex.Replace(text, replacementText);
+        }
+
         // SET SCENE ITEM TRANSFORM
         public static void SUObsSetSceneItemTransform(this IInlineInvokeProxy CPH, string productName, int obsConnection, int parentSourceType, string parentSource, string childSource, string transformSettings) {
             // Load log string
