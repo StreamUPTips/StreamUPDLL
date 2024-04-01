@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using Streamer.bot.Plugin.Interface;
 using Streamer.bot.Common.Events;
 using System.Text.RegularExpressions;
+using System.Collections;
+using Newtonsoft.Json;
 
 namespace StreamUP {
 
     public static class EventTriggerExtensions 
     {
+        // Get Twitch profile picture
         public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, int userType)
         {
             // Load log string
@@ -47,7 +50,18 @@ namespace StreamUP {
             CPH.SUWriteLog("Method complete", logName);
             return image;
         }
-    
+            
+        // Check if youtube profile pic arg exists
+        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH)
+        {
+            if (!CPH.TryGetArg("userProfileUrl", out string profileImage))
+            {
+                profileImage = "https://www.tea-tron.com/antorodriguez/blog/wp-content/uploads/2016/04/Image-Not-Found1.png";
+            }
+            return profileImage;
+        }
+
+        // Process SB events
         public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber) {
             // Load baseInfo var
             var baseInfo = new TriggerData();
@@ -224,16 +238,42 @@ namespace StreamUP {
             }
             return baseInfo;
         }
-
-        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH)
+    
+        // Queue system
+        public static bool SUSBSaveQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue myQueue, string varName, bool persisted)
         {
-            if (!CPH.TryGetArg("userProfileUrl", out string profileImage))
-            {
-                profileImage = "https://www.tea-tron.com/antorodriguez/blog/wp-content/uploads/2016/04/Image-Not-Found1.png";
-            }
-            return profileImage;
+            // Load log string
+            string logName = "EventTriggerExtensions-SUSaveQueueToGlobalVar";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Convert the queue to an array then to a JSON string
+            var array = myQueue.ToArray();
+            string jsonString = JsonConvert.SerializeObject(array);
+
+            // Set the global variable in Streamer.Bot
+            CPH.SetGlobalVar(varName, jsonString, persisted);
+
+            return true;
         }
+        public static Queue SUSBGetQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
+        {
+            // Load log string
+            string logName = "EventTriggerExtensions-SUGetQueueFromGlobalVar";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Retrieve the JSON string from the global variable
+            string jsonString = CPH.GetGlobalVar<string>(varName, persisted);
+
+            // Convert the JSON string back to an array, then to a Queue
+            var array = JsonConvert.DeserializeObject<object[]>(jsonString);
+            Queue myQueue = new Queue(array);
+
+            CPH.SUWriteLog("Method Complete", logName);
+            return myQueue;
+        }
+
     }
+        // SB events trigger data
         public class TriggerData 
         {
             public int Amount { get; set; }
