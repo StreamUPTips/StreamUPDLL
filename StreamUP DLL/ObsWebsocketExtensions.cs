@@ -697,10 +697,10 @@ namespace StreamUP {
         }
     
         // Get Canvas Scale Factor
-        public static double SUGetObsCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
+        public static double SUObsGetCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
         {
             // Load log string
-            string logName = "GeneralExtensions-SUGetObsCanvasScaleFactor";
+            string logName = $"{productName}-SUObsGetCanvasScaleFactor";
             CPH.SUWriteLog("Method Started", logName);
 
             // Pull obs canvas width
@@ -719,5 +719,54 @@ namespace StreamUP {
             return canvasScaleFactor;
         }
 
+        // Get Current DSK Scene
+        public static string SUObsGetCurrentDSKScene(this IInlineInvokeProxy CPH, string productName, string dskName, int obsConnection)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsGetCurrentDSKScene";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Send the request and get the response
+            string responseJson = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"get_downstream_keyer\",\"requestData\":{\"dsk_name\":\""+dskName+"\"}}", obsConnection);
+            
+            // Log the response (optional)
+            CPH.SUWriteLog($"Response: {responseJson}", logName);
+
+            // Parse the response to extract the "scene" value
+            string sceneName = "";
+            try
+            {
+                JObject jsonResponse = JObject.Parse(responseJson);
+                sceneName = jsonResponse["responseData"]?["scene"]?.ToString();
+
+                if (string.IsNullOrEmpty(sceneName))
+                {
+                    CPH.SUWriteLog("Scene name not found in response.", logName);
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                CPH.SUWriteLog($"Error parsing response: {ex.Message}", logName);
+                return null;
+            }
+
+            CPH.SUWriteLog($"Extracted scene: {sceneName}", logName);
+            CPH.SUWriteLog("Method complete", logName);
+            return sceneName;
+        }
+
+        // Set Current DSK Scene
+        public static void SUObsSetCurrentDSKScene(this IInlineInvokeProxy CPH, string productName, string dskName, string sceneName, int obsConnection)
+        {
+            // Load log string
+            string logName = $"{productName}-SUObsGetCurrentDSKScene";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Set DSK scene
+            CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"dsk_select_scene\",\"requestData\":{\"dsk_name\":\""+dskName+"\",\"scene\":\""+sceneName+"\"}}", obsConnection);
+            
+            CPH.SUWriteLog("Method complete", logName);
+        }
     }
 }
