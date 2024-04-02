@@ -123,7 +123,7 @@ namespace StreamUP {
                     baseInfo.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productNumber, 0);
                     break;
                 case EventType.TwitchGiftBomb:
-                    baseInfo.Amount = int.Parse(sbArgs["bits"].ToString());
+                    baseInfo.Amount = int.Parse(sbArgs["gifts"].ToString());
                     baseInfo.Anonymous = bool.Parse(sbArgs["anonymous"].ToString());
                     baseInfo.Tier = sbArgs["tier"].ToString();
                     baseInfo.TotalAmount = int.Parse(sbArgs["totalGifts"].ToString());
@@ -244,41 +244,44 @@ namespace StreamUP {
         }
         private static void LoadCustomMessage1Vars(this IInlineInvokeProxy CPH, string productNumber, TriggerData baseInfo)
         {
-            baseInfo.CustomMessage1 = CPH.GetGlobalVar<string>($"{productNumber}_{CPH.GetEventType().ToString()}CustomMessage");
+            baseInfo.CustomMessage1 = CPH.GetGlobalVar<string>($"{productNumber}_{CPH.GetEventType().ToString()}CustomMessage1");
             if (!string.IsNullOrEmpty(baseInfo.CustomMessage1))
             {
                 baseInfo.CustomMessage1 = baseInfo.CustomMessage1
-                    .Replace("{user}", baseInfo.User)
-                    .Replace("{message}", baseInfo.Message)
-                    .Replace("{tier}", baseInfo.Tier)
-                    .Replace("{amount}", baseInfo.Amount.ToString())
-                    .Replace("{amountCurrency}", baseInfo.AmountCurrency)
-                    .Replace("{monthsAmount}", baseInfo.MonthsAmount.ToString())
-                    .Replace("{monthsGifted}", baseInfo.MonthsGifted.ToString())
-                    .Replace("{monthsStreak}", baseInfo.MonthsStreak.ToString())
-                    .Replace("{monthsTotal}", baseInfo.MonthsTotal.ToString())
-                    .Replace("{reveiver}", baseInfo.Receiver)
-                    .Replace("{totalAmount}", baseInfo.TotalAmount.ToString());
+                    .Replace("%user%", baseInfo.User)
+                    .Replace("%message%", baseInfo.Message)
+                    .Replace("%tier%", baseInfo.Tier)
+                    .Replace("%amount%", baseInfo.Amount.ToString())
+                    .Replace("%amountCurrency%", baseInfo.AmountCurrency)
+                    .Replace("%monthsAmount%", baseInfo.MonthsAmount.ToString())
+                    .Replace("%monthsGifted%", baseInfo.MonthsGifted.ToString())
+                    .Replace("%monthsStreak%", baseInfo.MonthsStreak.ToString())
+                    .Replace("%monthsTotal%", baseInfo.MonthsTotal.ToString())
+                    .Replace("%reveiver%", baseInfo.Receiver)
+                    .Replace("%totalAmount%", baseInfo.TotalAmount.ToString());
             }            
         }
 
         // Queue system
-        public static bool SUSBSaveQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue myQueue, string varName, bool persisted)
+        public static bool SUSBSaveQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
         {
-            // Load log string
             string logName = "EventTriggerExtensions-SUSaveQueueToGlobalVar";
             CPH.SUWriteLog("Method Started", logName);
 
-            // Convert the queue to an array then to a JSON string
+            // Serialize the queue to a JSON string
             var array = myQueue.ToArray();
             string jsonString = JsonConvert.SerializeObject(array);
 
-            // Set the global variable in Streamer.Bot
+            // Optionally, log the jsonString to verify its content
+            CPH.SUWriteLog($"Serialized JSON: {jsonString}", logName);
+
+            // Set the global variable
             CPH.SetGlobalVar(varName, jsonString, persisted);
+            CPH.SUWriteLog("Method Complete", logName);
 
             return true;
         }
-        public static Queue SUSBGetQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
+        public static Queue<TriggerData> SUSBGetQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
         {
             // Load log string
             string logName = "EventTriggerExtensions-SUGetQueueFromGlobalVar";
@@ -287,12 +290,27 @@ namespace StreamUP {
             // Retrieve the JSON string from the global variable
             string jsonString = CPH.GetGlobalVar<string>(varName, persisted);
 
-            // Convert the JSON string back to an array, then to a Queue
-            var array = JsonConvert.DeserializeObject<object[]>(jsonString);
-            Queue myQueue = new Queue(array);
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                CPH.SUWriteLog("JSON string is null or empty, returning a new empty Queue<TriggerData>.", logName);
+                return new Queue<TriggerData>(); // Return an empty queue if the global var is null or empty
+            }
 
-            CPH.SUWriteLog("Method Complete", logName);
-            return myQueue;
+            // Try to convert the JSON string back to a List<TriggerData>, then to a Queue
+            try
+            {
+                var list = JsonConvert.DeserializeObject<List<TriggerData>>(jsonString);
+                Queue<TriggerData> myQueue = new Queue<TriggerData>(list);
+
+                CPH.SUWriteLog("Successfully deserialized and converted to Queue<TriggerData>.", logName);
+                return myQueue;
+            }
+            catch (JsonException e)
+            {
+                CPH.SUWriteLog($"Failed to deserialize JSON: {e.Message}", logName);
+                // Handle error (e.g., by returning an empty queue or re-throwing the exception)
+                return new Queue<TriggerData>(); // Return an empty queue as a fallback
+            }
         }
 
     }
