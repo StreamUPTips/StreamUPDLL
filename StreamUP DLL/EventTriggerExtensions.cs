@@ -263,9 +263,9 @@ namespace StreamUP {
         }
 
         // Queue system
-        public static bool SUSBSaveQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
+        public static bool SUSBSaveTriggerQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
         {
-            string logName = "EventTriggerExtensions-SUSaveQueueToGlobalVar";
+            string logName = "EventTriggerExtensions-SUSBSaveTriggerQueueToGlobalVar";
             CPH.SUWriteLog("Method Started", logName);
 
             // Serialize the queue to a JSON string
@@ -281,10 +281,10 @@ namespace StreamUP {
 
             return true;
         }
-        public static Queue<TriggerData> SUSBGetQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
+        public static Queue<TriggerData> SUSBGetTriggerQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
         {
             // Load log string
-            string logName = "EventTriggerExtensions-SUGetQueueFromGlobalVar";
+            string logName = "EventTriggerExtensions-SUSBGetTriggerQueueFromGlobalVar";
             CPH.SUWriteLog("Method Started", logName);
 
             // Retrieve the JSON string from the global variable
@@ -293,7 +293,7 @@ namespace StreamUP {
             if (string.IsNullOrEmpty(jsonString))
             {
                 CPH.SUWriteLog("JSON string is null or empty, returning a new empty Queue<TriggerData>.", logName);
-                return new Queue<TriggerData>(); // Return an empty queue if the global var is null or empty
+                return new Queue<TriggerData>();
             }
 
             // Try to convert the JSON string back to a List<TriggerData>, then to a Queue
