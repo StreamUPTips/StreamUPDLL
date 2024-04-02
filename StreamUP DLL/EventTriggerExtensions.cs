@@ -153,6 +153,7 @@ namespace StreamUP {
                     baseInfo.Message = sbArgs["rawInput"].ToString();
                     baseInfo.User = sbArgs["user"].ToString();
                     baseInfo.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productNumber, 0);
+
                     break;
                 case EventType.TwitchSub:
                     baseInfo.Message = sbArgs["rawInput"].ToString();
@@ -236,9 +237,31 @@ namespace StreamUP {
                     .Replace("\\r", "")
                     .Replace("\\t", "");
             }
+
+            LoadCustomMessage1Vars(CPH, productNumber, baseInfo);
+
             return baseInfo;
         }
-    
+        private static void LoadCustomMessage1Vars(this IInlineInvokeProxy CPH, string productNumber, TriggerData baseInfo)
+        {
+            baseInfo.CustomMessage1 = CPH.GetGlobalVar<string>($"{productNumber}_{CPH.GetEventType().ToString()}CustomMessage");
+            if (!string.IsNullOrEmpty(baseInfo.CustomMessage1))
+            {
+                baseInfo.CustomMessage1 = baseInfo.CustomMessage1
+                    .Replace("{user}", baseInfo.User)
+                    .Replace("{message}", baseInfo.Message)
+                    .Replace("{tier}", baseInfo.Tier)
+                    .Replace("{amount}", baseInfo.Amount.ToString())
+                    .Replace("{amountCurrency}", baseInfo.AmountCurrency)
+                    .Replace("{monthsAmount}", baseInfo.MonthsAmount.ToString())
+                    .Replace("{monthsGifted}", baseInfo.MonthsGifted.ToString())
+                    .Replace("{monthsStreak}", baseInfo.MonthsStreak.ToString())
+                    .Replace("{monthsTotal}", baseInfo.MonthsTotal.ToString())
+                    .Replace("{reveiver}", baseInfo.Receiver)
+                    .Replace("{totalAmount}", baseInfo.TotalAmount.ToString());
+            }            
+        }
+
         // Queue system
         public static bool SUSBSaveQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue myQueue, string varName, bool persisted)
         {
@@ -279,6 +302,7 @@ namespace StreamUP {
             public int Amount { get; set; }
             public string AmountCurrency { get; set; }
             public bool Anonymous { get; set; }
+            public string CustomMessage1 { get; set; }
             public string EventSource { get; set; }
             public string EventType { get; set; }
             public string Message { get; set; }
