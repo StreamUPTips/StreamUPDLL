@@ -39,6 +39,13 @@ namespace StreamUP {
         private static string logName = "DLL::ProductSettingsUI";
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs)
         {
+            Dictionary<string, object> productSettings = null;
+            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
+            if (!string.IsNullOrEmpty(productSettingsJson))
+            {
+                productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(productSettingsJson);
+            }
+
             List<string> sbActions = new List<string>();
             for (int i = 0; i < streamUpSettings.Count; i++) {
                 StreamUpSetting item = streamUpSettings[i];
@@ -78,43 +85,43 @@ namespace StreamUP {
                 StreamUpSetting item = streamUpSettings[i];
 
                 if (item.Type == StreamUpSettingType.Action) {
-                    CPH.AddActionSetting(toTable: settingsTable, withSetting: item, withActions: sbActions, atIndex: i);
+                    CPH.AddActionSetting(toTable: settingsTable, withSetting: item, withActions: sbActions, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Boolean) {
-                    CPH.AddBoolSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddBoolSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Colour) {
-                    CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Double) {
-                    CPH.AddDoubleSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddDoubleSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Dropdown) {
-                    CPH.AddDropdownSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddDropdownSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Heading) {
-                    CPH.AddHeadingSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddHeadingSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Integer) {
-                    CPH.AddIntSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddIntSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Label) {
-                    CPH.AddLabelSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddLabelSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Reward) {
-                    CPH.AddRewardSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddRewardSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Ruler) {
-                    CPH.AddRulerSettings(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddRulerSettings(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Secret) {
-                    CPH.AddSecretSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddSecretSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Spacer) {
-                    CPH.AddSpacerSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddSpacerSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.String) {
-                    CPH.AddStringSetting(toTable: settingsTable, withSetting: item, atIndex: i);
+                    CPH.AddStringSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
             }
 
@@ -192,7 +199,7 @@ namespace StreamUP {
             return sbActions;
         }
 
-        private static void AddActionSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, List<string> withActions, int atIndex)
+        private static void AddActionSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, List<string> withActions, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -208,7 +215,13 @@ namespace StreamUP {
             SetComboBoxWidth(dropdown);
             dropdown.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            string currentValue = CPH.GetGlobalVar<string>(withSetting.Name);
+
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
             if (!string.IsNullOrEmpty(currentValue)) {
                 dropdown.SelectedItem = currentValue;
             }
@@ -225,7 +238,7 @@ namespace StreamUP {
             toTable.Controls.Add(dropdown, 1, atIndex + 1);
         }
 
-        private static void AddRewardSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddRewardSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var twitchRewards = CPH.TwitchGetRewards();
             List<string> titleList = new List<string>();
@@ -252,7 +265,12 @@ namespace StreamUP {
             SetComboBoxWidth(dropdown);
             dropdown.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            string currentValue = CPH.GetGlobalVar<string>(withSetting.Name);
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+            
             string rewardTitle = null;
             foreach (var reward in twitchRewards) {
                 if (reward.Id == currentValue) {
@@ -274,7 +292,7 @@ namespace StreamUP {
             toTable.Controls.Add(dropdown, 1, atIndex + 1);
         }
 
-        private static void AddDropdownSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddDropdownSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -296,7 +314,12 @@ namespace StreamUP {
                 dropdown.SelectedItem = null;
             };
 
-            string currentValue = CPH.GetGlobalVar<string>(withSetting.Name);
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
             if (!string.IsNullOrEmpty(currentValue)) {
                 dropdown.SelectedItem = currentValue;
             }
@@ -331,7 +354,7 @@ namespace StreamUP {
             };
         }
 
-        private static void AddSecretSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddSecretSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -345,7 +368,12 @@ namespace StreamUP {
             textbox.Width = 240;
             textbox.UseSystemPasswordChar = true;
 
-            string currentValue = CPH.GetGlobalVar<string>(withSetting.Name);
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
             if (!string.IsNullOrEmpty(currentValue)) {
                 textbox.Text = currentValue;
             }
@@ -357,13 +385,13 @@ namespace StreamUP {
             toTable.Controls.Add(textbox, 1, atIndex + 1);
         }
 
-        private static void AddSpacerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddSpacerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             toTable.Controls.Add(new Label(), 0, atIndex + 1);
             toTable.Controls.Add(new Label(), 1, atIndex + 1);
         }
 
-        private static void AddRulerSettings(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddRulerSettings(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             Label rulerLabel = new Label();
             rulerLabel.BorderStyle = BorderStyle.Fixed3D;
@@ -375,7 +403,7 @@ namespace StreamUP {
             toTable.SetColumnSpan(rulerLabel, 2);
         }
 
-        private static void AddStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -386,7 +414,13 @@ namespace StreamUP {
             var textbox = new TextBox();
             textbox.Name = withSetting.Name;
             textbox.Width = 240;
-            string currentValue = CPH.GetGlobalVar<string>(withSetting.Name);
+
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
             if (!string.IsNullOrEmpty(currentValue)) {
                 textbox.Text = currentValue;
             }
@@ -397,7 +431,7 @@ namespace StreamUP {
             toTable.Controls.Add(textbox, 1, atIndex + 1);
         }
 
-        private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -409,7 +443,13 @@ namespace StreamUP {
             button.Text = "Pick a colour";
             button.AutoSize = true;
             button.Name = withSetting.Name;
-            var currentValue = CPH.GetGlobalVar<long>(withSetting.Name);
+
+            long currentValue = 0;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = long.Parse(settings[withSetting.Name].ToString());
+            }
+            
             if (currentValue != 0) {
                 byte a = (byte)((currentValue & 0xff000000) >> 24);
                 byte b = (byte)((currentValue & 0x00ff0000) >> 16);
@@ -437,7 +477,7 @@ namespace StreamUP {
             toTable.Controls.Add(button, 1, atIndex + 1);
         }
 
-        private static void AddBoolSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddBoolSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -447,7 +487,13 @@ namespace StreamUP {
             toTable.Controls.Add(label, 0, atIndex + 1);
             var checkbox = new CheckBox();
             checkbox.Name = withSetting.Name;
-            var currentValue = CPH.GetGlobalVar<bool?>(withSetting.Name);
+
+            bool? currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = bool.Parse(settings[withSetting.Name].ToString());
+            }
+            
             if (currentValue != null) {
                 checkbox.Checked = currentValue.Value;
             }
@@ -459,7 +505,7 @@ namespace StreamUP {
             toTable.Controls.Add(checkbox, 1, atIndex + 1);
         }
 
-        private static void AddIntSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddIntSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -472,8 +518,14 @@ namespace StreamUP {
             input.Maximum = int.MaxValue;
             input.Name = withSetting.Name;
             input.Tag = withSetting.Type;
-            var currentValue = CPH.GetGlobalVar<int>(withSetting.Name);
-            if (currentValue != 0) {
+
+            int currentValue = 0;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = int.Parse(settings[withSetting.Name].ToString());
+            }
+ 
+            if (currentValue != 0) {        
                 input.Value = currentValue;
             }
             else if (!string.IsNullOrEmpty(withSetting.Default)) {
@@ -484,7 +536,7 @@ namespace StreamUP {
             toTable.Controls.Add(input, 1, atIndex + 1);
         }
 
-        private static void AddLabelSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddLabelSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -496,7 +548,7 @@ namespace StreamUP {
             toTable.SetColumnSpan(label, 2);
         }
 
-        private static void AddHeadingSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddHeadingSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -509,7 +561,7 @@ namespace StreamUP {
             toTable.SetColumnSpan(label, 2);
         }
 
-        private static void AddDoubleSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex)
+        private static void AddDoubleSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
             label.Text = withSetting.Description;
@@ -526,7 +578,12 @@ namespace StreamUP {
             input.Name = withSetting.Name;
             input.Tag = withSetting.Type;
 
-            var currentValue = CPH.GetGlobalVar<double>(withSetting.Name);
+            double currentValue = 0;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = double.Parse(settings[withSetting.Name].ToString());
+            }
+            
             if (currentValue != 0) {
                 input.Value = Convert.ToDecimal(currentValue);
             }

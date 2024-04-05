@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -45,8 +42,10 @@ namespace StreamUP {
             CPH.SUWriteLog("Checking ProductInfo is loaded.", logName);
 
             // Check ProductInfo is already loaded, if not, load it
-            ProductInfo productInfo = CPH.GetGlobalVar<ProductInfo>($"{productNumber}_ProductInfo", false);
-            if (productInfo == null)
+            ProductInfo productInfo;
+            string productInfoJson = CPH.GetGlobalVar<string>($"{productNumber}_ProductInfo", false);
+
+            if (string.IsNullOrEmpty(productInfoJson))
             {
                 if (!CPH.SULoadProductInfo(actionName))
                 {
@@ -60,7 +59,7 @@ namespace StreamUP {
                 CPH.SUWriteLog("ProductInfo already loaded.", logName);
             }
 
-            productInfo = CPH.GetGlobalVar<ProductInfo>($"{productNumber}_ProductInfo", false);
+            productInfo = JsonConvert.DeserializeObject<ProductInfo>(CPH.GetGlobalVar<string>($"{productNumber}_ProductInfo", false));
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return productInfo;
         }
@@ -69,7 +68,7 @@ namespace StreamUP {
         {
             string logName = $"{productInfo.ProductNumber}::SUValProductSettingsLoaded";
             CPH.SUWriteLog("METHOD STARTED!", logName);
-            CPH.SUWriteLog("Checking ProductInfo is loaded.", logName);
+            CPH.SUWriteLog("Checking ProductSettings is loaded.", logName);
 
             string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
             if (string.IsNullOrEmpty(productSettingsJson))

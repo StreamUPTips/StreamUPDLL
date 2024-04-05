@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Streamer.bot.Plugin.Interface;
 using Streamer.bot.Common.Events;
 using System.Text.RegularExpressions;
-using System.Collections;
 using Newtonsoft.Json;
 
 namespace StreamUP {

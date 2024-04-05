@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
@@ -122,6 +121,8 @@ namespace StreamUP {
 
             CPH.SUWriteLog("Loading a products information...", logName);
 
+            actionName = actionName.Replace("•", "-");
+
             // Split the triggeredAction string at the "-" character
             string[] parts = actionName.Split(new[] { '-' }, 2); // Limiting to 2 parts to ensure we only split at the first '-'
             if (parts.Length > 0)
@@ -180,7 +181,7 @@ namespace StreamUP {
             // Load settings menu
             CPH.SUWriteLog("Launching settings menu...", logName);
             bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs);
-            if (settingsSaved.HasValue && settingsSaved.Value == false)
+            if (!settingsSaved.HasValue || settingsSaved == false)
             {
                 CPH.SUWriteLog("METHOD FAILED!", logName);
                 return false;
