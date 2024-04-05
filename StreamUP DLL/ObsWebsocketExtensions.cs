@@ -712,9 +712,6 @@ namespace StreamUP {
             double canvasScaleFactor = (canvasWidth / 1920);
             CPH.SUWriteLog($"Worked out canvas scale factor: canvasScaleFactor=[{canvasScaleFactor}]", logName);
 
-            // Save canvasScaleFactor to sb global var
-            CPH.SetGlobalVar($"{productNumber}_ScaleFactor", canvasScaleFactor); 
-
             CPH.SUWriteLog("Method complete", logName);
             return canvasScaleFactor;
         }

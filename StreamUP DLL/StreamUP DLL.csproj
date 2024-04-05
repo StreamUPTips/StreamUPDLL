@@ -61,7 +61,6 @@
     <Compile Include="ObsWebSocketExtensions.cs" />
     <Compile Include="ValidationExtensions.cs" />
     <Compile Include="UIExtensions.cs" />
-    <Compile Include="CheckObsPluginsExtensions.cs" />
     <Compile Include="ProductSettingsUIExtensions.cs" />
     <Compile Include="EventTriggerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
