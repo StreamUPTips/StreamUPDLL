@@ -229,7 +229,7 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull product version from source settings
-            JObject inputSettings = CPH.SUObsGetInputSettings(productInfo, productInfo.SourceNameVersionCheck);
+            JObject inputSettings = CPH.SUObsGetInputSettings(productInfo.ProductNumber, obsConnection, productInfo.SourceNameVersionCheck);
             CPH.SUWriteLog($"Pulled inputSettings: inputSettings=[{inputSettings.ToString()}]", logName);
 
             // Check if filter names contain the word 'Version'
@@ -277,7 +277,6 @@ namespace StreamUP {
     [Serializable]
     public class ProductInfo
     {
-        public int ObsConnection { get; set; } = -1;
         public string ProductName { get; set; }
         public string ProductNumber { get; set; }
         public Version RequiredLibraryVersion { get; set; }

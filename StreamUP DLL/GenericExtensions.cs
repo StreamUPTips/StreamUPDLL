@@ -210,37 +210,25 @@ namespace StreamUP {
             // Set the version number on each source in that scene
             foreach (string currentItemName in sceneItemNames)
             {
-                if (!CPH.SUObsSetInputSettings(productNumber, obsConnection, currentItemName, inputSettings))
-                {
-                    CPH.SUWriteLog("METHOD FAILED!", logName);
-                    return false;
-                }
+                CPH.SUObsSetInputSettings(productNumber, obsConnection, currentItemName, inputSettings);
             }
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
     
-
-
-
-
-
-
-
-        public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency)
+        public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = "GeneralExtensions-SUConvertCurrency";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::[SUConvertCurrency]";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Get the exchange rate
             decimal exchangeRate = SUGetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
-            CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]");
+            CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]", logName);
 
             // Convert the amount
             decimal convertedAmount = amount / exchangeRate;
-            CPH.SUWriteLog($"convertedAmount=[{convertedAmount}]");
+            CPH.SUWriteLog($"convertedAmount=[{convertedAmount}]", logName);
 
             // Get the currency symbol
             string currencySymbol = CPH.SUGetCurrencySymbol(toCurrency);
@@ -250,15 +238,14 @@ namespace StreamUP {
             string formattedAmount = $"{currencySymbol}{convertedAmount:N2}";
             CPH.SUWriteLog($"formattedAmount=[{formattedAmount}]", logName);
 
-            CPH.SUWriteLog("Method completed", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return formattedAmount;
         }
 
-        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency)
+        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = "GeneralExtensions-SUGetExchangeRate";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::[SUGetExchangeRate]";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
             CPH.SUWriteLog(url, logName);
@@ -277,16 +264,20 @@ namespace StreamUP {
             decimal exRate = (decimal)json[toCurrency][fromCurrency];
             CPH.SUWriteLog($"exRate=[{exRate}]");
 
-            CPH.SUWriteLog("Method completed", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return exRate;
         }
 
-        public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode)
+        public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode, string productNumber = "DLL")
         {
+            string logName = $"{productNumber}::[SUGetCurrencySymbol]";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
             RegionInfo region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
                 .Select(ci => new RegionInfo(ci.LCID))
                 .FirstOrDefault(ri => ri.ISOCurrencySymbol.Equals(currencyCode, StringComparison.OrdinalIgnoreCase));
 
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return region != null ? region.CurrencySymbol : currencyCode;
         }      
 

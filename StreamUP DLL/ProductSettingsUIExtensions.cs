@@ -650,7 +650,7 @@ namespace StreamUP {
                         CPH.SUWriteLog("METHOD FAILED", logName);
                         return;
                     }
-                    settingsToSave["ScaleFactor"] = CPH.SUObsGetCanvasScaleFactor(productInfo.ProductNumber, productInfo.ProductName, (int)settingsToSave["ObsConnection"]);
+                    settingsToSave["ScaleFactor"] = CPH.SUObsGetCanvasScaleFactor(productInfo.ProductNumber, (int)settingsToSave["ObsConnection"]);
                 }
 
                 string settingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(settingsToSave);
