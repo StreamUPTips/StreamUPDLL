@@ -16,7 +16,7 @@ namespace StreamUP {
     public static class GenericExtensions {
         public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUInitialiseObsProduct]";
+            string logName = $"{productNumber}::SUInitialiseObsProduct";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             if (CPH.GetGlobalVar<bool>($"{productNumber}_ProductInitialised", false))
@@ -117,7 +117,7 @@ namespace StreamUP {
    
         public static bool SULoadProductInfo(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SULoadProductInfo]";
+            string logName = $"{productNumber}::SULoadProductInfo";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             CPH.SUWriteLog("Loading a products information...", logName);
@@ -143,7 +143,7 @@ namespace StreamUP {
 
         public static string SULoadProductSettings(this IInlineInvokeProxy CPH, ProductInfo productInfo)
         {
-            string logName = $"{productInfo.ProductNumber}::[SULoadProductInfo]";
+            string logName = $"{productInfo.ProductNumber}::SULoadProductInfo";
             CPH.SUWriteLog("METHOD STARTED!", logName);
             CPH.SUWriteLog("Loading a products settings...", logName);
 
@@ -166,7 +166,7 @@ namespace StreamUP {
 
         public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList)
         {
-            string logName = $"{productInfo.ProductNumber}::[SULoadSettingsMenu]";
+            string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Check if StreamUP.dll version is the required version or newer
@@ -194,9 +194,9 @@ namespace StreamUP {
             return true;
         }
 
-        public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, string actionName, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
+        public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SULoadSettingsMenu]";
+            string logName = $"{productNumber}::SULoadSettingsMenu";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
@@ -219,7 +219,7 @@ namespace StreamUP {
     
         public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUConvertCurrency]";
+            string logName = $"{productNumber}::SUConvertCurrency";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Get the exchange rate
@@ -244,7 +244,7 @@ namespace StreamUP {
 
         private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUGetExchangeRate]";
+            string logName = $"{productNumber}::SUGetExchangeRate";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
@@ -270,7 +270,7 @@ namespace StreamUP {
 
         public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUGetCurrencySymbol]";
+            string logName = $"{productNumber}::SUGetCurrencySymbol";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             RegionInfo region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)

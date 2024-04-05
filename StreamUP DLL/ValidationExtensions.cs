@@ -14,7 +14,7 @@ namespace StreamUP {
     public static class ValidationExtensions {
         public static bool SUValSBUpdateChecker(this IInlineInvokeProxy CPH, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUValSBUpdateChecker]";
+            string logName = $"{productNumber}::SUValSBUpdateChecker";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Check if Update checker action exists
@@ -40,7 +40,7 @@ namespace StreamUP {
         
         public static ProductInfo SUValProductInfoLoaded(this IInlineInvokeProxy CPH,string actionName, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUValProductInfoLoaded]";
+            string logName = $"{productNumber}::SUValProductInfoLoaded";
             CPH.SUWriteLog("METHOD STARTED!", logName);
             CPH.SUWriteLog("Checking ProductInfo is loaded.", logName);
 
@@ -67,7 +67,7 @@ namespace StreamUP {
 
         public static bool SUValProductSettingsLoaded(this IInlineInvokeProxy CPH, ProductInfo productInfo)
         {
-            string logName = $"{productInfo.ProductNumber}::[SUValProductSettingsLoaded]";
+            string logName = $"{productInfo.ProductNumber}::SUValProductSettingsLoaded";
             CPH.SUWriteLog("METHOD STARTED!", logName);
             CPH.SUWriteLog("Checking ProductInfo is loaded.", logName);
 
@@ -99,7 +99,7 @@ namespace StreamUP {
 
         public static bool SUValLibraryVersion(this IInlineInvokeProxy CPH, Version minimumRequiredVersion, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SUValLibraryVersion]";
+            string logName = $"{productNumber}::SUValLibraryVersion";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -120,7 +120,7 @@ namespace StreamUP {
     
         public static bool SUValObsIsConnected(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
-            string logName = $"{productInfo.ProductNumber}::[SUValObsIsConnected]";
+            string logName = $"{productInfo.ProductNumber}::SUValObsIsConnected";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Check obs connection is connected
@@ -162,7 +162,7 @@ namespace StreamUP {
 
         public static bool SUValObsPlugins(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
-            string logName = $"{productInfo.ProductNumber}::[SUValObsPlugins]";
+            string logName = $"{productInfo.ProductNumber}::SUValObsPlugins";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string checkPlugins = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"check_plugins\",\"requestData\":null}", obsConnection);
@@ -202,7 +202,7 @@ namespace StreamUP {
 
         public static bool SUValStreamUPSceneExists(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
-            string logName = $"{productInfo.ProductNumber}::[SUValStreamUPSceneExists]";
+            string logName = $"{productInfo.ProductNumber}::SUValStreamUPSceneExists";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull Obs scene list and see if sceneName exists
@@ -225,7 +225,7 @@ namespace StreamUP {
 
         public static bool SUValProductObsVersion(this IInlineInvokeProxy CPH,  ProductInfo productInfo, int obsConnection)
         {
-            string logName = $"{productInfo.ProductNumber}::[SUValProductObsVersion]";
+            string logName = $"{productInfo.ProductNumber}::SUValProductObsVersion";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull product version from source settings

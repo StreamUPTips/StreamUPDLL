@@ -10,7 +10,7 @@ namespace StreamUP {
 
         // GET VIDEO SETTINGS
         public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection) {
-            string logName = $"{productNumber}::[SUObsGetVideoSettings]";
+            string logName = $"{productNumber}::SUObsGetVideoSettings";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull obs video settings
@@ -30,7 +30,7 @@ namespace StreamUP {
 
         // PULL SCENE ITEM TRANSFORM
         public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productNumber}::[SUObsGetSceneItemTransform]";
+            string logName = $"{productNumber}::SUObsGetSceneItemTransform";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull sceneItemId
@@ -65,7 +65,7 @@ namespace StreamUP {
 
         // PULL SCENE ITEM ID
         public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productNumber}::[SUObsGetSceneItemId]";
+            string logName = $"{productNumber}::SUObsGetSceneItemId";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull sceneItemLists (Group or Scene)
@@ -104,7 +104,7 @@ namespace StreamUP {
 
         private static int SUObsFindSceneItemId(this IInlineInvokeProxy CPH, string productNumber, JArray sceneItems, string childSource) 
         {
-            string logName = $"{productNumber}::[SUObsFindSceneItemId]";
+            string logName = $"{productNumber}::SUObsFindSceneItemId";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Find sceneItemId from all sources on scene
@@ -128,7 +128,7 @@ namespace StreamUP {
         // SET SOURCE FILTER SETTINGS
         public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, string filterSettings) 
         {
-            string logName = $"{productNumber}::[SUObsSetSourceFilterSettings]";
+            string logName = $"{productNumber}::SUObsSetSourceFilterSettings";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Set source filter settings
@@ -149,7 +149,7 @@ namespace StreamUP {
         // SET INPUT (SOURCE) SETTINGS
         public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, string inputSettings) 
         {
-            string logName = $"{productNumber}::[SUObsSetInputSettings]";
+            string logName = $"{productNumber}::SUObsSetInputSettings";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Set source (input) settings
@@ -169,7 +169,7 @@ namespace StreamUP {
         // SET SCENE TRANSITION FOR SCENE
         public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName, string transitionName, int transitionDuration) 
         {
-            string logName = $"{productNumber}::[SUObsSetSceneSceneTransitionOverride]";
+            string logName = $"{productNumber}::SUObsSetSceneSceneTransitionOverride";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Set scene transition override
@@ -188,7 +188,7 @@ namespace StreamUP {
         // GET SOURCE FILTER
         public static JObject SUObsGetSourceFilter(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName) 
         {
-            string logName = $"{productNumber}::[SUObsGetSourceFilter]";
+            string logName = $"{productNumber}::SUObsGetSourceFilter";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull source filter
@@ -209,7 +209,7 @@ namespace StreamUP {
         // GET SOURCE FILTER LIST
         public static JArray SUObsGetSourceFilterList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
         {
-            string logName = $"{productNumber}::[SUObsGetSourceFilterList]";
+            string logName = $"{productNumber}::SUObsGetSourceFilterList";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetSourceFilterList", $"{{\"sourceName\":\"{sourceName}\"}}", obsConnection);
@@ -222,7 +222,7 @@ namespace StreamUP {
         // GET INPUT (SOURCE) SETTINGS
         public static JObject SUObsGetInputSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
         {
-            string logName = $"{productNumber}::[SUObsGetInputSettings]";
+            string logName = $"{productNumber}::SUObsGetInputSettings";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetInputSettings", "{\"inputName\":\""+sourceName+"\"}", obsConnection);
@@ -235,7 +235,7 @@ namespace StreamUP {
         // SET INPUT (SOURCE) VOLUME
         public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, int volumeType, double volumeLevel)
         {
-            string logName = $"{productNumber}::[SUObsSetInputVolume]";
+            string logName = $"{productNumber}::SUObsSetInputVolume";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             switch (volumeType)
@@ -259,7 +259,7 @@ namespace StreamUP {
         // GET SCENE ITEM LIST
         public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
         {
-            string logName = $"{productNumber}::[SUObsGetSceneItemList]";
+            string logName = $"{productNumber}::SUObsGetSceneItemList";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetSceneItemList", $"{{\"sceneName\":\"{sceneName}\"}}", obsConnection);
@@ -272,7 +272,7 @@ namespace StreamUP {
         // GET GROUP SCENE ITEM LIST
         public static JArray SUObsGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string groupName)
         {
-            string logName = $"{productNumber}::[SUObsGetGroupSceneItemList]";
+            string logName = $"{productNumber}::SUObsGetGroupSceneItemList";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", $"{{\"sceneName\":\"{groupName}\"}}", obsConnection);
@@ -285,7 +285,7 @@ namespace StreamUP {
         // GET SCENE ITEM NAMES
         public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int sceneType, string sceneName, List<string> sceneItemNames)
         {
-            string logName = $"{productNumber}::[SUObsGetSceneItemNames]";
+            string logName = $"{productNumber}::SUObsGetSceneItemNames";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             JArray sceneItems = new JArray();
@@ -334,7 +334,7 @@ namespace StreamUP {
         // AUTOSIZE ADVANCED MASK
         public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
         {
-            string logName = $"{productNumber}::[SUObsAutosizeAdvancedMask]";
+            string logName = $"{productNumber}::SUObsAutosizeAdvancedMask";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
@@ -352,7 +352,7 @@ namespace StreamUP {
 
         public static void SUObsAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, int padX, int padY)
         {
-            string logName = $"{productNumber}::[SUObsAutoposAdvancedMask]";
+            string logName = $"{productNumber}::SUObsAutoposAdvancedMask";
             CPH.SUWriteLog("METHOD STARTED!", logName);
     
             // Pull advanced mask
@@ -379,7 +379,7 @@ namespace StreamUP {
            
         public static int SUObsGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName)
         {
-            string logName = $"{productNumber}::[SUObsGetMoveFilterDuration]";
+            string logName = $"{productNumber}::SUObsGetMoveFilterDuration";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             CPH.SUWriteLog("Getting source filter...", logName);
@@ -393,7 +393,7 @@ namespace StreamUP {
         // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
         public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
-            string logName = $"{productNumber}::[SUObsSplitTextOnWidth]";
+            string logName = $"{productNumber}::SUObsSplitTextOnWidth";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Remove URLs from the text
@@ -525,7 +525,7 @@ namespace StreamUP {
 
         private static List<string> SUObsSplitTextIntoLines(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName)
         {
-            string logName = $"{productNumber}::[SUObsSplitTextIntoLines]";
+            string logName = $"{productNumber}::SUObsSplitTextIntoLines";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             List<string> lines = new List<string>();
@@ -566,7 +566,7 @@ namespace StreamUP {
 
         public static string SURemoveUrls(this IInlineInvokeProxy CPH, string text, string replacementText, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::[SURemoveUrls]";
+            string logName = $"{productNumber}::SURemoveUrls";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // This pattern matches URLs starting with http://, https://, or ftp:// followed by any characters until a space is encountered
@@ -581,7 +581,7 @@ namespace StreamUP {
         // SET SCENE ITEM TRANSFORM
         public static void SUObsSetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource, string transformSettings) 
         {
-            string logName = $"{productNumber}::[SUObsSetSceneItemTransform]";
+            string logName = $"{productNumber}::SUObsSetSceneItemTransform";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull sceneItemId
@@ -613,7 +613,7 @@ namespace StreamUP {
         // SET SCENE ITEM ENABLED
         public static void SUObsSetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource, bool visibilityState)
         {
-            string logName = $"{productNumber}::[SUObsSetSceneItemEnabled]";
+            string logName = $"{productNumber}::SUObsSetSceneItemEnabled";
             CPH.SUWriteLog("METHOD STARTED!", logName);
                 		
             // Pull scene Item ID
@@ -629,7 +629,7 @@ namespace StreamUP {
     
         public static bool SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource)
         {
-            string logName = $"{productNumber}::[SUObsGetSceneItemEnabled]";
+            string logName = $"{productNumber}::SUObsGetSceneItemEnabled";
             CPH.SUWriteLog("METHOD STARTED!", logName);
                 		
             // Pull scene Item ID
@@ -652,7 +652,7 @@ namespace StreamUP {
         // Get Canvas Scale Factor
         public static double SUObsGetCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, int obsConnection)
         {
-            string logName = $"{productNumber}::[SUObsGetCanvasScaleFactor]";
+            string logName = $"{productNumber}::SUObsGetCanvasScaleFactor";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull obs canvas width
@@ -672,7 +672,7 @@ namespace StreamUP {
         // Get Current DSK Scene
         public static string SUObsGetCurrentDSKScene(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string dskName)
         {
-            string logName = $"{productNumber}::[SUObsGetCurrentDSKScene]";
+            string logName = $"{productNumber}::SUObsGetCurrentDSKScene";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Send the request and get the response
@@ -710,7 +710,7 @@ namespace StreamUP {
         // Set Current DSK Scene
         public static void SUObsSetCurrentDSKScene(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string dskName, string sceneName)
         {
-            string logName = $"{productNumber}::[SUObsSetCurrentDSKScene]";
+            string logName = $"{productNumber}::SUObsSetCurrentDSKScene";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Set DSK scene
