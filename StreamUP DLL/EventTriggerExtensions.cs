@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Text;
+using System.Drawing;
 
 namespace StreamUP {
 
@@ -24,9 +26,13 @@ namespace StreamUP {
             decimal amount;
             string currency;
             string localCurrency;
+            string defaultDonationImageUrl;
+            string triggerType = CPH.GetEventType().ToString();
+            CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
             switch (CPH.GetEventType())
             {
+                // CORE
                 case EventType.CommandTriggered:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     string command = sbArgs["command"].ToString();
@@ -41,10 +47,72 @@ namespace StreamUP {
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
                             break;
                         case "youtube":
-                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                             break;
                     }
                     break;
+                // DONATIONS
+                case EventType.FourthwallDonation:
+                    triggerData.User = sbArgs["username"].ToString();
+                    triggerData.Message = sbArgs["message"].ToString();
+
+                    amount = decimal.Parse(sbArgs["amount"].ToString());
+                    currency = sbArgs["currency"].ToString();
+                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+
+                    defaultDonationImageUrl = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    break;
+                case EventType.KofiDonation:
+                    triggerData.User = sbArgs["from"].ToString();
+                    triggerData.Message = sbArgs["message"].ToString();
+
+                    amount = decimal.Parse(sbArgs["amount"].ToString());
+                    currency = sbArgs["currency"].ToString();
+                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+
+                    defaultDonationImageUrl = "https://wiki.streamer.bot/ko-fi_icon_rgb_rounded.png";
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    break;
+                case EventType.StreamElementsTip:
+                    triggerData.User = sbArgs["tipUsername"].ToString();
+                    triggerData.Message = sbArgs["tipMessage"].ToString();
+
+                    amount = decimal.Parse(sbArgs["tipAmount"].ToString());
+                    currency = sbArgs["tipCurrency"].ToString();
+                    localCurrency = productSettings["LocalCurrencyCode"].ToString();         
+                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+
+                    defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamelements.png";
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    break;
+                case EventType.StreamlabsDonation:
+                    triggerData.User = sbArgs["donationFrom"].ToString();
+                    triggerData.Message = sbArgs["donationMessage"].ToString();
+
+                    amount = decimal.Parse(sbArgs["donationAmount"].ToString());
+                    currency = sbArgs["donationCurrency"].ToString();
+                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+
+                    defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamlabs.png";
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    break;
+                case EventType.TipeeeStreamDonation:
+                    triggerData.User = sbArgs["username"].ToString();
+                    triggerData.Message = sbArgs["message"].ToString();
+
+                    amount = decimal.Parse(sbArgs["amount"].ToString());
+                    currency = sbArgs["currency"].ToString();
+                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+
+                    defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    break;
+                // TWITCH
                 case EventType.TwitchAnnouncement:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
@@ -95,6 +163,11 @@ namespace StreamUP {
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
                     break;
+                case EventType.TwitchRaid:
+                    triggerData.Amount = int.Parse(sbArgs["viewers"].ToString());
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    break;         
                 case EventType.TwitchReSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.MonthsTotal = int.Parse(sbArgs["cumulative"].ToString());
@@ -119,48 +192,59 @@ namespace StreamUP {
                     triggerData.User = sbArgs["targetUserDisplayName"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
                     break;
+                case EventType.TwitchUserBanned:
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserSource = sbArgs["createdByUsername"].ToString();
+                    break;
+                case EventType.TwitchUserTimedOut:
+                    triggerData.BanDuration = sbArgs["duration"].ToString();
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = sbArgs["userProfileUrl"].ToString();
+                    break;
                 case EventType.TwitchWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
                     break;
+                // YOUTUBE
                 case EventType.YouTubeFirstWords:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = sbArgs["userProfileUrl"].ToString();
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeGiftMembershipReceived:
                     triggerData.Receiver = sbArgs["user"].ToString();
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["gifterUser"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);         
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeMembershipGift:
                     triggerData.Amount = int.Parse(sbArgs["count"].ToString());
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeMemberMileStone:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.MonthsTotal = int.Parse(sbArgs["months"].ToString());
                     triggerData.Tier = sbArgs["levelName"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeMessage:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = sbArgs["userProfileUrl"].ToString();
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeNewSponsor:
                     triggerData.Tier = sbArgs["levelName"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeNewSubscriber:
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeSuperChat:
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
@@ -169,7 +253,7 @@ namespace StreamUP {
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeSuperSticker:
                     amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
@@ -177,11 +261,17 @@ namespace StreamUP {
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    break;
+                case EventType.YouTubeUserBanned:
+                    triggerData.BanDuration = sbArgs["banDuration"].ToString();
+                    triggerData.BanType = sbArgs["banType"].ToString();
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 default:
-                    CPH.SUWriteLog($"The trigger method [{CPH.GetEventType().ToString()}] is not supported. Feel free to open a ticket in the StreamUP Discord and the StreamUP team will try and add it.");
-                    DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The trigger method [{CPH.GetEventType().ToString()}] is not supported.\n\nFeel free to open a ticket in the StreamUP Discord and the StreamUP team will try and add it.\n\nWould you like a link to the Discord Server?");
+                    CPH.SUWriteLog($"The trigger method [{triggerType}] is not supported. Feel free to open a ticket in the StreamUP Discord and the StreamUP team will try and add it.");
+                    DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The trigger method [{triggerType}] is not supported.\n\nFeel free to open a ticket in the StreamUP Discord and the StreamUP team will try and add it.\n\nWould you like a link to the Discord Server?");
                     if (result == DialogResult.Yes)
                     {
                         Process.Start("https://discord.com/invite/RnDKRaVCEu?");
@@ -190,7 +280,7 @@ namespace StreamUP {
                     return null;
             }
 
-            // Fix message string
+            // Escape message string for OBS
             if (!string.IsNullOrEmpty(triggerData.Message)) {
                 triggerData.Message = triggerData.Message
                     .Replace("\\n", "")
@@ -198,49 +288,62 @@ namespace StreamUP {
                     .Replace("\\t", "");
             }
 
-            
-            LoadCustomMessage1Vars(CPH, triggerData, productSettings);
+            ReplaceAlertMessageVars(CPH, triggerData, productInfo, productSettings);
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return triggerData;
         }
-        private static void LoadCustomMessage1Vars(this IInlineInvokeProxy CPH, TriggerData triggerData, Dictionary<string, object> productSettings)
+        
+        private static void ReplaceAlertMessageVars(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
         {
+            string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVars";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
             string triggerType = CPH.GetEventType().ToString();
-            string eventTypeKey = triggerType + "CustomMessage1";
-            string customMessageValue = null;
-            CPH.SUWriteLog($"Checking if productSettings contains the key [{eventTypeKey}]");
-            if (productSettings.ContainsKey(eventTypeKey))
+            string eventTypeKey = triggerType + "AlertMessage";
+            if (productSettings.TryGetValue(eventTypeKey, out object value))
             {
-                customMessageValue = productSettings[eventTypeKey].ToString();
+                string customMessageValue = value.ToString();
+                CPH.SUWriteLog($"Custom message value found: [{customMessageValue}]");
+
+                StringBuilder builder = new StringBuilder(customMessageValue);
+                builder.Replace("%user%", triggerData.User)
+                .Replace("%message%", triggerData.Message)
+                .Replace("%tier%", triggerData.Tier)
+                .Replace("%amount%", triggerData.Amount.ToString())
+                .Replace("%amountCurrency%", triggerData.AmountCurrency)
+                .Replace("%monthsAmount%", triggerData.MonthsAmount.ToString())
+                .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
+                .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
+                .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
+                .Replace("%receiver%", triggerData.Receiver)
+                .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
+
+                triggerData.AlertMessage = builder.ToString();
+            }
+            else
+            {
+                CPH.SUWriteLog("No custom message configuration found for event type: " + eventTypeKey);
             }
 
-            CPH.SUWriteLog($"customMessageValue=[{customMessageValue}]");
-            if (!string.IsNullOrEmpty(customMessageValue))
-            {
-                triggerData.CustomMessage1 = customMessageValue
-                    .Replace("%user%", triggerData.User)
-                    .Replace("%message%", triggerData.Message)
-                    .Replace("%tier%", triggerData.Tier)
-                    .Replace("%amount%", triggerData.Amount.ToString())
-                    .Replace("%amountCurrency%", triggerData.AmountCurrency)
-                    .Replace("%monthsAmount%", triggerData.MonthsAmount.ToString())
-                    .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
-                    .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
-                    .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
-                    .Replace("%reveiver%", triggerData.Receiver)
-                    .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
-            }            
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
+        private static string SUSBGetDonationUserImage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string triggerType, string defaultDonationImageUrl)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUSBGetDonationUserImage";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
+            string userImage = defaultDonationImageUrl;
 
-        // Get Twitch profile picture
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return userImage;
+        }               
+
         public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, int userType)
         {
-            // Load log string
-            string logName = "EventTriggerExtensions-SUSBGetTwitchProfilePicture";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SUSBGetTwitchProfilePicture";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // pull requested sizes '50, 70, 150, 300'
             int userImageSize = CPH.GetGlobalVar<int>($"{productNumber}_ProfileImageSize");
@@ -269,22 +372,29 @@ namespace StreamUP {
             string newSizePattern = $"{userImageSize}x{userImageSize}";
             string image = Regex.Replace(originalImage, basePattern, newSizePattern);
 
-            // Log created image URL
             CPH.SUWriteLog($"Created {newSizePattern} profile image: image=[{image}]", logName);
-
-            CPH.SUWriteLog("Method complete", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return image;
         }
             
-        // Check if youtube profile pic arg exists
-        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH)
+        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH, string productNumber)
         {
+            string logName = $"{productNumber}::SUSBCheckYouTubeProfileImageArgs";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
             if (!CPH.TryGetArg("userProfileUrl", out string profileImage))
             {
-                profileImage = "https://www.tea-tron.com/antorodriguez/blog/wp-content/uploads/2016/04/Image-Not-Found1.png";
+                CPH.SUWriteLog($"User Profile Url args do not exist. Setting to default YouTube logo", logName);
+                profileImage = "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png";
             }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return profileImage;
         }
+
+
+
+
 
 
         // Queue system
@@ -327,12 +437,12 @@ namespace StreamUP {
                 var list = JsonConvert.DeserializeObject<List<TriggerData>>(jsonString);
                 Queue<TriggerData> myQueue = new Queue<TriggerData>(list);
 
-                CPH.SUWriteLog("Successfully deserialized and converted to Queue<TriggerData>.", logName);
+                CPH.SUWriteLog("Successfully deserialised and converted to Queue<TriggerData>.", logName);
                 return myQueue;
             }
             catch (JsonException e)
             {
-                CPH.SUWriteLog($"Failed to deserialize JSON: {e.Message}", logName);
+                CPH.SUWriteLog($"Failed to deserialise JSON: {e.Message}", logName);
                 // Handle error (e.g., by returning an empty queue or re-throwing the exception)
                 return new Queue<TriggerData>(); // Return an empty queue as a fallback
             }
@@ -340,26 +450,29 @@ namespace StreamUP {
 
 
     }
-        // SB events trigger data
-        public class TriggerData 
-        {
-            public int Amount { get; set; }
-            public string AmountCurrency { get; set; }
-            public bool Anonymous { get; set; }
-            public string CustomMessage1 { get; set; }
-            public string EventSource { get; set; }
-            public string EventType { get; set; }
-            public string Message { get; set; }
-            public int MonthsAmount { get; set; }
-            public int MonthsGifted { get; set; }
-            public int MonthsStreak { get; set; }
-            public int MonthsTotal { get; set; }
-            public string Receiver { get; set; }
-            public string ReceiverImage { get; set; }
-            public string Tier { get; set; }
-            public int TotalAmount { get; set; }
-            public string User { get; set; }
-            public string UserImage { get; set; }
-        }
+    // SB events trigger data
+    public class TriggerData 
+    {
+        public string AlertMessage { get; set; }
+        public int Amount { get; set; }
+        public string AmountCurrency { get; set; }
+        public bool Anonymous { get; set; }
+        public string BanDuration { get; set; }
+        public string BanType { get; set; }
+        public string EventSource { get; set; }
+        public string EventType { get; set; }
+        public string Message { get; set; }
+        public int MonthsAmount { get; set; }
+        public int MonthsGifted { get; set; }
+        public int MonthsStreak { get; set; }
+        public int MonthsTotal { get; set; }
+        public string Receiver { get; set; }
+        public string ReceiverImage { get; set; }
+        public string Tier { get; set; }
+        public int TotalAmount { get; set; }
+        public string User { get; set; }
+        public string UserImage { get; set; }
+        public string UserSource { get; set; }
+    }
 }
 
