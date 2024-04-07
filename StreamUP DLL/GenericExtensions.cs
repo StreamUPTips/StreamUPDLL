@@ -165,7 +165,7 @@ namespace StreamUP {
             return productSettings;
         }
 
-        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList)
+        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
         {
             string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -178,6 +178,14 @@ namespace StreamUP {
                 return false;
             }
 
+            // Check if there are any required fonts and that they are installed
+            CPH.SUWriteLog("Checking for any required system fonts...", logName);
+            if (requiredFonts.Count > 0)
+            {
+                CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
+                CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+            }
+            
             // Load settings menu
             CPH.SUWriteLog("Launching settings menu...", logName);
             bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs);

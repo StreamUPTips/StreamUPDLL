@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -271,7 +276,115 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
+    
+    public static bool SUValFontInstalled(this IInlineInvokeProxy CPH, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string productNumber = "DLL")
+    {
+        string logName = $"{productNumber}::SUValFontInstalled";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        bool allFontsInstalled = true;
+
+        foreach (var font in requiredFonts)
+        {
+            string fontName = font.fontName;
+            string fontFile = font.fontFile;
+            string fontUrl = font.fontUrl;
+
+            // Get the list of installed font families
+            FontFamily[] installedFonts = FontFamily.Families;
+
+            if (!installedFonts.Any(ff => ff.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
+            {
+                CPH.SUWriteLog($"WARNING: Unable to locate '{fontName}' in the font family list.", logName);
+                allFontsInstalled = false;
+                CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
+                DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
+                if (result == DialogResult.Yes)
+                {
+                    Process.Start(fontUrl);
+                }
+                continue; // Skip further checks and move to the next font in the list
+            }
+
+            // Check for specific font file extension type
+            string fontFileName = Path.GetFileNameWithoutExtension(fontFile);
+            string searchPattern = $"{fontFileName}.*";
+
+            // Check default font folder
+            string directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+            List<string> baseDirMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+
+            if (!CheckIfFontMatches(CPH, baseDirMatchingFontFiles, fontFile, productNumber))
+            {
+                // Check APPDATA font folder
+                string appdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                directoryPath = Path.Combine(appdataFolder, "Microsoft", "Windows", "Fonts");
+                CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+
+                List<string> appdataMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+                if (!CheckIfFontMatches(CPH, appdataMatchingFontFiles, fontFile, productNumber))
+                {
+                    allFontsInstalled = false;
+                    CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
+                    DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
+                    if (result == DialogResult.Yes)
+                    {
+                        Process.Start(fontUrl);
+                    }
+                }
+            }
+        }
+
+        if (allFontsInstalled)
+        {
+            CPH.SUWriteLog("All required fonts are installed.", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+        else
+        {
+            CPH.SUWriteLog("One or more required fonts are not installed.", logName);
+            CPH.SUWriteLog("METHOD FAILED", logName);
+            return false;
+        }
     }
+
+    private static List<string> GetAllMatchingFontFiles(this IInlineInvokeProxy CPH, string directoryPath, string searchPattern, string productNumber)
+    {
+        string logName = $"{productNumber}::GetAllMatchingFontFiles";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        string[] filePaths = Directory.GetFiles(directoryPath, searchPattern);
+        List<string> fileNames = new List<string>();
+        foreach (var filePath in filePaths)
+        {
+            string fileName = Path.GetFileName(filePath);
+            fileNames.Add(fileName);
+            CPH.SUWriteLog($"Added '{fileName}' to list", logName);
+        }
+        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        return fileNames;
+    }
+
+    private static bool CheckIfFontMatches(this IInlineInvokeProxy CPH, List<string> fontFiles, string fontName, string productNumber)
+    {
+        string logName = $"{productNumber}::CheckIfFontMatches";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        foreach (var file in fontFiles)
+        {
+            if (file.Equals(fontName, StringComparison.OrdinalIgnoreCase))
+            {
+                CPH.SUWriteLog($"Font match found: {file}", logName);
+                return true;
+            }
+        }
+        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        return false;
+    }    
+}
+
 
     [Serializable]
     public class ProductInfo
