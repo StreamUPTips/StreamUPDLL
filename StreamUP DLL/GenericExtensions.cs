@@ -3,16 +3,80 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
 using System.Globalization;
 using System.Net;
+using Newtonsoft.Json;
 
 namespace StreamUP {
 
     public static class GenericExtensions {
+        public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUInitialiseObsProduct";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            if (CPH.GetGlobalVar<bool>($"{productNumber}_ProductInitialised", false))
+            {
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return true;
+            }
+
+            // Check ProductInfo is loaded
+            ProductInfo productInfo = CPH.SUValProductInfoLoaded(actionName, productNumber);
+            if (productInfo == null)
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Check ProductSettings is loaded
+            if (!CPH.SUValProductSettingsLoaded(productInfo))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Deserialise productSettings into a Dictionary
+            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings"));
+            int obsConnection = Convert.ToInt32(productSettings["ObsConnection"]);
+
+            // Check Obs is connected
+            if (!CPH.SUValObsIsConnected(productInfo, obsConnection))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Check Obs plugins are installed and up to date
+            if (!CPH.SUValObsPlugins(productInfo, obsConnection))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Check StreamUP scene exists
+            if (!CPH.SUValStreamUPSceneExists(productInfo, obsConnection))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Check StreamUP scene/source version
+            if (!CPH.SUValProductObsVersion(productInfo, obsConnection))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Mark product as initialised
+            CPH.SetGlobalVar($"{productInfo.ProductNumber}_ProductInitialised", true, false);
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
 
         public static string SUGetStreamerBotFolder(this IInlineInvokeProxy CPH) {
             return AppDomain.CurrentDomain.BaseDirectory;
@@ -50,61 +114,130 @@ namespace StreamUP {
             }
         }
    
-        public static void SUSetProductObsVersion(this IInlineInvokeProxy CPH, string productName, int obsConnection, string sceneName, string versionNumber)
+        public static bool SULoadProductInfo(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = "GeneralExtensions-SUSetProductObsVersion";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SULoadProductInfo";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            CPH.SUWriteLog("Loading a products information...", logName);
+
+            actionName = actionName.Replace("•", "-");
+
+            // Split the triggeredAction string at the "-" character
+            string[] parts = actionName.Split(new[] { '-' }, 2); // Limiting to 2 parts to ensure we only split at the first '-'
+            if (parts.Length > 0)
+            {
+                string actionBeforeDash = parts[0].Trim();
+                CPH.ExecuteMethod($"{actionBeforeDash} - Select Settings", "LoadProductInfo");
+                CPH.SUWriteLog("Loaded products information.", logName);
+            }
+            else
+            {
+                CPH.SUWriteLog($"ERROR: Action that was run didn't have a '-' in the name. Make sure you use the Streamer.Bot action naming format 'productName - functionName'.", logName);
+                CPH.SUWriteLog("METHOD FAILED!", logName);
+                return false;
+            }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
+        public static string SULoadProductSettings(this IInlineInvokeProxy CPH, ProductInfo productInfo)
+        {
+            string logName = $"{productInfo.ProductNumber}::SULoadProductInfo";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+            CPH.SUWriteLog("Loading a products settings...", logName);
+
+            // Load ProductSettings
+            string productSettings = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);        
+            if (productSettings == null)
+            {
+                CPH.SUWriteLog($"Product settings have not been run");
+                DialogResult runSettings = CPH.SUUIShowWarningYesNoMessage($"{productInfo.ProductName} has no settings.\n\nWould you like to run the settings selection now?");
+                if (runSettings == DialogResult.Yes)
+                {
+                    CPH.RunAction(productInfo.SettingsAction, false);
+                }
+                CPH.SUWriteLog("METHOD FAILED!", logName);
+                return null;
+            }
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return productSettings;
+        }
+
+        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
+        {
+            string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            // Check if StreamUP.dll version is the required version or newer
+            CPH.SUWriteLog("Checking if StreamUP.dll is the required version or newer...", logName);
+            if (!CPH.SUValLibraryVersion(productInfo.RequiredLibraryVersion))
+            {
+                CPH.SUWriteLog("METHOD FAILED!", logName);
+                return false;
+            }
+
+            // Check if there are any required fonts and that they are installed
+            CPH.SUWriteLog("Checking for any required system fonts...", logName);
+            if (requiredFonts.Count > 0)
+            {
+                CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
+                CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+            }
+            
+            // Load settings menu
+            CPH.SUWriteLog("Launching settings menu...", logName);
+            bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs);
+            if (!settingsSaved.HasValue || settingsSaved == false)
+            {
+                CPH.SUWriteLog("METHOD FAILED!", logName);
+                return false;
+            }
+
+            // Check SB product update checker is installed
+            CPH.SUWriteLog("Checking if the Streamer.Bot StreamUP update checker is installed...", logName);
+            CPH.SUValSBUpdateChecker();
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
+        public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SULoadSettingsMenu";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
             CPH.SUWriteLog($"Loaded version settings to set: inputSettings=[{inputSettings}]", logName);
 
             // Create sceneItem list
             List<string> sceneItemNames = new List<string>();
-            CPH.SUObsGetSceneItemNames(productName, obsConnection, 0, sceneName, sceneItemNames);
+            CPH.SUObsGetSceneItemNames(productNumber, obsConnection, 0, sceneName, sceneItemNames);
             CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
 
             // Set the version number on each source in that scene
             foreach (string currentItemName in sceneItemNames)
             {
-                CPH.SUObsSetInputSettings("GeneralExtensions", obsConnection, currentItemName, inputSettings);
+                CPH.SUObsSetInputSettings(productNumber, obsConnection, currentItemName, inputSettings);
             }
-            CPH.SUWriteLog("Method complete", logName);
-        }
 
-        public static double SUGetObsCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
-        {
-            // Load log string
-            string logName = "GeneralExtensions-SUGetObsCanvasScaleFactor";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Pull obs canvas width
-            JObject videoSettings = CPH.SUObsGetVideoSettings(productName, obsConnection);
-            double canvasWidth = (double)videoSettings["baseWidth"];
-            CPH.SUWriteLog($"Pulled base canvas width from obs: canvasWidth=[{canvasWidth}]", logName);
-
-            // Work out scale difference based on 1920x1080
-            double canvasScaleFactor = (canvasWidth / 1920);
-            CPH.SUWriteLog($"Worked out canvas scale factor: canvasScaleFactor=[{canvasScaleFactor}]", logName);
-
-            // Save canvasScaleFactor to sb global var
-            CPH.SetGlobalVar($"{productNumber}_CanvasScaleFactor", canvasScaleFactor); 
-            return canvasScaleFactor;
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
         }
     
-        public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency)
+        public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = "GeneralExtensions-SUConvertCurrency";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SUConvertCurrency";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Get the exchange rate
             decimal exchangeRate = SUGetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
-            CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]");
+            CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]", logName);
 
             // Convert the amount
             decimal convertedAmount = amount / exchangeRate;
-            CPH.SUWriteLog($"convertedAmount=[{convertedAmount}]");
+            CPH.SUWriteLog($"convertedAmount=[{convertedAmount}]", logName);
 
             // Get the currency symbol
             string currencySymbol = CPH.SUGetCurrencySymbol(toCurrency);
@@ -114,15 +247,14 @@ namespace StreamUP {
             string formattedAmount = $"{currencySymbol}{convertedAmount:N2}";
             CPH.SUWriteLog($"formattedAmount=[{formattedAmount}]", logName);
 
-            CPH.SUWriteLog("Method completed", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return formattedAmount;
         }
 
-        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency)
+        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = "GeneralExtensions-SUGetExchangeRate";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SUGetExchangeRate";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
             CPH.SUWriteLog(url, logName);
@@ -141,18 +273,23 @@ namespace StreamUP {
             decimal exRate = (decimal)json[toCurrency][fromCurrency];
             CPH.SUWriteLog($"exRate=[{exRate}]");
 
-            CPH.SUWriteLog("Method completed", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return exRate;
         }
 
-        public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode)
+        public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode, string productNumber = "DLL")
         {
+            string logName = $"{productNumber}::SUGetCurrencySymbol";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
             RegionInfo region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
                 .Select(ci => new RegionInfo(ci.LCID))
                 .FirstOrDefault(ri => ri.ISOCurrencySymbol.Equals(currencyCode, StringComparison.OrdinalIgnoreCase));
 
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return region != null ? region.CurrencySymbol : currencyCode;
         }      
+
 
     }
 }

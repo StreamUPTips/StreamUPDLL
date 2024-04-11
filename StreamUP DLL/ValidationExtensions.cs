@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,94 +14,128 @@ using Streamer.bot.Plugin.Interface;
 namespace StreamUP {
 
     public static class ValidationExtensions {
-
-        public static bool SUInitialiseProduct(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, string settingsAction, Version requiredLibraryVersion)
+        public static bool SUValSBUpdateChecker(this IInlineInvokeProxy CPH, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = $"{productName}-SUInitialiseProduct";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SUValSBUpdateChecker";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            if (CPH.GetGlobalVar<bool>($"{productNumber}_Initialised", false))
+            // Check if Update checker action exists
+            if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
             {
-                CPH.SUWriteLog($"{productName} is already initialised. Skipping checks.", logName);
-                CPH.SUWriteLog("Method complete", logName);
-                return true;
-            }
-
-            // Check product settings have been run
-            if (!CPH.SUCheckProductSettingsLoaded(productNumber, productName, settingsAction))
-            {
-                CPH.SUWriteLog("Settings action has not been run. Initialisation aborted.", logName);
-                return false;
-            }     
-
-            // Check if obs is connected
-            int obsConnection = CPH.GetGlobalVar<int>($"{productNumber}_ObsConnection", true);
-            if (!CPH.SUCheckObsIsConnected(productNumber, productName, obsConnection))
-            {
-                CPH.SUWriteLog("OBS is not connected. Initialisation aborted.", logName);
-                return false;
-            }
-
-            // Check if products scene exists
-            if (!CPH.SUCheckStreamUPSceneExists(productNumber, productName, sceneName, obsConnection))
-            {
-                CPH.SUWriteLog($"Scene '{sceneName}' does not exist. Initialisation aborted.", logName);
-                return false;
-            }
-
-            // Check dll version
-            CPH.SUWriteLog("Checking if dll is the required version or newer", logName);
-            if (!CPH.SUCheckLibraryVersion(requiredLibraryVersion))
-            {
-                CPH.SUWriteLog($"Method complete", logName);
-                return false;
-            }
-
-            CPH.SetGlobalVar($"{productNumber}_Initialised", true, false);
-            CPH.SUWriteLog($"Method complete", logName);
-            return true;
-        }
-
-        public static bool SUCheckProductSettingsLoaded(this IInlineInvokeProxy CPH, string productNumber, string productName, string settingsAction)
-        {
-            // Load log string
-            string logName = $"{productName}-SUCheckProductSettingsLoaded";
-            CPH.SUWriteLog("Method Started", logName);
-            if (CPH.GetGlobalVar<string>($"{productNumber}_ObsConnection", true) == null)
-            {
-                string error1 = $"There are no {productName} settings found.";
-                string error2 = $"Please run the '{productName} • Settings' Action first.";
-                string error3 = "Press 'Yes' to open these settings automatically.";
-
+                string error1 = "The StreamUP Update Checker for Streamer.Bot is not installed";
+                string error2 = "You can download it from the StreamUP website.";
+                string error3 = "Would you like to open the link now?";
                 CPH.SUWriteLog(error1, logName);
-                var errorOutput = MessageBox.Show($"{error1}\n\n{error2}\n\n{error3}", $"StreamUP • {productName} Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
-                if (errorOutput == DialogResult.Yes)
-                {
-                    CPH.RunAction(settingsAction, false);
-                }
-                CPH.SUWriteLog($"Method complete", logName);
-                return false;    
-            }
-            CPH.SUWriteLog($"Method complete", logName);
+                DialogResult errorOutput = CPH.SUUIShowWarningYesNoMessage($"{error1}\n{error2}\n\n{error3}");           
+                
+                if (errorOutput == DialogResult.Yes) {
+                    Process.Start("https://streamup.tips/product/update-checker");
+                }      
+            }  
+            else
+            {
+                CPH.SUWriteLog("StreamUP update checker for Streamer.Bot is installed.", logName);
+            } 
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
         
-        public static bool SUCheckObsIsConnected(this IInlineInvokeProxy CPH, string productNumber, string productName, int obsConnection)
+        public static ProductInfo SUValProductInfoLoaded(this IInlineInvokeProxy CPH,string actionName, string productNumber = "DLL")
         {
-            // Load log string
-            string logName = $"{productName}-SUCheckObsIsConnected";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productNumber}::SUValProductInfoLoaded";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+            CPH.SUWriteLog("Checking ProductInfo is loaded.", logName);
+
+            // Check ProductInfo is already loaded, if not, load it
+            ProductInfo productInfo;
+            string productInfoJson = CPH.GetGlobalVar<string>($"{productNumber}_ProductInfo", false);
+
+            if (string.IsNullOrEmpty(productInfoJson))
+            {
+                if (!CPH.SULoadProductInfo(actionName))
+                {
+                    CPH.SUWriteLog("Couldn't load ProductInfo", logName);
+                    CPH.SUWriteLog("METHOD FAILED!", logName);
+                    return null;
+                }
+            }
+            else
+            {
+                CPH.SUWriteLog("ProductInfo already loaded.", logName);
+            }
+
+            productInfo = JsonConvert.DeserializeObject<ProductInfo>(CPH.GetGlobalVar<string>($"{productNumber}_ProductInfo", false));
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return productInfo;
+        }
+
+        public static bool SUValProductSettingsLoaded(this IInlineInvokeProxy CPH, ProductInfo productInfo)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUValProductSettingsLoaded";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+            CPH.SUWriteLog("Checking ProductSettings is loaded.", logName);
+
+            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
+            if (string.IsNullOrEmpty(productSettingsJson))
+            {
+                CPH.SUWriteLog($"Product settings for '{productInfo.ProductName}' are not loaded. Showing Dialog option for user to open settings menu", logName);
+                var errorOutput = CPH.SUUIShowWarningYesNoMessage($"There are no product settings loaded for '{productInfo.ProductName}'\n\nWould you like to open the products settings menu now?");
+                if (errorOutput == DialogResult.Yes)
+                {
+                    CPH.SUWriteLog($"User selected 'Yes'. Opening settings menu...", logName);
+                    CPH.RunAction(productInfo.SettingsAction, false);
+                }
+                else
+                {
+                    CPH.SUWriteLog($"User selected 'No'.", logName);
+                }
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;   
+            }
+            else
+            {
+                CPH.SUWriteLog("ProductSettings already loaded.", logName);
+            }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
+        public static bool SUValLibraryVersion(this IInlineInvokeProxy CPH, Version minimumRequiredVersion, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUValLibraryVersion";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            CPH.SUWriteLog($"Pulled library version. currentVersion=[{currentVersion}], minimumRequiredVersion=[{minimumRequiredVersion}]", logName);
+
+            if (currentVersion < minimumRequiredVersion)
+            {       
+                CPH.SUWriteLog("StreamUP.dll file is not the required version. Prompting the user to download the latest.", logName);
+                CPH.SUUIShowErrorOKMessage("You do not have the required version of 'StreamUP.dll' installed.\nPlease download it via the 'StreamUP_Library_Updater.exe' that was bundled in with this product.\n\nYou should have placed it in the root of your Streamer.Bot folder.");
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            CPH.SUWriteLog("The current version of the StreamUP.dll file is okay.", logName);          
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+    
+        public static bool SUValObsIsConnected(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUValObsIsConnected";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Check obs connection is connected
             if (!CPH.ObsIsConnected(obsConnection))
             {
                 var errorMessage = $"There is no OBS connection on connection number '{obsConnection}'.\n\n" +
                             "1. Check your OBS settings in the 'Stream Apps' tab.\n" +
-                            $"2. Set the correct OBS number in the '{productName} • Settings' Action.\n";
-                CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
-                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error); 
-                CPH.SUWriteLog($"Method complete", logName);          
+                            $"2. Set the correct OBS number in the '{productInfo.SettingsAction}' Action.\n";
+                CPH.SUWriteLog($"ERROR: There is no OBS connection on connection number '{obsConnection}'.", logName);
+                CPH.SUUIShowErrorOKMessage(errorMessage);
+                CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
             else
@@ -114,45 +153,87 @@ namespace StreamUP {
                 {
                     var errorMessage = $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.\n\n" +
                                 "1. Check your OBS settings in the 'Stream Apps' tab.\n";
-                    CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
-                    var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);           
-                    CPH.SUWriteLog($"Method complete", logName);          
+                    CPH.SUWriteLog($"ERROR: There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.", logName);
+                    CPH.SUUIShowErrorOKMessage(errorMessage);
+                    CPH.SUWriteLog("METHOD FAILED", logName);
                     return false;
                 }
             }
-            CPH.SUWriteLog($"Method complete", logName);          
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-        
-        public static bool SUCheckStreamUPSceneExists(this IInlineInvokeProxy CPH, string productNumber, string productName, string sceneName, int obsConnection)
+
+        public static bool SUValObsPlugins(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
-            // Load log string
-            string logName = $"{productName}-SUCheckStreamUPSceneExists";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productInfo.ProductNumber}::SUValObsPlugins";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            string checkPlugins = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"check_plugins\",\"requestData\":null}", obsConnection);
+            if (checkPlugins.Trim() == "{}")
+            {
+                CPH.SUWriteLog("Cannot check OBS plugins. The StreamUP OBS plugin may not be installed or is out of date.", logName);
+                DialogResult response = CPH.SUUIShowWarningYesNoMessage("Cannot check OBS plugins. The StreamUP OBS plugin may not be installed or is out of date.\n\nWould you like to go to the download page now?");       
+                if (response == DialogResult.Yes)
+                {
+                    CPH.SUWriteLog("User selected 'Yes'. Opening StreamUP website in web browser.", logName);
+                    Process.Start("https://streamup.tips/plugin");
+                }
+
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            JObject checkPluginsObj = JObject.Parse(checkPlugins);
+            bool isSuccess = checkPluginsObj["responseData"]?["success"]?.Value<bool>() ?? false;
+            if (!isSuccess)
+            {
+                CPH.SUWriteLog($"OBS has plugins that are required that are out of date.", logName);          
+                DialogResult response = CPH.SUUIShowWarningYesNoMessage("OBS has plugins that are required that are missing or out of date.\nYou can use the StreamUP Pluginstaller to download them all in one go.\n\nWould you like to open the download page now?");       
+                if (response == DialogResult.Yes)
+                {
+                    CPH.SUWriteLog("User selected 'Yes'. Opening StreamUP website in web browser.", logName);
+                    Process.Start("https://streamup.tips/product/plugin-installer");
+                }
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            CPH.SUWriteLog("All plugins are loaded and up to date.", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
+        public static bool SUValStreamUPSceneExists(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUValStreamUPSceneExists";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull Obs scene list and see if sceneName exists
             var sceneList = CPH.ObsSendRaw("GetSceneList", "{}", obsConnection);
-            if (!sceneList.Contains($"{sceneName}"))
+            if (!sceneList.Contains($"{productInfo.SceneName}"))
             {
-                var errorMessage = $"The scene '{sceneName}' does not exist in OBS.\n\n" +
+                string errorMessage = $"The scene '{productInfo.SceneName}' does not exist in OBS.\n\n" +
                                     "Please reinstall it into OBS using the products '.StreamUP' file.";
-                CPH.SUWriteLog($"ERROR: {errorMessage}", logName);
-                var error = MessageBox.Show($"{errorMessage}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);    
-                CPH.SUWriteLog($"Method complete", logName);          
+                CPH.SUWriteLog($"ERROR: The scene '{productInfo.SceneName}' does not exist in OBS.", logName);
+                CPH.SUUIShowErrorOKMessage(errorMessage);
+
+                CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
-            CPH.SUWriteLog($"Method complete", logName);          
+
+            CPH.SUWriteLog($"The scene '{productInfo.SceneName}' exists in Obs.", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-    
-        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, string productNumber, string productName, string targetVersion, int obsConnection, string sceneName, string sourceName)
+
+        public static bool SUValProductObsVersion(this IInlineInvokeProxy CPH,  ProductInfo productInfo, int obsConnection)
         {
-            // Load log string
-            string logName = $"{productName}-SUGetProductObsVersion";
-            CPH.SUWriteLog("Method Started", logName);
+            string logName = $"{productInfo.ProductNumber}::SUValProductObsVersion";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull product version from source settings
-            JObject inputSettings = CPH.SUObsGetInputSettings(productName, obsConnection, sourceName);
+            JObject inputSettings = CPH.SUObsGetInputSettings(productInfo.ProductNumber, obsConnection, productInfo.SourceNameVersionCheck);
             CPH.SUWriteLog($"Pulled inputSettings: inputSettings=[{inputSettings.ToString()}]", logName);
 
             // Check if filter names contain the word 'Version'
@@ -166,157 +247,154 @@ namespace StreamUP {
 
             if (foundVersion == null)
             {
-                string error1 = $"No version number has been found in OBS for '{productName}'.";
-                string error2 = $"Please remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
+                string error1 = $"No version number has been found in OBS for '{productInfo.ProductName}'.";
+                string error2 = $"Please install the latest .StreamUP version for '{productInfo.ProductName}' into OBS.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
-                var error = MessageBox.Show($"{error1}\n\n{error2}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
-                CPH.SUWriteLog($"Method complete", logName);          
+                CPH.SUUIShowErrorOKMessage($"{error1}\n\n{error2}");
+
+                CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
 
             // Check if installed version is up to date
             Version foundVer = new Version(foundVersion);
-            Version targetVer = new Version(targetVersion);
+            Version targetVer = productInfo.SourceNameVersionNumber;
 
-            if (foundVer >= targetVer)
+            if (foundVer < targetVer)
             {
-                CPH.SUWriteLog($"Current version {foundVersion} is up to date with target version {targetVersion}.", logName);
-                CPH.SUWriteLog($"Method complete", logName);          
-                return true;
-            }
-            else
-            {
-                string error1 = $"Current version of '{productName}' in OBS is out of date.";
+                string error1 = $"Current version of '{productInfo.ProductName}' in OBS is out of date.";
                 string error2 = $"Please make sure you have downloaded the latest version from https://my.streamup.tips";
-                string error3 = $"Then remove the scene '{sceneName}' and reinstall it into OBS using the products '.StreamUP' file.";
+                string error3 = $"Then install the latest .StreamUP version for '{productInfo.ProductName}' into OBS.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
-                var error = MessageBox.Show($"{error1}\n\n{error2}\n{error3}", $"StreamUP • {productName} Error", MessageBoxButtons.OK, MessageBoxIcon.Error);  
-                CPH.SUWriteLog($"Method complete", logName);          
+                CPH.SUUIShowErrorOKMessage($"{error1}\n\n{error2}\n{error3}");
+                
+                CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
+
+            CPH.SUWriteLog($"Current version {foundVersion} is up to date with target version {targetVer}.", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
         }
     
-        public static bool SUCheckObsPlugins(this IInlineInvokeProxy CPH)
+    public static bool SUValFontInstalled(this IInlineInvokeProxy CPH, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string productNumber = "DLL")
+    {
+        string logName = $"{productNumber}::SUValFontInstalled";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        bool allFontsInstalled = true;
+
+        foreach (var font in requiredFonts)
         {
-            // Load log string
-            string logName = $"ValidationExtensions-SUCheckObsPlugins";
-            CPH.SUWriteLog("Method Started", logName);
+            string fontName = font.fontName;
+            string fontFile = font.fontFile;
+            string fontUrl = font.fontUrl;
 
-            // Search for obs connection
-            int obsConnection = 0;
-	        string versionNumberString = null;
-            while (obsConnection <= 20)
+            // Get the list of installed font families
+            FontFamily[] installedFonts = FontFamily.Families;
+
+            if (!installedFonts.Any(ff => ff.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
             {
-                if (CPH.ObsIsConnected(obsConnection))
+                CPH.SUWriteLog($"WARNING: Unable to locate '{fontName}' in the font family list.", logName);
+                allFontsInstalled = false;
+                CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
+                DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
+                if (result == DialogResult.Yes)
                 {
-                    CPH.SUWriteLog($"Obs connection found connected on connection [{obsConnection}]", logName);
+                    Process.Start(fontUrl);
+                }
+                continue; // Skip further checks and move to the next font in the list
+            }
 
-                    // Pull obs version data
-                    string obsData = CPH.ObsSendRaw("GetVersion", "{}", obsConnection);
-                    JObject obsDataJson = JsonConvert.DeserializeObject<JObject>(obsData);                
-                    CPH.SUWriteLog($"Pulled Obs GetVersion data: GetVersion=[{obsDataJson.ToString()}]", logName);
+            // Check for specific font file extension type
+            string fontFileName = Path.GetFileNameWithoutExtension(fontFile);
+            string searchPattern = $"{fontFileName}.*";
 
-                    // Check websocket version 4.0 or lower, 5.0+
-                    if (obsDataJson.TryGetValue("obsWebSocketVersion", out var versionToken) ||
-                        obsDataJson.TryGetValue("obs-websocket-version", out versionToken))
+            // Check default font folder
+            string directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+            CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+            List<string> baseDirMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+
+            if (!CheckIfFontMatches(CPH, baseDirMatchingFontFiles, fontFile, productNumber))
+            {
+                // Check APPDATA font folder
+                string appdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                directoryPath = Path.Combine(appdataFolder, "Microsoft", "Windows", "Fonts");
+                CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+
+                List<string> appdataMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+                if (!CheckIfFontMatches(CPH, appdataMatchingFontFiles, fontFile, productNumber))
+                {
+                    allFontsInstalled = false;
+                    CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
+                    DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
+                    if (result == DialogResult.Yes)
                     {
-                        CPH.SUWriteLog($"Pulled websocket version string: versionNumberString=[{versionToken.ToString()}]", logName);
-                        versionNumberString = versionToken.ToString();
-                    }                
-                    if (CPH.CheckWebsocketVersionCompatible(versionNumberString))
-                    {
-                        break;
+                        Process.Start(fontUrl);
                     }
                 }
-                // Increase obs connection number
-                obsConnection++;
             }
-
-            if (!CPH.ObsIsConnected(obsConnection))
-            {
-                if (versionNumberString == null)
-                {
-                    string error1 = "OBS is not connected to Streamer.Bot";
-                    string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
-                    CPH.SUWriteLog(error1, logName);
-                    CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
-                }
-                else
-                {
-                    string error1 = $"Your OBS is connected to Streamer.Bot via websocket {versionNumberString}";
-                    string error2 = "Visit the 'Stream Apps' tab in Streamer.Bot and connect OBS via Websocket 5.0.0 or above.";
-                    CPH.SUWriteLog(error1, logName);
-                    CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
-                }
-                CPH.SUWriteLog($"Method complete", logName);          
-                return false;
-            }
-
-            // Search for obs log file
-            CPH.SUWriteLog("Beginning search for OBS log file", logName);
-            var obsPluginResult = CPH.FindOBSLogFile(obsConnection);
-            if (!obsPluginResult.Success)
-            {
-                CPH.SUUIShowErrorMessage(obsPluginResult.Message);
-                CPH.SUWriteLog($"Method complete", logName);          
-                return false;
-            }
-            string error3 = "StreamUP plugin is installed and loaded correctly";   
-            string error4 = "Initiating StreamUP product settings menu..."; 
-            CPH.SUWriteLog($"{error3} {error4}", logName);
-
-            // Check if StreamerBot product update checker is installed
-            CPH.SUCheckForSBUpdateChecker();
-            CPH.SUWriteLog($"Method complete", logName);          
-            return true;
         }
 
-        public static bool SUCheckForSBUpdateChecker(this IInlineInvokeProxy CPH)
+        if (allFontsInstalled)
         {
-            // Load log string
-            string logName = $"ValidationExtensions-SUCheckForSBUpdateChecker";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Check if Update checker action exists
-            if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
-            {
-                string error1 = "The StreamUP Update Checker for Streamer.Bot is notinstalled";
-                string error2 = "You can download it from the StreamUP website.";
-                string error3 = "Would you like to open the link now?";
-                CPH.SUWriteLog(error1, logName);
-                DialogResult errorOutput = CPH.SUUIShowYesNoWarningMessage($"{error1}\n{error2}\n\n{error3}");           
-                
-                if (errorOutput == DialogResult.Yes) {
-                    Process.Start("https://streamup.tips/product/update-checker");
-                }      
-            }   
-            CPH.SUWriteLog($"Method complete", logName);          
+            CPH.SUWriteLog("All required fonts are installed.", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-
-        public static bool SUCheckLibraryVersion(this IInlineInvokeProxy CPH, Version minimumRequiredVersion)
+        else
         {
-            // Load log string
-            string logName = $"ValidationExtensions-SUCheckLibraryVersion";
-            CPH.SUWriteLog("Method Started", logName);
-
-            Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            CPH.SUWriteLog($"currentVersion=[{currentVersion}], minimumRequiredVersion=[{minimumRequiredVersion}]");
-
-            if (currentVersion < minimumRequiredVersion)
-            {       
-                string error1 = "The StreamUP .dll file is not the required version.";
-                string error2 = "Please install the latest version.";
-                CPH.SUWriteLog(error1, logName);
-                CPH.SUUIShowErrorMessage($"{error1}\n\n{error2}");
-                CPH.SUWriteLog($"Method complete", logName);          
-                return false;
-            }
-
-            CPH.SUWriteLog($"Current version is fine.", logName);          
-            CPH.SUWriteLog($"Method complete", logName);         
-            return true;
+            CPH.SUWriteLog("One or more required fonts are not installed.", logName);
+            CPH.SUWriteLog("METHOD FAILED", logName);
+            return false;
         }
-    
+    }
+
+    private static List<string> GetAllMatchingFontFiles(this IInlineInvokeProxy CPH, string directoryPath, string searchPattern, string productNumber)
+    {
+        string logName = $"{productNumber}::GetAllMatchingFontFiles";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        string[] filePaths = Directory.GetFiles(directoryPath, searchPattern);
+        List<string> fileNames = new List<string>();
+        foreach (var filePath in filePaths)
+        {
+            string fileName = Path.GetFileName(filePath);
+            fileNames.Add(fileName);
+            CPH.SUWriteLog($"Added '{fileName}' to list", logName);
+        }
+        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        return fileNames;
+    }
+
+    private static bool CheckIfFontMatches(this IInlineInvokeProxy CPH, List<string> fontFiles, string fontName, string productNumber)
+    {
+        string logName = $"{productNumber}::CheckIfFontMatches";
+        CPH.SUWriteLog("METHOD STARTED!", logName);
+
+        foreach (var file in fontFiles)
+        {
+            if (file.Equals(fontName, StringComparison.OrdinalIgnoreCase))
+            {
+                CPH.SUWriteLog($"Font match found: {file}", logName);
+                return true;
+            }
+        }
+        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        return false;
+    }    
+}
+
+
+    [Serializable]
+    public class ProductInfo
+    {
+        public string ProductName { get; set; }
+        public string ProductNumber { get; set; }
+        public Version RequiredLibraryVersion { get; set; }
+        public string SceneName { get; set; }
+        public string SettingsAction { get; set; }
+        public string SourceNameVersionCheck { get; set; }
+        public Version SourceNameVersionNumber { get; set; }
     }
 }
