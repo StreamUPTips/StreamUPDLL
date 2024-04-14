@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text;
-using System.Drawing;
 
 namespace StreamUP {
 
@@ -44,7 +43,7 @@ namespace StreamUP {
                     switch (sbArgs["commandSource"].ToString())
                     {
                         case "twitch":
-                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                             break;
                         case "youtube":
                             triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
@@ -116,33 +115,33 @@ namespace StreamUP {
                 case EventType.TwitchAnnouncement:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchBotWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchChatMessage:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchCheer:
                     triggerData.Amount = int.Parse(sbArgs["bits"].ToString());
                     triggerData.Anonymous = bool.Parse(sbArgs["anonymous"].ToString());
                     triggerData.Message = sbArgs["messageCheermotesStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFirstWord:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFollow:
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchGiftBomb:
                     triggerData.Amount = int.Parse(sbArgs["gifts"].ToString());
@@ -150,23 +149,23 @@ namespace StreamUP {
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.TotalAmount = int.Parse(sbArgs["totalGifts"].ToString());
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchGiftSub:
                     triggerData.Anonymous = bool.Parse(sbArgs["anonymous"].ToString());
                     triggerData.MonthsAmount = int.Parse(sbArgs["cumulativeMonths"].ToString());
                     triggerData.MonthsGifted = int.Parse(sbArgs["monthsGifted"].ToString());
                     triggerData.Receiver = sbArgs["recipientUser"].ToString();
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 1);
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 1, productSettings);
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.TotalAmount = int.Parse(sbArgs["totalSubsGifted"].ToString());
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchRaid:
                     triggerData.Amount = int.Parse(sbArgs["viewers"].ToString());
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;         
                 case EventType.TwitchReSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -174,27 +173,27 @@ namespace StreamUP {
                     triggerData.MonthsStreak = int.Parse(sbArgs["monthStreak"].ToString());
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchRewardRedemption:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
 
                     break;
                 case EventType.TwitchSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchShoutoutCreated:
                     triggerData.User = sbArgs["targetUserDisplayName"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchUserBanned:
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     triggerData.UserSource = sbArgs["createdByUsername"].ToString();
                     break;
                 case EventType.TwitchUserTimedOut:
@@ -205,7 +204,7 @@ namespace StreamUP {
                 case EventType.TwitchWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 // YOUTUBE
                 case EventType.YouTubeFirstWords:
@@ -340,17 +339,29 @@ namespace StreamUP {
             return userImage;
         }               
 
-        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, int userType)
+        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, int userType, Dictionary<string, object> productSettings)
         {
             string logName = $"{productNumber}::SUSBGetTwitchProfilePicture";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // pull requested sizes '50, 70, 150, 300'
-            int userImageSize = CPH.GetGlobalVar<int>($"{productNumber}_ProfileImageSize");
+            int userImageSize = 300;
 
-            if (userImageSize <= 0)
+            // Attempt to retrieve 'ProfilePictureSize' from productSettings
+            if (productSettings.TryGetValue("ProfilePictureSize", out object value) && int.TryParse(value.ToString(), out int size))
             {
-                userImageSize = 300;
+                if (size > 0)
+                {
+                    userImageSize = size;
+                }
+                else
+                {
+                    CPH.SUWriteLog("Invalid ProfilePictureSize provided. Using default size: 300");
+                }
+            }
+            else
+            {
+                CPH.SUWriteLog("ProfilePictureSize not set. Using default size: 300");
             }
 
             // Get profile picture
