@@ -27,6 +27,8 @@ namespace StreamUP {
             string localCurrency;
             string defaultDonationImageUrl;
             string triggerType = CPH.GetEventType().ToString();
+            triggerData.EventType = triggerType;
+            
             CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
             switch (CPH.GetEventType())

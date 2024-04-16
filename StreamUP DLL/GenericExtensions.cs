@@ -290,6 +290,31 @@ namespace StreamUP {
             return region != null ? region.CurrencySymbol : currencyCode;
         }      
 
+        public static long SUGetContrastingColour(this IInlineInvokeProxy CPH, long inputColour, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUGetCurrencySymbol";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
+            long a = (long)(inputColour >> 24) & 0xFF;
+            long g = (long)(inputColour >> 16) & 0xFF; 
+            long b = (long)(inputColour >> 8) & 0xFF;  
+            long r = (long)inputColour & 0xFF;         
+
+            double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+            if (luminance > 0.5)
+            {
+                CPH.SUWriteLog("Returning black as contrasting colour", logName);
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return 4278190080L;
+            }
+            else
+            {
+                CPH.SUWriteLog("Returning white as contrasting colour", logName);
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return 4294967295L;
+            }
+            
+        }
     }
 }
