@@ -190,18 +190,25 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchShoutoutCreated:
-                    triggerData.User = sbArgs["targetUserDisplayName"].ToString();
+                    triggerData.Receiver = sbArgs["targetUserDisplayName"].ToString();
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 3, productSettings);
+                    triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchUserBanned:
-                    triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
-                    triggerData.UserSource = sbArgs["createdByUsername"].ToString();
+                    triggerData.BanType = sbArgs["reason"].ToString();
+                    triggerData.Receiver = sbArgs["user"].ToString();
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.User = sbArgs["createdByDisplayName"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 2, productSettings);
                     break;
                 case EventType.TwitchUserTimedOut:
                     triggerData.BanDuration = sbArgs["duration"].ToString();
-                    triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = sbArgs["userProfileUrl"].ToString();
+                    triggerData.BanType = sbArgs["reason"].ToString();
+                    triggerData.Receiver = sbArgs["user"].ToString();
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.User = sbArgs["createdByDisplayName"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 2, productSettings);
                     break;
                 case EventType.TwitchWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -289,15 +296,15 @@ namespace StreamUP {
                     .Replace("\\t", "");
             }
 
-            ReplaceAlertMessageVars(CPH, triggerData, productInfo, productSettings);
+            ReplaceAlertMessageVarsTriggerData(CPH, triggerData, productInfo, productSettings);
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return triggerData;
         }
         
-        private static void ReplaceAlertMessageVars(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
+        public static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
         {
-            string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVars";
+            string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVarsTriggerData";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string triggerType = CPH.GetEventType().ToString();
@@ -376,6 +383,12 @@ namespace StreamUP {
                 case 1:
                     userCheck = "recipientId";
                     break;
+                case 2:
+                    userCheck = "createdById";
+                break;
+                case 3:
+                    userCheck = "targetUserId";
+                break;
             }
             var userInfo = CPH.TwitchGetExtendedUserInfoById(sbArgs[$"{userCheck}"].ToString());
             string originalImage = userInfo.ProfileImageUrl;
@@ -404,6 +417,34 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return profileImage;
         }
+
+        public static string SUSBReplaceAlertMessageVars(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings, string inputMessage)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUSBReplaceAlertMessageVars";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            string customMessageValue = inputMessage;
+
+            StringBuilder builder = new StringBuilder(customMessageValue);
+            builder.Replace("%user%", triggerData.User)
+            .Replace("%message%", triggerData.Message)
+            .Replace("%tier%", triggerData.Tier)
+            .Replace("%amount%", triggerData.Amount.ToString())
+            .Replace("%amountCurrency%", triggerData.AmountCurrency)
+            .Replace("%monthsAmount%", triggerData.MonthsAmount.ToString())
+            .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
+            .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
+            .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
+            .Replace("%receiver%", triggerData.Receiver)
+            .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
+
+            string outputMessage = builder.ToString();
+            
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return outputMessage;
+        }
+
+
 
 
 
