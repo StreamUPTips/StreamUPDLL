@@ -155,7 +155,7 @@ namespace StreamUP {
                     break;
                 case EventType.TwitchGiftSub:
                     triggerData.Anonymous = bool.Parse(sbArgs["anonymous"].ToString());
-                    triggerData.MonthsAmount = int.Parse(sbArgs["cumulativeMonths"].ToString());
+                    triggerData.MonthsTotal = int.Parse(sbArgs["cumulativeMonths"].ToString());
                     triggerData.MonthsGifted = int.Parse(sbArgs["monthsGifted"].ToString());
                     triggerData.Receiver = sbArgs["recipientUser"].ToString();
                     triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 1, productSettings);
@@ -320,10 +320,12 @@ namespace StreamUP {
                 .Replace("%tier%", triggerData.Tier)
                 .Replace("%amount%", triggerData.Amount.ToString())
                 .Replace("%amountCurrency%", triggerData.AmountCurrency)
-                .Replace("%monthsAmount%", triggerData.MonthsAmount.ToString())
+                .Replace("%banType%", triggerData.BanType.ToString())
+                .Replace("%duration%", triggerData.BanDuration.ToString())
                 .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
                 .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
                 .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
+                .Replace("%reason%", triggerData.BanType.ToString())
                 .Replace("%receiver%", triggerData.Receiver)
                 .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
@@ -385,7 +387,7 @@ namespace StreamUP {
                     break;
                 case 2:
                     userCheck = "createdById";
-                break;
+                    break;
                 case 3:
                     userCheck = "targetUserId";
                 break;
@@ -431,10 +433,12 @@ namespace StreamUP {
             .Replace("%tier%", triggerData.Tier)
             .Replace("%amount%", triggerData.Amount.ToString())
             .Replace("%amountCurrency%", triggerData.AmountCurrency)
-            .Replace("%monthsAmount%", triggerData.MonthsAmount.ToString())
+            .Replace("%banType%", triggerData.BanType.ToString())
+            .Replace("%duration%", triggerData.BanDuration.ToString())
             .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
             .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
             .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
+            .Replace("%reason%", triggerData.BanType.ToString())
             .Replace("%receiver%", triggerData.Receiver)
             .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
@@ -516,7 +520,6 @@ namespace StreamUP {
         public string EventSource { get; set; }
         public string EventType { get; set; }
         public string Message { get; set; }
-        public int MonthsAmount { get; set; }
         public int MonthsGifted { get; set; }
         public int MonthsStreak { get; set; }
         public int MonthsTotal { get; set; }
