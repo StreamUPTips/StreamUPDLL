@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 namespace StreamUP {
 
     public static class GenericExtensions {
-        public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
+        public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productNumber}::SUInitialiseObsProduct";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -40,7 +40,7 @@ namespace StreamUP {
             }
 
             // Deserialise productSettings into a Dictionary
-            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings"));
+            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}"));
             int obsConnection = Convert.ToInt32(productSettings["ObsConnection"]);
 
             // Check Obs is connected
@@ -165,7 +165,7 @@ namespace StreamUP {
             return productSettings;
         }
 
-        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
+        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -179,16 +179,19 @@ namespace StreamUP {
             }
 
             // Check if there are any required fonts and that they are installed
-            CPH.SUWriteLog("Checking for any required system fonts...", logName);
-            if (requiredFonts.Count > 0)
+            if (requiredFonts != null)
             {
-                CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
-                CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+                CPH.SUWriteLog("Checking for any required system fonts...", logName);
+                if (requiredFonts.Count > 0)
+                {
+                    CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
+                    CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+                }
             }
-            
+
             // Load settings menu
             CPH.SUWriteLog("Launching settings menu...", logName);
-            bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs);
+            bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs, settingsGlobalName);
             if (!settingsSaved.HasValue || settingsSaved == false)
             {
                 CPH.SUWriteLog("METHOD FAILED!", logName);
