@@ -54,6 +54,7 @@ namespace StreamUP {
                     break;
                 // DONATIONS
                 case EventType.FourthwallDonation:
+                    triggerData.Donation = true;
                     triggerData.User = sbArgs["username"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
@@ -66,6 +67,7 @@ namespace StreamUP {
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
                 case EventType.KofiDonation:
+                    triggerData.Donation = true;
                     triggerData.User = sbArgs["from"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
@@ -78,6 +80,7 @@ namespace StreamUP {
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
                 case EventType.StreamElementsTip:
+                    triggerData.Donation = true;
                     triggerData.User = sbArgs["tipUsername"].ToString();
                     triggerData.Message = sbArgs["tipMessage"].ToString();
 
@@ -90,6 +93,7 @@ namespace StreamUP {
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
                 case EventType.StreamlabsDonation:
+                    triggerData.Donation = true;
                     triggerData.User = sbArgs["donationFrom"].ToString();
                     triggerData.Message = sbArgs["donationMessage"].ToString();
 
@@ -102,6 +106,7 @@ namespace StreamUP {
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
                 case EventType.TipeeeStreamDonation:
+                    triggerData.Donation = true;
                     triggerData.User = sbArgs["username"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
@@ -203,7 +208,7 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 2, productSettings);
                     break;
                 case EventType.TwitchUserTimedOut:
-                    triggerData.BanDuration = sbArgs["duration"].ToString();
+                    triggerData.BanDuration = int.Parse(sbArgs["duration"].ToString());
                     triggerData.BanType = sbArgs["reason"].ToString();
                     triggerData.Receiver = sbArgs["user"].ToString();
                     triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
@@ -272,7 +277,7 @@ namespace StreamUP {
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
                 case EventType.YouTubeUserBanned:
-                    triggerData.BanDuration = sbArgs["banDuration"].ToString();
+                    triggerData.BanDuration = int.Parse(sbArgs["banDuration"].ToString());
                     triggerData.BanType = sbArgs["banType"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
@@ -302,7 +307,7 @@ namespace StreamUP {
             return triggerData;
         }
         
-        public static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
+        private static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
         {
             string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVarsTriggerData";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -433,12 +438,12 @@ namespace StreamUP {
             .Replace("%tier%", triggerData.Tier)
             .Replace("%amount%", triggerData.Amount.ToString())
             .Replace("%amountCurrency%", triggerData.AmountCurrency)
-            .Replace("%banType%", triggerData.BanType.ToString())
+            .Replace("%banType%", triggerData.BanType)
             .Replace("%duration%", triggerData.BanDuration.ToString())
             .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
             .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
             .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
-            .Replace("%reason%", triggerData.BanType.ToString())
+            .Replace("%reason%", triggerData.BanType)
             .Replace("%receiver%", triggerData.Receiver)
             .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
@@ -464,9 +469,6 @@ namespace StreamUP {
             // Serialize the queue to a JSON string
             var array = myQueue.ToArray();
             string jsonString = JsonConvert.SerializeObject(array);
-
-            // Optionally, log the jsonString to verify its content
-            CPH.SUWriteLog($"Serialized JSON: {jsonString}", logName);
 
             // Set the global variable
             CPH.SetGlobalVar(varName, jsonString, persisted);
@@ -515,8 +517,9 @@ namespace StreamUP {
         public int Amount { get; set; }
         public string AmountCurrency { get; set; }
         public bool Anonymous { get; set; }
-        public string BanDuration { get; set; }
+        public int BanDuration { get; set; }
         public string BanType { get; set; }
+        public bool Donation { get; set; }
         public string EventSource { get; set; }
         public string EventType { get; set; }
         public string Message { get; set; }
