@@ -260,21 +260,17 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
-            CPH.SUWriteLog(url, logName);
 
             string rawJson;
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                 rawJson = client.DownloadString(url);
-                CPH.SUWriteLog(rawJson, logName);
             }
 
             JObject json = JObject.Parse(rawJson);
-            CPH.SUWriteLog(json.ToString(), logName);
 
             decimal exRate = (decimal)json[toCurrency][fromCurrency];
-            CPH.SUWriteLog($"exRate=[{exRate}]");
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return exRate;
@@ -317,5 +313,20 @@ namespace StreamUP {
                 return 4294967295L;
             }
         }
+
+        public static string SUGetRandomColour(this IInlineInvokeProxy CPH, string productNumber = "DLL")
+        {
+            Random random = new Random();            
+            int red = random.Next(256);
+            int green = random.Next(256);
+            int blue = random.Next(256);
+
+            // Convert RGB values to a hexadecimal string
+            string hexColor = $"#{red:X2}{green:X2}{blue:X2}";
+
+            return hexColor;
+        }
+
+
     }
 }
