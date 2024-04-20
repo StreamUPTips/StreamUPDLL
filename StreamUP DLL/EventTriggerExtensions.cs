@@ -163,11 +163,11 @@ namespace StreamUP {
                     triggerData.MonthsTotal = int.Parse(sbArgs["cumulativeMonths"].ToString());
                     triggerData.MonthsGifted = int.Parse(sbArgs["monthsGifted"].ToString());
                     triggerData.Receiver = sbArgs["recipientUser"].ToString();
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 1, productSettings);
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.recipientId, productSettings);
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.TotalAmount = int.Parse(sbArgs["totalSubsGifted"].ToString());
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     break;
                 case EventType.TwitchRaid:
                     triggerData.Amount = int.Parse(sbArgs["viewers"].ToString());
@@ -196,24 +196,24 @@ namespace StreamUP {
                     break;
                 case EventType.TwitchShoutoutCreated:
                     triggerData.Receiver = sbArgs["targetUserDisplayName"].ToString();
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 3, productSettings);
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.targetUserId, productSettings);
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     break;
                 case EventType.TwitchUserBanned:
                     triggerData.BanType = sbArgs["reason"].ToString();
                     triggerData.Receiver = sbArgs["user"].ToString();
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     triggerData.User = sbArgs["createdByDisplayName"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 2, productSettings);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.createdById, productSettings);
                     break;
                 case EventType.TwitchUserTimedOut:
                     triggerData.BanDuration = int.Parse(sbArgs["duration"].ToString());
                     triggerData.BanType = sbArgs["reason"].ToString();
                     triggerData.Receiver = sbArgs["user"].ToString();
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     triggerData.User = sbArgs["createdByDisplayName"].ToString();
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 2, productSettings);
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.createdById, productSettings);
                     break;
                 case EventType.TwitchWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -355,7 +355,7 @@ namespace StreamUP {
             return userImage;
         }               
 
-        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, int userType, Dictionary<string, object> productSettings)
+        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, TwitchProfilePictureUserType userType, Dictionary<string, object> productSettings)
         {
             string logName = $"{productNumber}::SUSBGetTwitchProfilePicture";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -380,24 +380,7 @@ namespace StreamUP {
                 CPH.SUWriteLog("ProfilePictureSize not set. Using default size: 300");
             }
 
-            // Get profile picture
-            string userCheck = "";
-            switch (userType)
-            {
-                case 0:
-                    userCheck = "userId";
-                    break;
-                case 1:
-                    userCheck = "recipientId";
-                    break;
-                case 2:
-                    userCheck = "createdById";
-                    break;
-                case 3:
-                    userCheck = "targetUserId";
-                break;
-            }
-            var userInfo = CPH.TwitchGetExtendedUserInfoById(sbArgs[$"{userCheck}"].ToString());
+            var userInfo = CPH.TwitchGetExtendedUserInfoById(sbArgs[$"{userType}"].ToString());
             string originalImage = userInfo.ProfileImageUrl;
             string basePattern = "300x300";
 
@@ -459,7 +442,6 @@ namespace StreamUP {
 
 
 
-
         // Queue system
         public static bool SUSBSaveTriggerQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
         {
@@ -510,6 +492,16 @@ namespace StreamUP {
 
 
     }
+
+    public enum TwitchProfilePictureUserType
+    {
+        userId = 0,   
+        recipientId = 1,
+        createdById = 2,
+        targetUserId = 3
+    }
+
+
     // SB events trigger data
     public class TriggerData 
     {
