@@ -233,29 +233,29 @@ namespace StreamUP {
         }
 
         // SET INPUT (SOURCE) VOLUME
-        public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, int volumeType, double volumeLevel)
+        public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, VolumeType volumeType, double volumeLevel)
         {
             string logName = $"{productNumber}::SUObsSetInputVolume";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             switch (volumeType)
             {
-                case 0:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[0 (Db)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
+                case VolumeType.Db:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection);
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}], inputType=[Db], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
-                case 1:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[1 (Multiplier)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
+                case VolumeType.Multiplier:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection);
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}], inputType=[Multiplier], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
                 default:
-                    CPH.SUWriteLog($"Cannot set obs inputVolume. Please make sure the type is either [0](Db) or [1](Multiplier). You set this to [{volumeType}]", logName);
+                    CPH.SUWriteLog($"Invalid volume type [{volumeType}]. Please use Db or Multiplier.", logName);
                     CPH.SUWriteLog("METHOD FAILED", logName);
-                    break;
+                    return;
             }
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
-    
+
         // GET SCENE ITEM LIST
         public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
         {
@@ -718,5 +718,11 @@ namespace StreamUP {
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
+    }
+
+    public enum VolumeType
+    {
+        Db = 0,        // Decibels
+        Multiplier = 1 // Multiplicative factor
     }
 }
