@@ -129,7 +129,7 @@ namespace StreamUP {
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                     }
-                    
+
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
@@ -162,7 +162,22 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFollow:
-                    triggerData.User = sbArgs["user"].ToString();
+                    if (productSettings.ContainsKey("AnonymousFollow"))
+                    {
+                        if ((bool)productSettings["AnonymousFollow"])
+                        {
+                            triggerData.User = productSettings["AnonymousFollowName"].ToString();
+                        }
+                        else
+                        {
+                            triggerData.User = sbArgs["user"].ToString();
+                        }
+                    }
+                    else
+                    {
+                        triggerData.User = sbArgs["user"].ToString();
+                    }
+
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchGiftBomb:
