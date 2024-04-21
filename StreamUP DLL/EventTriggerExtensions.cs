@@ -58,10 +58,13 @@ namespace StreamUP {
                     triggerData.User = sbArgs["username"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
-                    amount = decimal.Parse(sbArgs["amount"].ToString());
-                    currency = sbArgs["currency"].ToString();
-                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
-                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        amount = decimal.Parse(sbArgs["amount"].ToString());
+                        currency = sbArgs["currency"].ToString();
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    }
 
                     defaultDonationImageUrl = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
@@ -71,10 +74,13 @@ namespace StreamUP {
                     triggerData.User = sbArgs["from"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
-                    amount = decimal.Parse(sbArgs["amount"].ToString());
-                    currency = sbArgs["currency"].ToString();
-                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
-                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                        amount = decimal.Parse(sbArgs["amount"].ToString());
+                        currency = sbArgs["currency"].ToString();
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    }
 
                     defaultDonationImageUrl = "https://wiki.streamer.bot/ko-fi_icon_rgb_rounded.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
@@ -84,10 +90,13 @@ namespace StreamUP {
                     triggerData.User = sbArgs["tipUsername"].ToString();
                     triggerData.Message = sbArgs["tipMessage"].ToString();
 
-                    amount = decimal.Parse(sbArgs["tipAmount"].ToString());
-                    currency = sbArgs["tipCurrency"].ToString();
-                    localCurrency = productSettings["LocalCurrencyCode"].ToString();         
-                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        amount = decimal.Parse(sbArgs["tipAmount"].ToString());
+                        currency = sbArgs["tipCurrency"].ToString();
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();         
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamelements.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
@@ -97,10 +106,13 @@ namespace StreamUP {
                     triggerData.User = sbArgs["donationFrom"].ToString();
                     triggerData.Message = sbArgs["donationMessage"].ToString();
 
-                    amount = decimal.Parse(sbArgs["donationAmount"].ToString());
-                    currency = sbArgs["donationCurrency"].ToString();
-                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
-                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        amount = decimal.Parse(sbArgs["donationAmount"].ToString());
+                        currency = sbArgs["donationCurrency"].ToString();
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamlabs.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
@@ -110,11 +122,14 @@ namespace StreamUP {
                     triggerData.User = sbArgs["username"].ToString();
                     triggerData.Message = sbArgs["message"].ToString();
 
-                    amount = decimal.Parse(sbArgs["amount"].ToString());
-                    currency = sbArgs["currency"].ToString();
-                    localCurrency = productSettings["LocalCurrencyCode"].ToString();
-                    triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
-
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        amount = decimal.Parse(sbArgs["amount"].ToString());
+                        currency = sbArgs["currency"].ToString();
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    }
+                    
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
