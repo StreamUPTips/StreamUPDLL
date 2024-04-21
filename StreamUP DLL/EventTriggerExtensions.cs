@@ -443,7 +443,7 @@ namespace StreamUP {
 
             CPH.SendMessage(message, botAccount);
             CPH.SendYouTubeMessage(message, botAccount);
-            CPH.SendTrovoMessage(message, botAccount);
+            //CPH.SendTrovoMessage(message, botAccount);
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
