@@ -20,6 +20,7 @@ namespace StreamUP {
     // - StreamUpSettingType.Action
     // - StreamUpSettingType.Boolean
     // - StreamUpSettingType.Colour
+    // - StreamUpSettingType.ColourHex
     // - StreamUpSettingType.Double
     // - StreamUpSettingType.Dropdown
     // - StreamUpSettingType.Heading
@@ -96,6 +97,9 @@ namespace StreamUP {
                     CPH.AddBoolSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Colour) {
+                    CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
+                }
+                else if (item.Type == StreamUpSettingType.ColourHex) {
                     CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
                 }
                 else if (item.Type == StreamUpSettingType.Double) {
@@ -451,11 +455,18 @@ namespace StreamUP {
             button.Text = "Pick a colour";
             button.AutoSize = true;
             button.Name = withSetting.Name;
+            button.Tag = withSetting.Type;            
 
             long currentValue = 0;
             if (settings != null && settings.ContainsKey(withSetting.Name))
             {
-                currentValue = long.Parse(settings[withSetting.Name].ToString());
+                var colorSetting = settings[withSetting.Name].ToString();
+                if (colorSetting.Contains("#")) {
+                    Color color = ColorTranslator.FromHtml(colorSetting);
+                    currentValue = ((long)color.A << 24) | ((long)color.B << 16) | ((long)color.G << 8) | color.R;
+                } else {
+                    currentValue = long.Parse(settings[withSetting.Name].ToString());
+                }
             }
             
             if (currentValue != 0) {
@@ -686,6 +697,11 @@ namespace StreamUP {
                             case CheckBox checkBox:
                                 value = checkBox.Checked;
                                 break;
+                            case Button button when control.Tag is StreamUpSettingType.ColourHex:
+                                Color buttonColor = button.BackColor;
+                                string colorHex = $"#{buttonColor.R.ToString("X2")}{buttonColor.G.ToString("X2")}{buttonColor.B.ToString("X2")}";
+                                value = colorHex;
+                                break;
                             case Button button:
                                 long colourValue = ((long)button.BackColor.A << 24) | ((long)button.BackColor.B << 16) | ((long)button.BackColor.G << 8) | button.BackColor.R;
                                 value = colourValue;
@@ -755,6 +771,7 @@ namespace StreamUP {
         Action,
         Boolean,
         Colour,
+        ColourHex,
         Double,
         Dropdown,
         Heading,
@@ -798,11 +815,13 @@ namespace StreamUP {
 
             return settings;
         }    
-        public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false, bool returnHex = false)
         {
+            var type = StreamUpSettingType.Colour;
+            if (returnHex) type = StreamUpSettingType.ColourHex;
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Colour, Default = defaultValue,}
+                new StreamUpSetting { Name = name, Description = description, Type = type, Default = defaultValue,}
             };
 
             if (addSpacer)
