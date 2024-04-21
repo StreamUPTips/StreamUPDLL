@@ -167,18 +167,20 @@ namespace StreamUP {
                         if ((bool)productSettings["AnonymousFollow"])
                         {
                             triggerData.User = productSettings["AnonymousFollowName"].ToString();
+                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
                         }
                         else
                         {
                             triggerData.User = sbArgs["user"].ToString();
+                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                         }
                     }
                     else
                     {
                         triggerData.User = sbArgs["user"].ToString();
+                        triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     }
 
-                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchGiftBomb:
                     triggerData.Amount = int.Parse(sbArgs["gifts"].ToString());
@@ -538,7 +540,8 @@ namespace StreamUP {
         userId = 0,   
         recipientId = 1,
         createdById = 2,
-        targetUserId = 3
+        targetUserId = 3,
+        broadcastUserId = 4
     }
 
 
