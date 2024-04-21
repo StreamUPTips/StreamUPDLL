@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 namespace StreamUP {
 
     public static class GenericExtensions {
-        public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
+        public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productNumber}::SUInitialiseObsProduct";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -40,7 +40,7 @@ namespace StreamUP {
             }
 
             // Deserialise productSettings into a Dictionary
-            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings"));
+            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}"));
             int obsConnection = Convert.ToInt32(productSettings["ObsConnection"]);
 
             // Check Obs is connected
@@ -165,7 +165,7 @@ namespace StreamUP {
             return productSettings;
         }
 
-        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
+        public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -179,16 +179,19 @@ namespace StreamUP {
             }
 
             // Check if there are any required fonts and that they are installed
-            CPH.SUWriteLog("Checking for any required system fonts...", logName);
-            if (requiredFonts.Count > 0)
+            if (requiredFonts != null)
             {
-                CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
-                CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+                CPH.SUWriteLog("Checking for any required system fonts...", logName);
+                if (requiredFonts.Count > 0)
+                {
+                    CPH.SUWriteLog("Required fonts found. Checking if user has them installed...", logName);
+                    CPH.SUValFontInstalled(requiredFonts, productInfo.ProductNumber);
+                }
             }
-            
+
             // Load settings menu
             CPH.SUWriteLog("Launching settings menu...", logName);
-            bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs);
+            bool? settingsSaved = CPH.SUExecuteSettingsMenu(productInfo, supSettingsList, sbArgs, settingsGlobalName);
             if (!settingsSaved.HasValue || settingsSaved == false)
             {
                 CPH.SUWriteLog("METHOD FAILED!", logName);
@@ -257,21 +260,17 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
-            CPH.SUWriteLog(url, logName);
 
             string rawJson;
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                 rawJson = client.DownloadString(url);
-                CPH.SUWriteLog(rawJson, logName);
             }
 
             JObject json = JObject.Parse(rawJson);
-            CPH.SUWriteLog(json.ToString(), logName);
 
             decimal exRate = (decimal)json[toCurrency][fromCurrency];
-            CPH.SUWriteLog($"exRate=[{exRate}]");
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return exRate;
@@ -289,6 +288,44 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return region != null ? region.CurrencySymbol : currencyCode;
         }      
+
+        public static long SUGetContrastingColour(this IInlineInvokeProxy CPH, long inputColour, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUGetContrastingColour";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            long a = (inputColour >> 24) & 0xFF;
+            long r = (inputColour >> 16) & 0xFF; 
+            long g = (inputColour >> 8) & 0xFF;  
+            long b = inputColour & 0xFF;         
+
+            // Convert RGB to YIQ:
+            double y = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            
+            if (y >= 0.5)
+            {
+                CPH.SUWriteLog("Returning black as contrasting colour", logName);
+                return 4278190080L;
+            }
+            else
+            {
+                CPH.SUWriteLog("Returning white as contrasting colour", logName);
+                return 4294967295L;
+            }
+        }
+
+        public static string SUGetRandomColour(this IInlineInvokeProxy CPH, string productNumber = "DLL")
+        {
+            Random random = new Random();            
+            int red = random.Next(256);
+            int green = random.Next(256);
+            int blue = random.Next(256);
+
+            // Convert RGB values to a hexadecimal string
+            string hexColor = $"#{red:X2}{green:X2}{blue:X2}";
+
+            return hexColor;
+        }
 
 
     }

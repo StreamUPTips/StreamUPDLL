@@ -19,6 +19,14 @@ namespace StreamUP {
             string logName = $"{productNumber}::SUValSBUpdateChecker";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
+            // Check if user has already been prompted for the update checker this launch
+            if (CPH.GetGlobalVar<bool>("sup000_UpdateCheckerPrompted", false))
+            {
+                CPH.SUWriteLog("Update checker has already been prompted this launch.", logName);
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return true;
+            } 
+
             // Check if Update checker action exists
             if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
             {
@@ -31,6 +39,7 @@ namespace StreamUP {
                 if (errorOutput == DialogResult.Yes) {
                     Process.Start("https://streamup.tips/product/update-checker");
                 }      
+                CPH.SetGlobalVar("sup000_UpdateCheckerPrompted", true, false);
             }  
             else
             {

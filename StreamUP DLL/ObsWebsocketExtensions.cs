@@ -29,7 +29,7 @@ namespace StreamUP {
         }
 
         // PULL SCENE ITEM TRANSFORM
-        public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource) {
+        public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {
             string logName = $"{productNumber}::SUObsGetSceneItemTransform";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
@@ -64,17 +64,17 @@ namespace StreamUP {
         }
 
         // PULL SCENE ITEM ID
-        public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource) {
+        public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {
             string logName = $"{productNumber}::SUObsGetSceneItemId";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Pull sceneItemLists (Group or Scene)
             string jsonResponse = "";
             switch (parentSourceType) {
-                case 0:
+                case OBSSceneType.Scene:
                     jsonResponse = CPH.ObsSendRaw("GetSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
                     break;
-                case 1:
+                case OBSSceneType.Group:
                     jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
                     break;
                 default:
@@ -233,29 +233,29 @@ namespace StreamUP {
         }
 
         // SET INPUT (SOURCE) VOLUME
-        public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, int volumeType, double volumeLevel)
+        public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, VolumeType volumeType, double volumeLevel)
         {
             string logName = $"{productNumber}::SUObsSetInputVolume";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             switch (volumeType)
             {
-                case 0:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[0 (Db)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
+                case VolumeType.Db:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeDb\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection);
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}], inputType=[Db], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
-                case 1:
-                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection); 
-                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}, inputType=[1 (Multiplier)], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
+                case VolumeType.Multiplier:
+                    CPH.ObsSendRaw("SetInputVolume", "{\"inputName\":\""+inputName+"\",\"inputVolumeMul\":"+volumeLevel.ToString(CultureInfo.InvariantCulture)+"}", obsConnection);
+                    CPH.SUWriteLog($"Set obs input volume: inputName=[{inputName}], inputType=[Multiplier], volumeLevel=[{volumeLevel.ToString(CultureInfo.InvariantCulture)}]", logName);
                     break;
                 default:
-                    CPH.SUWriteLog($"Cannot set obs inputVolume. Please make sure the type is either [0](Db) or [1](Multiplier). You set this to [{volumeType}]", logName);
+                    CPH.SUWriteLog($"Invalid volume type [{volumeType}]. Please use Db or Multiplier.", logName);
                     CPH.SUWriteLog("METHOD FAILED", logName);
-                    break;
+                    return;
             }
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
-    
+
         // GET SCENE ITEM LIST
         public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
         {
@@ -283,7 +283,7 @@ namespace StreamUP {
         }
 
         // GET SCENE ITEM NAMES
-        public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int sceneType, string sceneName, List<string> sceneItemNames)
+        public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productNumber, int obsConnection,  OBSSceneType sceneType, string sceneName, List<string> sceneItemNames)
         {
             string logName = $"{productNumber}::SUObsGetSceneItemNames";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -291,12 +291,12 @@ namespace StreamUP {
             JArray sceneItems = new JArray();
             switch (sceneType)
             {
-                case 0:
+                case OBSSceneType.Scene:
                     CPH.SUWriteLog("Getting scene item list...", logName);
                     sceneItems = CPH.SUObsGetSceneItemList(productNumber, obsConnection, sceneName);
                     CPH.SUWriteLog($"Created sceneItemList of sceneName [{sceneName}]", logName);
                     break;
-                case 1:
+                case OBSSceneType.Group:
                     CPH.SUWriteLog("Getting group scene item list", logName);
                     sceneItems = CPH.SUObsGetGroupSceneItemList(productNumber, obsConnection, sceneName);
                     CPH.SUWriteLog($"Created sceneItemList of sceneName (group) [{sceneName}]", logName);
@@ -318,7 +318,7 @@ namespace StreamUP {
                 {
                     // If the item is a group, recursively fetch its scene items
                     CPH.SUWriteLog($"Source is a group, getting sceneItemNames for that group: sourceName=[{sourceName}]", logName);
-                    CPH.SUObsGetSceneItemNames(productNumber, obsConnection, 1, sourceName, sceneItemNames);
+                    CPH.SUObsGetSceneItemNames(productNumber, obsConnection, OBSSceneType.Group, sourceName, sceneItemNames);
                 }
                 else
                 {
@@ -391,7 +391,7 @@ namespace StreamUP {
         }
     
         // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
-        public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
+        public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
             string logName = $"{productNumber}::SUObsSplitTextOnWidth";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -523,7 +523,7 @@ namespace StreamUP {
             return newMessage;
         }
 
-        private static List<string> SUObsSplitTextIntoLines(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int maxWidth, string message, int parentSourceType, string sceneName, string sourceName)
+        private static List<string> SUObsSplitTextIntoLines(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int maxWidth, string message, OBSSceneType parentSourceType, string sceneName, string sourceName)
         {
             string logName = $"{productNumber}::SUObsSplitTextIntoLines";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -579,11 +579,11 @@ namespace StreamUP {
         }
 
         // SET SCENE ITEM TRANSFORM
-        public static void SUObsSetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource, string transformSettings) 
+        public static void SUObsSetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource, string transformSettings) 
         {
             string logName = $"{productNumber}::SUObsSetSceneItemTransform";
             CPH.SUWriteLog("METHOD STARTED!", logName);
-
+            
             // Pull sceneItemId
             CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
             CPH.SUWriteLog("Getting scene item id...", logName);
@@ -611,7 +611,7 @@ namespace StreamUP {
         }
     
         // SET SCENE ITEM ENABLED
-        public static void SUObsSetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource, bool visibilityState)
+        public static void SUObsSetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource, bool visibilityState)
         {
             string logName = $"{productNumber}::SUObsSetSceneItemEnabled";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -627,7 +627,7 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
     
-        public static bool SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, int parentSourceType, string parentSource, string childSource)
+        public static bool SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
         {
             string logName = $"{productNumber}::SUObsGetSceneItemEnabled";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -718,5 +718,17 @@ namespace StreamUP {
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
+    }
+
+    public enum VolumeType
+    {
+        Db = 0,        // Decibels
+        Multiplier = 1 // Multiplicative factor
+    }
+
+    public enum OBSSceneType
+    {
+        Scene = 0,
+        Group = 1
     }
 }
