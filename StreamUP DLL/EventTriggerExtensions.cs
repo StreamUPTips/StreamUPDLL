@@ -436,7 +436,17 @@ namespace StreamUP {
             return outputMessage;
         }
 
+        public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount)
+        {
+            string logName = $"{productInfo.ProductNumber}::SUSBSendMessage";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
+            CPH.SendMessage(message, botAccount);
+            CPH.SendYouTubeMessage(message, botAccount);
+            CPH.SendTrovoMessage(message, botAccount);
+            
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        }
 
 
 
