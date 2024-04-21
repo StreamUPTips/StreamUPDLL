@@ -41,7 +41,8 @@ namespace StreamUP {
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
-            CPH.SUUIShowSettingsLoadingMessage("Please wait while the settings menu loads...", "StreamUP Settings Loading...");
+            UIResources.closeLoadingWindow = false;            
+            CPH.SUUIShowSettingsLoadingMessage("StreamUP Settings Loading...");
 
             Dictionary<string, object> productSettings = null;
             string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
