@@ -42,6 +42,11 @@ namespace StreamUP {
             return result;
         }
 
+        public static void SUUIShowToastMessage(this IInlineInvokeProxy CPH, string title, string message)
+        {
+            CPH.ShowToastNotification(title, message);
+        }
+
         public static void SUUIShowSettingsLoadingMessage(this IInlineInvokeProxy CPH, string title)
         {
             Thread thread = new Thread(() =>
