@@ -42,7 +42,7 @@ namespace StreamUP {
             return result;
         }
 
-        public static void SUUIShowToastMessage(this IInlineInvokeProxy CPH, string title, string message)
+        public static void SUUIShowToastNotification(this IInlineInvokeProxy CPH, string title, string message)
         {
             CPH.ShowToastNotification(title, message);
         }
