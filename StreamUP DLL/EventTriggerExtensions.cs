@@ -13,7 +13,7 @@ namespace StreamUP {
     public static class EventTriggerExtensions 
     {
         // Process SB events
-        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings) 
+        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings, string settingsGlobalName = "ProductSettings") 
         {
             string logName = $"{productInfo.ProductNumber}::SUSBProcessEvent";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -29,6 +29,15 @@ namespace StreamUP {
             string triggerType = CPH.GetEventType().ToString();
             triggerData.EventType = triggerType;
             
+            // Try load other product settings
+            string otherSettingsLoad = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}", true);
+            Dictionary<string, object> otherSettingsDict = null;
+            if (!string.IsNullOrEmpty(otherSettingsLoad) || otherSettingsLoad != "null")
+            {
+                otherSettingsDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(otherSettingsLoad);
+            }
+
+
             CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
             switch (CPH.GetEventType())
@@ -162,11 +171,16 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFollow:
-                    if (productSettings.ContainsKey("AnonymousFollow"))
+                    if (productSettings.ContainsKey("AnonymousFollow") || otherSettingsDict.ContainsKey("AnonymousFollow"))
                     {
                         if ((bool)productSettings["AnonymousFollow"])
                         {
                             triggerData.User = productSettings["AnonymousFollowName"].ToString();
+                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
+                        }
+                        else if ((bool)otherSettingsDict["AnonymousFollow"])
+                        {
+                            triggerData.User = otherSettingsDict["AnonymousFollowName"].ToString();
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
                         }
                         else

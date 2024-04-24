@@ -46,7 +46,7 @@ namespace StreamUP {
             CPH.SUUIShowSettingsLoadingMessage("StreamUP Settings Loading...");
 
             Dictionary<string, object> productSettings = null;
-            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
+            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}", true);
             if (!string.IsNullOrEmpty(productSettingsJson))
             {
                 productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(productSettingsJson);
