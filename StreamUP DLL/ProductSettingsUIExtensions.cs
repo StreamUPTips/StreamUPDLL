@@ -42,7 +42,8 @@ namespace StreamUP {
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
-            UIResources.closeLoadingWindow = false;            
+            UIResources.closeLoadingWindow = false; 
+            UIResources.streamUpSettingsCount = streamUpSettings.Count;
             CPH.SUUIShowSettingsLoadingMessage("StreamUP Settings Loading...");
 
             Dictionary<string, object> productSettings = null;
@@ -116,6 +117,7 @@ namespace StreamUP {
 
                 // Now add settings to the table
                 CPH.AddSettingToTable(tabPages[tabName], setting, sbActions, productSettings, ref rowIndex);
+                UIResources.streamUpSettingsProgress += 1;
             }
 
             CPH.AddButtonControls(tabPages["General"], withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
@@ -129,6 +131,8 @@ namespace StreamUP {
             UIResources.closeLoadingWindow = true;
 
             settingsForm.ShowDialog();
+            UIResources.streamUpSettingsProgress = 0;
+            UIResources.streamUpSettingsCount = 0;
             CPH.SUWriteLog("Settings menu loaded.", logName);
 
             return savePressed;
