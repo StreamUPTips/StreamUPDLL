@@ -171,16 +171,11 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFollow:
-                    if (productSettings.ContainsKey("AnonymousFollow") || otherSettingsDict.ContainsKey("AnonymousFollow"))
+                    if (productSettings.ContainsKey("TwitchFollowAnonymous"))
                     {
-                        if ((bool)productSettings["AnonymousFollow"])
+                        if (bool.Parse(productSettings["TwitchFollowAnonymous"].ToString()))
                         {
-                            triggerData.User = productSettings["AnonymousFollowName"].ToString();
-                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
-                        }
-                        else if ((bool)otherSettingsDict["AnonymousFollow"])
-                        {
-                            triggerData.User = otherSettingsDict["AnonymousFollowName"].ToString();
+                            triggerData.User = productSettings["TwitchFollowAnonymousName"].ToString();
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
                         }
                         else
@@ -371,16 +366,17 @@ namespace StreamUP {
                 .Replace("%tier%", triggerData.Tier)
                 .Replace("%amount%", triggerData.Amount.ToString())
                 .Replace("%amountCurrency%", triggerData.AmountCurrency)
-                .Replace("%banType%", triggerData.BanType.ToString())
+                .Replace("%banType%", triggerData.BanType)
                 .Replace("%duration%", triggerData.BanDuration.ToString())
                 .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
                 .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
                 .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
-                .Replace("%reason%", triggerData.BanType.ToString())
+                .Replace("%reason%", triggerData.BanType)
                 .Replace("%receiver%", triggerData.Receiver)
                 .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
                 triggerData.AlertMessage = builder.ToString();
+                
             }
             else
             {
@@ -562,26 +558,26 @@ namespace StreamUP {
     // SB events trigger data
     public class TriggerData 
     {
-        public string AlertMessage { get; set; }
-        public int Amount { get; set; }
-        public string AmountCurrency { get; set; }
-        public bool Anonymous { get; set; }
-        public int BanDuration { get; set; }
-        public string BanType { get; set; }
-        public bool Donation { get; set; }
-        public string EventSource { get; set; }
-        public string EventType { get; set; }
-        public string Message { get; set; }
-        public int MonthsGifted { get; set; }
-        public int MonthsStreak { get; set; }
-        public int MonthsTotal { get; set; }
-        public string Receiver { get; set; }
-        public string ReceiverImage { get; set; }
-        public string Tier { get; set; }
-        public int TotalAmount { get; set; }
-        public string User { get; set; }
-        public string UserImage { get; set; }
-        public string UserSource { get; set; }
+        public string AlertMessage { get; set; } = null;
+        public int Amount { get; set; } = 0;
+        public string AmountCurrency { get; set; } = null;
+        public bool Anonymous { get; set; } = false;
+        public int BanDuration { get; set; } = 0;
+        public string BanType { get; set; } = null;
+        public bool Donation { get; set; } = false;
+        public string EventSource { get; set; } = null;
+        public string EventType { get; set; } = null;
+        public string Message { get; set; } = null;
+        public int MonthsGifted { get; set; } = 0;
+        public int MonthsStreak { get; set; } = 0;
+        public int MonthsTotal { get; set; } = 0;
+        public string Receiver { get; set; } = null;
+        public string ReceiverImage { get; set; } = null;
+        public string Tier { get; set; } = null;
+        public int TotalAmount { get; set; } = 0;
+        public string User { get; set; } = null;
+        public string UserImage { get; set; } = null;
+        public string UserSource { get; set; } = null;
     }
 }
 
