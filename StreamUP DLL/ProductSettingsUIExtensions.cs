@@ -120,12 +120,20 @@ namespace StreamUP {
                 UIResources.streamUpSettingsProgress += 1;
             }
 
-            CPH.AddButtonControls(tabPages["General"], withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
+            // Add Save, Reset, Cancel buttons
+            Panel buttonPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 40
+            };
+
+            CPH.AddButtonControls(buttonPanel, withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
 
             var statusBar = new StatusStrip();
             var statusLabel = new ToolStripStatusLabel();
             statusLabel.Text = "© StreamUP";
             statusBar.Items.Add(statusLabel);
+            settingsForm.Controls.Add(buttonPanel);
             settingsForm.Controls.Add(statusBar);
             
             UIResources.closeLoadingWindow = true;
@@ -648,7 +656,7 @@ namespace StreamUP {
             toTable.Controls.Add(input, 1, atIndex);
         }
 
-        private static void AddButtonControls(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName, TabControl tabControl)
+        private static void AddButtonControls(this IInlineInvokeProxy CPH, Panel buttonPanel, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName, TabControl tabControl)
         {
             var resetButton = new Button
             {
@@ -703,7 +711,7 @@ namespace StreamUP {
                     CPH.RunAction(sbArgs["actionName"].ToString(), false);
                 }
             };
-            
+
             var saveButton = new Button();
             saveButton.Font = new Font("Segoe UI Emoji", 10);
             saveButton.Text = "💾 Save";
@@ -780,16 +788,28 @@ namespace StreamUP {
                 withParent.Close();
             };
 
-            TableLayoutPanel innerTableLayoutPanel = new TableLayoutPanel();
-            innerTableLayoutPanel.ColumnCount = 2; // Adjust the number of columns as needed
-            innerTableLayoutPanel.RowCount = 1;
-            innerTableLayoutPanel.Dock = DockStyle.Fill;
+            var cancelButton = new Button();
+            cancelButton.Font = new Font("Segoe UI Emoji", 10);
+            cancelButton.Text = "❌ Cancel";
+            cancelButton.BackColor = Color.LightGray;
+            cancelButton.Click += (sender, e) => {
+                savePressed = false;
+                withParent.Close();
+            };
 
-            toTable.Controls.Add(innerTableLayoutPanel, 0, atIndex);
-            toTable.SetColumnSpan(innerTableLayoutPanel, 2);
+            cancelButton.Width = 100;
+            resetButton.Width = 100;
+            saveButton.Width = 100;
 
-            innerTableLayoutPanel.Controls.Add(resetButton, 0, 0);
-            innerTableLayoutPanel.Controls.Add(saveButton, 1, 0);
+            resetButton.Dock = DockStyle.Left;
+
+            saveButton.Dock = DockStyle.Right;
+            buttonPanel.Controls.Add(saveButton); 
+
+            cancelButton.Dock = DockStyle.Right;
+            buttonPanel.Controls.Add(cancelButton); 
+
+            buttonPanel.Controls.Add(resetButton);
         }
     }
     public class StreamUpSetting
