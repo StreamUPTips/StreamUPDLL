@@ -354,6 +354,11 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string triggerType = CPH.GetEventType().ToString();
+            if (triggerData.Donation)
+            {
+                triggerType = "Donation";
+            }
+            
             string eventTypeKey = triggerType + "AlertMessage";
             if (productSettings.TryGetValue(eventTypeKey, out object value))
             {
@@ -473,6 +478,7 @@ namespace StreamUP {
             .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
             string outputMessage = builder.ToString();
+            triggerData.AlertMessage = outputMessage;
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return outputMessage;
