@@ -332,47 +332,40 @@ namespace StreamUP {
         }    
 
         // AUTOSIZE ADVANCED MASK
-        public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
+        public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, Dictionary<string, object> productSettings, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
         {
             string logName = $"{productNumber}::SUObsAutosizeAdvancedMask";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
-            CPH.SUWriteLog($"Pulled product scaleFactor: scaleFactor=[{scaleFactor}]", logName);
-
-            double newHeight = sourceHeight + (padHeight * scaleFactor);
-            double newWidth = sourceWidth + (padWidth * scaleFactor);
+            double newHeight = sourceHeight + (padHeight * double.Parse(productSettings["ScaleFactor"].ToString()));
+            double newWidth = sourceWidth + (padWidth * double.Parse(productSettings["ScaleFactor"].ToString()));
             CPH.SUWriteLog($"Pulled size to change Advanced Mask: newHeight=[{newHeight}], newWidth=[{newWidth}]", logName);
 
             CPH.SUWriteLog("Setting source filter settings...", logName);
-            CPH.SUObsSetSourceFilterSettings(productNumber, obsConnection, sourceName, filterName, $"rectangle_width: {newWidth.ToString()}, rectangle_height: {newHeight}");
+            CPH.SUObsSetSourceFilterSettings(productNumber, int.Parse(productSettings["ObsConnection"].ToString()), sourceName, filterName, $"rectangle_width: {newWidth.ToString()}, rectangle_height: {newHeight}");
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
-        public static void SUObsAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, int padX, int padY)
+        public static void SUObsAutoposAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, Dictionary<string, object> productSettings, string sourceName, string filterName, int padX, int padY)
         {
             string logName = $"{productNumber}::SUObsAutoposAdvancedMask";
             CPH.SUWriteLog("METHOD STARTED!", logName);
     
             // Pull advanced mask
             CPH.SUWriteLog("Getting source filter...", logName);
-            JObject amFilter = CPH.SUObsGetSourceFilter(productNumber, obsConnection, sourceName, filterName);
+            JObject amFilter = CPH.SUObsGetSourceFilter(productNumber, int.Parse(productSettings["ObsConnection"].ToString()), sourceName, filterName);
             JObject filterSettings = (JObject)amFilter["filterSettings"];
             double amHeight = (double)filterSettings["rectangle_height"];
             double amWidth = (double)filterSettings["rectangle_width"];
             CPH.SUWriteLog($"Pulled size of Advanced Mask: amHeight=[{amHeight}], amWidth=[{amWidth}]", logName);
-            
-            // Pull canvas scaleFactor
-            double scaleFactor = CPH.GetGlobalVar<double>($"{productNumber}_ScaleFactor", true);
-            CPH.SUWriteLog($"Pulled product scaleFactor: scaleFactor=[{scaleFactor}]", logName);
-            
-            double xPos = (amWidth / 2) + (padX * scaleFactor);
-            double yPos = (amHeight / 2) + (padY * scaleFactor);
+                        
+            double xPos = (amWidth / 2) + (padX * double.Parse(productSettings["ScaleFactor"].ToString()));
+            double yPos = (amHeight / 2) + (padY * double.Parse(productSettings["ScaleFactor"].ToString()));
             CPH.SUWriteLog($"Worked out new positions for Advanced Mask: xPos=[{xPos}], yPos=[{yPos}]", logName);
 
             CPH.SUWriteLog("Setting source filter...", logName);
-            CPH.SUObsSetSourceFilterSettings(productNumber, obsConnection, sourceName, filterName, $"position_x: {xPos.ToString(CultureInfo.InvariantCulture)}, position_y: {yPos.ToString(CultureInfo.InvariantCulture)}");
+            CPH.SUObsSetSourceFilterSettings(productNumber, int.Parse(productSettings["ObsConnection"].ToString()), sourceName, filterName, $"position_x: {xPos.ToString(CultureInfo.InvariantCulture)}, position_y: {yPos.ToString(CultureInfo.InvariantCulture)}");
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }

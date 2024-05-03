@@ -13,6 +13,43 @@ using Newtonsoft.Json;
 namespace StreamUP {
 
     public static class GenericExtensions {
+
+        public static bool SUInitialiseGeneralProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
+        {
+            string logName = $"{productNumber}::SUInitialiseGeneralProduct";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            if (CPH.GetGlobalVar<bool>($"{productNumber}_ProductInitialised", false))
+            {
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return true;
+            }
+
+            // Check ProductInfo is loaded
+            ProductInfo productInfo = CPH.SUValProductInfoLoaded(actionName, productNumber);
+            if (productInfo == null)
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Check ProductSettings is loaded
+            if (!CPH.SUValProductSettingsLoaded(productInfo))
+            {
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
+            }
+
+            // Deserialise productSettings into a Dictionary
+            Dictionary<string, object> productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}"));
+
+            // Mark product as initialised
+            CPH.SetGlobalVar($"{productInfo.ProductNumber}_ProductInitialised", true, false);
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
         public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productNumber}::SUInitialiseObsProduct";

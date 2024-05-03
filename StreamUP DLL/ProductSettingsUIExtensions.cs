@@ -42,11 +42,12 @@ namespace StreamUP {
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
-            UIResources.closeLoadingWindow = false;            
+            UIResources.closeLoadingWindow = false; 
+            UIResources.streamUpSettingsCount = streamUpSettings.Count;
             CPH.SUUIShowSettingsLoadingMessage("StreamUP Settings Loading...");
 
             Dictionary<string, object> productSettings = null;
-            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_ProductSettings", true);
+            string productSettingsJson = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}", true);
             if (!string.IsNullOrEmpty(productSettingsJson))
             {
                 productSettings = JsonConvert.DeserializeObject<Dictionary<string, object>>(productSettingsJson);
@@ -63,98 +64,139 @@ namespace StreamUP {
                 }
             }
 
-            var settingsForm = new Form();
-            settingsForm.Text = $"StreamUP | {productInfo.ProductName}";
-            settingsForm.Width = 540;
-            settingsForm.Height = 720;
-            settingsForm.FormBorderStyle = FormBorderStyle.Fixed3D;
-            settingsForm.MaximizeBox = false;
-            settingsForm.MinimizeBox = false;
+            var settingsForm = new Form {
+                Text = $"StreamUP | {productInfo.ProductName}",
+                Width = 540,
+                Height = 720,
+                FormBorderStyle = FormBorderStyle.Fixed3D,
+                MaximizeBox = false,
+                MinimizeBox = false
+            };            
+            
             byte[] bytes = Convert.FromBase64String(UIResources.supIconString);
             using var ms = new MemoryStream(bytes);
             settingsForm.Icon = new Icon(ms);
+
+            var tabControl = new TabControl {
+                Dock = DockStyle.Fill
+            };
+            settingsForm.Controls.Add(tabControl);
+            Dictionary<string, TableLayoutPanel> tabPages = new Dictionary<string, TableLayoutPanel>();            
+            
             var description = new Label();
             description.Text = $"Please provide your preferred settings for {productInfo.ProductName} using the controls below.";
             description.MaximumSize = new System.Drawing.Size(498, 0);
             description.AutoSize = true;
             description.Dock = DockStyle.Fill;
             description.Padding = new Padding(0, 4, 0, 0);
-            var settingsTable = new TableLayoutPanel();
-            settingsTable.Dock = DockStyle.Fill;
-            settingsTable.ColumnCount = 2;
-            settingsTable.AutoScroll = true;
-            settingsTable.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            settingsTable.Controls.Add(description);
-            settingsTable.SetColumnSpan(description, 2);
+            settingsForm.Controls.Add(description);
 
-            for (int i = 0; i < streamUpSettings.Count; i++) {
-                StreamUpSetting item = streamUpSettings[i];
+            int rowIndex = 0;
+            foreach (var setting in streamUpSettings)
+            {
+                string tabName = setting.TabName ?? "General";
 
-                if (item.Type == StreamUpSettingType.Action) {
-                    CPH.AddActionSetting(toTable: settingsTable, withSetting: item, withActions: sbActions, atIndex: i, productSettings);
+                if (!tabPages.ContainsKey(tabName))
+                {
+                    var tabPage = new TabPage(tabName);
+                    var settingsTable = new TableLayoutPanel
+                    {
+                        Dock = DockStyle.Fill,
+                        ColumnCount = 2,
+                        AutoScroll = true,
+                        AutoSizeMode = AutoSizeMode.GrowAndShrink
+                    };
+
+                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));     
+                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
+                    tabPage.Controls.Add(settingsTable);
+                    tabControl.Controls.Add(tabPage);
+                    tabPages[tabName] = settingsTable;
                 }
-                else if (item.Type == StreamUpSettingType.Boolean) {
-                    CPH.AddBoolSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Colour) {
-                    CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.ColourHex) {
-                    CPH.AddColorSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Double) {
-                    CPH.AddDoubleSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Dropdown) {
-                    CPH.AddDropdownSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Heading) {
-                    CPH.AddHeadingSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Integer) {
-                    CPH.AddIntSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Label) {
-                    CPH.AddLabelSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Reward) {
-                    CPH.AddRewardSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Ruler) {
-                    CPH.AddRulerSettings(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Secret) {
-                    CPH.AddSecretSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.Spacer) {
-                    CPH.AddSpacerSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
-                else if (item.Type == StreamUpSettingType.String) {
-                    CPH.AddStringSetting(toTable: settingsTable, withSetting: item, atIndex: i, productSettings);
-                }
+
+                // Now add settings to the table
+                CPH.AddSettingToTable(tabPages[tabName], setting, sbActions, productSettings, ref rowIndex);
+                UIResources.streamUpSettingsProgress += 1;
             }
 
-            CPH.AddButtonControls(toTable: settingsTable, withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName);
+            // Add Save, Reset, Cancel buttons
+            Panel buttonPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 40
+            };
 
-            settingsTable.AutoScroll = false;
-            settingsTable.HorizontalScroll.Enabled = false;
-            settingsTable.AutoScroll = true;
+            CPH.AddButtonControls(buttonPanel, withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
 
-            settingsForm.Controls.Add(settingsTable);
             var statusBar = new StatusStrip();
             var statusLabel = new ToolStripStatusLabel();
             statusLabel.Text = "© StreamUP";
             statusBar.Items.Add(statusLabel);
+            settingsForm.Controls.Add(buttonPanel);
             settingsForm.Controls.Add(statusBar);
             
             UIResources.closeLoadingWindow = true;
 
             settingsForm.ShowDialog();
+            UIResources.streamUpSettingsProgress = 0;
+            UIResources.streamUpSettingsCount = 0;
             CPH.SUWriteLog("Settings menu loaded.", logName);
 
             return savePressed;
         }
         
+        private static void AddSettingToTable(this IInlineInvokeProxy CPH, TableLayoutPanel table, StreamUpSetting setting, List<string> actions, Dictionary<string, object> settings, ref int rowIndex)
+        {
+            switch (setting.Type)
+            {   
+                case StreamUpSettingType.Action:
+                    CPH.AddActionSetting(toTable: table, withSetting: setting, withActions: actions, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Boolean:
+                    CPH.AddBoolSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Colour:
+                    CPH.AddColorSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.ColourHex:
+                    CPH.AddColorSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Double:
+                    CPH.AddDoubleSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Dropdown:
+                    CPH.AddDropdownSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Heading:
+                    CPH.AddHeadingSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Integer:
+                    CPH.AddIntSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Label:
+                    CPH.AddLabelSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Reward:
+                    CPH.AddRewardSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Ruler:
+                    CPH.AddRulerSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Secret:
+                    CPH.AddSecretSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Spacer:
+                    CPH.AddSpacerSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.String:
+                    CPH.AddStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+            }
+            rowIndex++;
+        }
+
+
         private static List<string> GetSBActions(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs)
         {
             ClientWebSocket ws = new ClientWebSocket();
@@ -218,7 +260,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
 
             var dropdown = new ComboBox();
             dropdown.Name = withSetting.Name;
@@ -247,7 +289,7 @@ namespace StreamUP {
                 }
             };
 
-            toTable.Controls.Add(dropdown, 1, atIndex + 1);
+            toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
         private static void AddRewardSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -268,7 +310,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
 
             var dropdown = new ComboBox();
             dropdown.Name = withSetting.Name;
@@ -301,7 +343,7 @@ namespace StreamUP {
                 }
             };
 
-            toTable.Controls.Add(dropdown, 1, atIndex + 1);
+            toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
         private static void AddDropdownSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -311,7 +353,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
 
             var dropdown = new ComboBox();
             dropdown.Name = withSetting.Name;
@@ -345,7 +387,7 @@ namespace StreamUP {
                 }
             };
 
-            toTable.Controls.Add(dropdown, 1, atIndex + 1);
+            toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
         private static void SetComboBoxWidth(ComboBox cb, int minWidth = 120, int maxWidth = 245)
@@ -373,7 +415,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
 
             var textbox = new TextBox();
             textbox.Name = withSetting.Name;
@@ -394,16 +436,16 @@ namespace StreamUP {
                 textbox.Text = withSetting.Default;
             }
 
-            toTable.Controls.Add(textbox, 1, atIndex + 1);
+            toTable.Controls.Add(textbox, 1, atIndex);
         }
 
         private static void AddSpacerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
-            toTable.Controls.Add(new Label(), 0, atIndex + 1);
-            toTable.Controls.Add(new Label(), 1, atIndex + 1);
+            toTable.Controls.Add(new Label(), 0, atIndex);
+            toTable.Controls.Add(new Label(), 1, atIndex);
         }
 
-        private static void AddRulerSettings(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        private static void AddRulerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             Label rulerLabel = new Label();
             rulerLabel.BorderStyle = BorderStyle.Fixed3D;
@@ -411,7 +453,7 @@ namespace StreamUP {
             rulerLabel.Width = 496;
             rulerLabel.Margin = new Padding(10, 10, 10, 10);
 
-            toTable.Controls.Add(rulerLabel, 0, atIndex + 1);
+            toTable.Controls.Add(rulerLabel, 0, atIndex);
             toTable.SetColumnSpan(rulerLabel, 2);
         }
 
@@ -422,7 +464,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             var textbox = new TextBox();
             textbox.Name = withSetting.Name;
             textbox.Width = 240;
@@ -440,7 +482,7 @@ namespace StreamUP {
                 textbox.Text = withSetting.Default;
             }
 
-            toTable.Controls.Add(textbox, 1, atIndex + 1);
+            toTable.Controls.Add(textbox, 1, atIndex);
         }
 
         private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -450,7 +492,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 8, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(270, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             var button = new Button();
             button.Text = "Pick a colour";
             button.AutoSize = true;
@@ -493,7 +535,7 @@ namespace StreamUP {
                     button.BackColor = colorDialog.Color;
                 }
             };
-            toTable.Controls.Add(button, 1, atIndex + 1);
+            toTable.Controls.Add(button, 1, atIndex);
         }
 
         private static void AddBoolSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -503,7 +545,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             var checkbox = new CheckBox();
             checkbox.Name = withSetting.Name;
 
@@ -521,7 +563,7 @@ namespace StreamUP {
                 checkbox.Checked = hasCorrectDefault ? defaultValue : false;
             }
 
-            toTable.Controls.Add(checkbox, 1, atIndex + 1);
+            toTable.Controls.Add(checkbox, 1, atIndex);
         }
 
         private static void AddIntSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -531,7 +573,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             var input = new NumericUpDown();
             input.Minimum = int.MinValue;
             input.Maximum = int.MaxValue;
@@ -552,7 +594,7 @@ namespace StreamUP {
                 input.Value = hasCorrectDefault ? defaultValue : 0;
             }
 
-            toTable.Controls.Add(input, 1, atIndex + 1);
+            toTable.Controls.Add(input, 1, atIndex);
         }
 
         private static void AddLabelSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -563,7 +605,7 @@ namespace StreamUP {
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(498, 0);
 
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             toTable.SetColumnSpan(label, 2);
         }
 
@@ -576,7 +618,7 @@ namespace StreamUP {
             label.MaximumSize = new System.Drawing.Size(498, 0);
             label.Font = new Font(label.Font.FontFamily, label.Font.Size + 2, System.Drawing.FontStyle.Bold);
 
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
             toTable.SetColumnSpan(label, 2);
         }
 
@@ -587,7 +629,7 @@ namespace StreamUP {
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
-            toTable.Controls.Add(label, 0, atIndex + 1);
+            toTable.Controls.Add(label, 0, atIndex);
 
             var input = new NumericUpDown();
             input.Minimum = decimal.MinValue;
@@ -611,10 +653,10 @@ namespace StreamUP {
                 input.Value = hasCorrectDefault ? defaultValue : 0;
             }
 
-            toTable.Controls.Add(input, 1, atIndex + 1);
+            toTable.Controls.Add(input, 1, atIndex);
         }
 
-        private static void AddButtonControls(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName)
+        private static void AddButtonControls(this IInlineInvokeProxy CPH, Panel buttonPanel, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName, TabControl tabControl)
         {
             var resetButton = new Button
             {
@@ -669,7 +711,7 @@ namespace StreamUP {
                     CPH.RunAction(sbArgs["actionName"].ToString(), false);
                 }
             };
-            
+
             var saveButton = new Button();
             saveButton.Font = new Font("Segoe UI Emoji", 10);
             saveButton.Text = "💾 Save";
@@ -678,47 +720,52 @@ namespace StreamUP {
                 var twitchRewards = CPH.TwitchGetRewards();
                 Dictionary<string, object> settingsToSave = new Dictionary<string, object>();
                 
-                foreach (Control control in toTable.Controls) {
-                    if (!string.IsNullOrEmpty(control.Name)) {
-                        object value = null;
+                foreach (TabPage tabPage in tabControl.TabPages) {
+                    var tableLayout = tabPage.Controls.OfType<TableLayoutPanel>().FirstOrDefault();
 
-                        switch (control) {
-                            case ComboBox comboBox when control.Tag is StreamUpSettingType.Action:
-                                value = comboBox.SelectedItem?.ToString() ?? string.Empty;
-                                break;
-                            case ComboBox comboBox when control.Tag is StreamUpSettingType.Reward:
-                                var rewardTitle = comboBox.SelectedItem?.ToString();
-                                var rewardId = twitchRewards.FirstOrDefault(reward => reward.Title == rewardTitle)?.Id;
-                                value = rewardId ?? string.Empty;
-                                break;
-                            case ComboBox comboBox when control.Tag is StreamUpSettingType.Dropdown:
-                                value = comboBox.SelectedItem?.ToString() ?? string.Empty;
-                                break;
-                            case CheckBox checkBox:
-                                value = checkBox.Checked;
-                                break;
-                            case Button button when control.Tag is StreamUpSettingType.ColourHex:
-                                Color buttonColor = button.BackColor;
-                                string colorHex = $"#{buttonColor.R.ToString("X2")}{buttonColor.G.ToString("X2")}{buttonColor.B.ToString("X2")}";
-                                value = colorHex;
-                                break;
-                            case Button button:
-                                long colourValue = ((long)button.BackColor.A << 24) | ((long)button.BackColor.B << 16) | ((long)button.BackColor.G << 8) | button.BackColor.R;
-                                value = colourValue;
-                                break;
-                            case NumericUpDown numericUpDown when control.Tag is StreamUpSettingType.Integer:
-                                value = Convert.ToInt32(numericUpDown.Value);
-                                break;
-                            case NumericUpDown numericUpDown when control.Tag is StreamUpSettingType.Double:
-                                value = Convert.ToDouble(numericUpDown.Value);
-                                break;
-                            case TextBox textBox:
-                                value = textBox.Text;
-                                break;
-                        }
+                    if (tableLayout != null) {
+                        foreach (Control control in tableLayout.Controls)
+                        {                        
+                            object value = null;
 
-                        if (value != null) {
-                            settingsToSave[control.Name] = value;
+                            switch (control) {
+                                case ComboBox comboBox when control.Tag is StreamUpSettingType.Action:
+                                    value = comboBox.SelectedItem?.ToString() ?? string.Empty;
+                                    break;
+                                case ComboBox comboBox when control.Tag is StreamUpSettingType.Reward:
+                                    var rewardTitle = comboBox.SelectedItem?.ToString();
+                                    var rewardId = twitchRewards.FirstOrDefault(reward => reward.Title == rewardTitle)?.Id;
+                                    value = rewardId ?? string.Empty;
+                                    break;
+                                case ComboBox comboBox when control.Tag is StreamUpSettingType.Dropdown:
+                                    value = comboBox.SelectedItem?.ToString() ?? string.Empty;
+                                    break;
+                                case CheckBox checkBox:
+                                    value = checkBox.Checked;
+                                    break;
+                                case Button button when control.Tag is StreamUpSettingType.ColourHex:
+                                    Color buttonColor = button.BackColor;
+                                    string colorHex = $"#{buttonColor.R.ToString("X2")}{buttonColor.G.ToString("X2")}{buttonColor.B.ToString("X2")}";
+                                    value = colorHex;
+                                    break;
+                                case Button button:
+                                    long colourValue = ((long)button.BackColor.A << 24) | ((long)button.BackColor.B << 16) | ((long)button.BackColor.G << 8) | button.BackColor.R;
+                                    value = colourValue;
+                                    break;
+                                case NumericUpDown numericUpDown when control.Tag is StreamUpSettingType.Integer:
+                                    value = Convert.ToInt32(numericUpDown.Value);
+                                    break;
+                                case NumericUpDown numericUpDown when control.Tag is StreamUpSettingType.Double:
+                                    value = Convert.ToDouble(numericUpDown.Value);
+                                    break;
+                                case TextBox textBox:
+                                    value = textBox.Text;
+                                    break;
+                            }
+
+                            if (value != null) {
+                                settingsToSave[control.Name] = value;
+                            }
                         }
                     }
                 }
@@ -741,16 +788,28 @@ namespace StreamUP {
                 withParent.Close();
             };
 
-            TableLayoutPanel innerTableLayoutPanel = new TableLayoutPanel();
-            innerTableLayoutPanel.ColumnCount = 2; // Adjust the number of columns as needed
-            innerTableLayoutPanel.RowCount = 1;
-            innerTableLayoutPanel.Dock = DockStyle.Fill;
+            var cancelButton = new Button();
+            cancelButton.Font = new Font("Segoe UI Emoji", 10);
+            cancelButton.Text = "❌ Cancel";
+            cancelButton.BackColor = Color.LightGray;
+            cancelButton.Click += (sender, e) => {
+                savePressed = false;
+                withParent.Close();
+            };
 
-            toTable.Controls.Add(innerTableLayoutPanel, 0, atIndex + 1);
-            toTable.SetColumnSpan(innerTableLayoutPanel, 2);
+            cancelButton.Width = 100;
+            resetButton.Width = 100;
+            saveButton.Width = 100;
 
-            innerTableLayoutPanel.Controls.Add(resetButton, 0, 0);
-            innerTableLayoutPanel.Controls.Add(saveButton, 1, 0);
+            resetButton.Dock = DockStyle.Left;
+
+            saveButton.Dock = DockStyle.Right;
+            buttonPanel.Controls.Add(saveButton); 
+
+            cancelButton.Dock = DockStyle.Right;
+            buttonPanel.Controls.Add(cancelButton); 
+
+            buttonPanel.Controls.Add(resetButton);
         }
     }
     public class StreamUpSetting
@@ -764,6 +823,7 @@ namespace StreamUP {
         public string Default { get; set; }
 
         public object Data { get; set; }
+        public string TabName { get; set; }
     }
 
     public enum StreamUpSettingType
@@ -787,181 +847,181 @@ namespace StreamUP {
 
    public static class ProductSettingsBuilder
     {
-        public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Action, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Action, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateBoolean(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateBoolean(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Boolean, Default = defaultValue }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Boolean, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }    
-        public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false, bool returnHex = false)
+        public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false, bool returnHex = false)
         {
             var type = StreamUpSettingType.Colour;
             if (returnHex) type = StreamUpSettingType.ColourHex;
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = type, Default = defaultValue,}
+                new StreamUpSetting { Name = name, Description = description, Type = type, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateDouble(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateDouble(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Double, Default = defaultValue,}
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Double, Default = defaultValue, TabName = tabName,}
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateDropdown(this IInlineInvokeProxy CPH, string name, string description, string[] data, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateDropdown(this IInlineInvokeProxy CPH, string name, string description, string[] data, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Dropdown, Data = data, Default = defaultValue}
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Dropdown, Data = data, Default = defaultValue, TabName = tabName,}
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateHeading(this IInlineInvokeProxy CPH, string description, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateHeading(this IInlineInvokeProxy CPH, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading,}           
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading, TabName = tabName,}           
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateInteger(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateInteger(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, Default = defaultValue, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Integer, Default = defaultValue, TabName = tabName,}
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateLabel(this IInlineInvokeProxy CPH, string description, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateLabel(this IInlineInvokeProxy CPH, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Label, }
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Label, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Reward, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Reward, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateRuler(this IInlineInvokeProxy CPH, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateRuler(this IInlineInvokeProxy CPH, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting {Type = StreamUpSettingType.Ruler, }
+                new StreamUpSetting {Type = StreamUpSettingType.Ruler, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateSecret(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateSecret(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Secret, Default = defaultValue, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.Secret, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateSpacer(this IInlineInvokeProxy CPH)
+        public static List<StreamUpSetting> SUSettingsCreateSpacer(this IInlineInvokeProxy CPH, string tabName = "General")
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Type = StreamUpSettingType.Spacer, }
+                new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, }
             };
 
             return settings;
         }
-        public static List<StreamUpSetting> SUSettingsCreateString(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateString(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.String, Default = defaultValue, }
+                new StreamUpSetting { Name = name, Description = description, Type = StreamUpSettingType.String, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
             {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer });
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
             }
 
             return settings;

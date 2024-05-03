@@ -13,7 +13,7 @@ namespace StreamUP {
     public static class EventTriggerExtensions 
     {
         // Process SB events
-        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings) 
+        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings, string settingsGlobalName = "ProductSettings") 
         {
             string logName = $"{productInfo.ProductNumber}::SUSBProcessEvent";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -29,6 +29,15 @@ namespace StreamUP {
             string triggerType = CPH.GetEventType().ToString();
             triggerData.EventType = triggerType;
             
+            // Try load other product settings
+            string otherSettingsLoad = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}", true);
+            Dictionary<string, object> otherSettingsDict = null;
+            if (!string.IsNullOrEmpty(otherSettingsLoad) || otherSettingsLoad != "null")
+            {
+                otherSettingsDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(otherSettingsLoad);
+            }
+
+
             CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
             switch (CPH.GetEventType())
@@ -162,11 +171,11 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 case EventType.TwitchFollow:
-                    if (productSettings.ContainsKey("AnonymousFollow"))
+                    if (productSettings.ContainsKey("TwitchFollowAnonymous"))
                     {
-                        if ((bool)productSettings["AnonymousFollow"])
+                        if (bool.Parse(productSettings["TwitchFollowAnonymous"].ToString()))
                         {
-                            triggerData.User = productSettings["AnonymousFollowName"].ToString();
+                            triggerData.User = productSettings["TwitchFollowAnonymousName"].ToString();
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.broadcastUserId, productSettings);
                         }
                         else
@@ -345,6 +354,11 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string triggerType = CPH.GetEventType().ToString();
+            if (triggerData.Donation)
+            {
+                triggerType = "Donation";
+            }
+            
             string eventTypeKey = triggerType + "AlertMessage";
             if (productSettings.TryGetValue(eventTypeKey, out object value))
             {
@@ -357,16 +371,17 @@ namespace StreamUP {
                 .Replace("%tier%", triggerData.Tier)
                 .Replace("%amount%", triggerData.Amount.ToString())
                 .Replace("%amountCurrency%", triggerData.AmountCurrency)
-                .Replace("%banType%", triggerData.BanType.ToString())
+                .Replace("%banType%", triggerData.BanType)
                 .Replace("%duration%", triggerData.BanDuration.ToString())
                 .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
                 .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
                 .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
-                .Replace("%reason%", triggerData.BanType.ToString())
+                .Replace("%reason%", triggerData.BanType)
                 .Replace("%receiver%", triggerData.Receiver)
                 .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
                 triggerData.AlertMessage = builder.ToString();
+                
             }
             else
             {
@@ -463,6 +478,7 @@ namespace StreamUP {
             .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
             string outputMessage = builder.ToString();
+            triggerData.AlertMessage = outputMessage;
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return outputMessage;
@@ -548,26 +564,26 @@ namespace StreamUP {
     // SB events trigger data
     public class TriggerData 
     {
-        public string AlertMessage { get; set; }
-        public int Amount { get; set; }
-        public string AmountCurrency { get; set; }
-        public bool Anonymous { get; set; }
-        public int BanDuration { get; set; }
-        public string BanType { get; set; }
-        public bool Donation { get; set; }
-        public string EventSource { get; set; }
-        public string EventType { get; set; }
-        public string Message { get; set; }
-        public int MonthsGifted { get; set; }
-        public int MonthsStreak { get; set; }
-        public int MonthsTotal { get; set; }
-        public string Receiver { get; set; }
-        public string ReceiverImage { get; set; }
-        public string Tier { get; set; }
-        public int TotalAmount { get; set; }
-        public string User { get; set; }
-        public string UserImage { get; set; }
-        public string UserSource { get; set; }
+        public string AlertMessage { get; set; } = null;
+        public int Amount { get; set; } = 0;
+        public string AmountCurrency { get; set; } = null;
+        public bool Anonymous { get; set; } = false;
+        public int BanDuration { get; set; } = 0;
+        public string BanType { get; set; } = null;
+        public bool Donation { get; set; } = false;
+        public string EventSource { get; set; } = null;
+        public string EventType { get; set; } = null;
+        public string Message { get; set; } = null;
+        public int MonthsGifted { get; set; } = 0;
+        public int MonthsStreak { get; set; } = 0;
+        public int MonthsTotal { get; set; } = 0;
+        public string Receiver { get; set; } = null;
+        public string ReceiverImage { get; set; } = null;
+        public string Tier { get; set; } = null;
+        public int TotalAmount { get; set; } = 0;
+        public string User { get; set; } = null;
+        public string UserImage { get; set; } = null;
+        public string UserSource { get; set; } = null;
     }
 }
 
