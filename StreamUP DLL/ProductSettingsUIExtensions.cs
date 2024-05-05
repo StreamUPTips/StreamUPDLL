@@ -70,8 +70,9 @@ namespace StreamUP {
                 Height = 720,
                 FormBorderStyle = FormBorderStyle.Fixed3D,
                 MaximizeBox = false,
-                MinimizeBox = false
-            };            
+                MinimizeBox = true,
+                StartPosition = FormStartPosition.CenterParent                
+            };
             
             byte[] bytes = Convert.FromBase64String(UIResources.supIconString);
             using var ms = new MemoryStream(bytes);
@@ -129,7 +130,9 @@ namespace StreamUP {
 
             CPH.AddButtonControls(buttonPanel, withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
 
-            var statusBar = new StatusStrip();
+            var statusBar = new StatusStrip{
+                SizingGrip = false
+            };
             var statusLabel = new ToolStripStatusLabel();
             statusLabel.Text = "© StreamUP";
             statusBar.Items.Add(statusLabel);
@@ -137,7 +140,7 @@ namespace StreamUP {
             settingsForm.Controls.Add(statusBar);
             
             UIResources.closeLoadingWindow = true;
-
+            settingsForm.Focus();
             settingsForm.ShowDialog();
             UIResources.streamUpSettingsProgress = 0;
             UIResources.streamUpSettingsCount = 0;
