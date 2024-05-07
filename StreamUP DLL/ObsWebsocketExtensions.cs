@@ -711,6 +711,89 @@ namespace StreamUP {
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
+
+        // Get Bitrate
+        public static string SUObsGetBitrate(this IInlineInvokeProxy CPH, int obsConnection)
+        {
+            // Get Bitrate
+            JObject bitrateJson = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getBitrate\",\"requestData\":{}}", obsConnection));            
+            string bitrate;
+            JToken errorToken = bitrateJson.SelectToken("responseData.error");
+            if (errorToken != null)
+            {
+                bitrate = null;
+            }
+            else
+            {
+                bitrate = bitrateJson["responseData"]["kbits-per-sec"].ToString();
+            }        
+            
+            return bitrate;
+        }
+
+        // Get Source Show Transition
+        public static JObject SUObsGetShowTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
+        {
+            JObject json = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getShowTransition\",\"requestData\":{\"sceneName\":\""+sceneName+"\",\"sourceName\":\""+sourceName+"\"}}", obsConnection));
+            JObject transition = (JObject)json["responseData"];
+
+            return transition;
+        }
+
+        // Get Source Hide Transition
+        public static JObject SUObsGetHideTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
+        {
+            JObject json = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getHideTransition\",\"requestData\":{\"sceneName\":\""+sceneName+"\",\"sourceName\":\""+sourceName+"\"}}", obsConnection));
+            JObject transition = (JObject)json["responseData"];
+
+            return transition;
+        }
+
+        // Set Source Show Transition
+        public static void SUObsSetShowTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName, string transitionType, string transitionSettings, int transitionDuration) 
+        {
+            JObject requestData = new JObject
+            {
+                ["sceneName"] = sceneName,
+                ["sourceName"] = sourceName,
+                ["transitionType"] = transitionType,
+                ["transitionSettings"] = JObject.Parse(transitionSettings),
+                ["transitionDuration"] = transitionDuration
+            };
+
+            JObject request = new JObject
+            {
+                ["vendorName"] = "streamup",
+                ["requestType"] = "setShowTransition",
+                ["requestData"] = requestData
+            };
+
+            // Send the request
+            CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
+        }
+
+        // Set Source Hide Transition
+        public static void SUObsSetHideTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName, string transitionType, string transitionSettings, int transitionDuration) 
+        {
+            JObject requestData = new JObject
+            {
+                ["sceneName"] = sceneName,
+                ["sourceName"] = sourceName,
+                ["transitionType"] = transitionType,
+                ["transitionSettings"] = JObject.Parse(transitionSettings),
+                ["transitionDuration"] = transitionDuration
+            };
+
+            JObject request = new JObject
+            {
+                ["vendorName"] = "streamup",
+                ["requestType"] = "setHideTransition",
+                ["requestData"] = requestData
+            };
+
+            // Send the request
+            CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
+        }
     }
 
     public enum VolumeType
