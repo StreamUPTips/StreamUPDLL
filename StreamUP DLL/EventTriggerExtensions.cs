@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text;
+using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP {
 
@@ -42,6 +43,35 @@ namespace StreamUP {
 
             switch (CPH.GetEventType())
             {
+                // TEST
+                case EventType.Test:
+                    triggerData.AlertMessage = "This is a test trigger";
+                    triggerData.Amount = 69;
+                    triggerData.AmountCurrency = "£4.20";
+                    triggerData.Anonymous = false;
+                    triggerData.BanDuration = 69;
+                    triggerData.BanType = "You were too awesome";
+                    triggerData.Donation = false;
+                    triggerData.EventSource = "Test";
+                    triggerData.EventType = "Test";
+                    triggerData.Message = "This is a test trigger";
+                    triggerData.MonthsGifted = 1;
+                    triggerData.MonthsStreak = 69;
+                    triggerData.MonthsTotal = 88;
+                    triggerData.Tier = "tier 3";
+                    triggerData.TotalAmount = 420;
+
+                    List<string> usernames = new List<string> { "Andilippi", "WaldoAndFriends", "Silverlink" };
+                    Random random = new Random();
+                    int index = random.Next(usernames.Count);
+                    triggerData.User = usernames[index];
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings, triggerData.User);
+                    usernames.RemoveAt(index);
+
+                    index = random.Next(usernames.Count);
+                    triggerData.Receiver = usernames[index];
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.recipientId, productSettings, triggerData.Receiver);                   
+                    break;
                 // CORE
                 case EventType.CommandTriggered:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -402,7 +432,7 @@ namespace StreamUP {
             return userImage;
         }               
 
-        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, TwitchProfilePictureUserType userType, Dictionary<string, object> productSettings)
+        public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, TwitchProfilePictureUserType userType, Dictionary<string, object> productSettings, string testUser = "")
         {
             string logName = $"{productNumber}::SUSBGetTwitchProfilePicture";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -427,7 +457,16 @@ namespace StreamUP {
                 CPH.SUWriteLog("ProfilePictureSize not set. Using default size: 300");
             }
 
-            var userInfo = CPH.TwitchGetExtendedUserInfoById(sbArgs[$"{userType}"].ToString());
+            TwitchUserInfoEx userInfo;
+            if (!string.IsNullOrEmpty(testUser))
+            {
+                userInfo = CPH.TwitchGetExtendedUserInfoByLogin(testUser);
+            }
+            else
+            {
+                userInfo = CPH.TwitchGetExtendedUserInfoById(sbArgs[$"{userType}"].ToString());
+            }
+
             string originalImage = userInfo.ProfileImageUrl;
             string basePattern = "300x300";
 
@@ -583,7 +622,6 @@ namespace StreamUP {
         public int TotalAmount { get; set; } = 0;
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
-        public string UserSource { get; set; } = null;
     }
 }
 
