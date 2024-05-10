@@ -71,7 +71,7 @@ namespace StreamUP {
                     index = random.Next(usernames.Count);
                     triggerData.Receiver = usernames[index];
                     triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.recipientId, productSettings, triggerData.Receiver);                   
-                    break;
+                    break;                
                 // CORE
                 case EventType.CommandTriggered:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -90,6 +90,24 @@ namespace StreamUP {
                             triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                             break;
                     }
+                    break;
+                case EventType.HotKeyPress:                   
+                    break;
+                case EventType.ChatWindowAction:
+                case 0:
+                    triggerData.Message = sbArgs["message"].ToString();
+                    triggerData.User = sbArgs["displayName"].ToString();
+                    switch (sbArgs["userType"].ToString())
+                    {
+                        case "twitch":
+                            triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                            break;
+                        case "youtube":
+                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                            break;
+                    }
+                    break;
+                case EventType.StreamDeckAction:
                     break;
                 // DONATIONS
                 case EventType.FourthwallDonation:
