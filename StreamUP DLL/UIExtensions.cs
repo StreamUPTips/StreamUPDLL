@@ -123,6 +123,74 @@ namespace StreamUP {
             thread.Start();
         }
 
+        public static (DialogResult, bool) SUUIShowObsPluginsUpdateMessage(this IInlineInvokeProxy CPH)
+        {
+            using (var form = new Form()
+            {
+                Text = "StreamUP Warning",
+                StartPosition = FormStartPosition.CenterParent,
+                MinimizeBox = false,
+                MaximizeBox = false,
+                Size = new System.Drawing.Size(400, 250),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                AcceptButton = new Button(),
+                CancelButton = new Button()
+            })
+            {
+
+                var pictureBoxIcon = new PictureBox()
+                {
+                    Image = SystemIcons.Warning.ToBitmap(),
+                    Location = new System.Drawing.Point(10, 20),
+                    Size = new System.Drawing.Size(32, 32),
+                    SizeMode = PictureBoxSizeMode.StretchImage
+                };               
+                
+                var labelMessage = new Label()
+                {
+                    Text = "OBS has plugins that are required that are missing or out of date.\nYou can use the StreamUP Pluginstaller to download them all in one go.\n\nWould you like to open the download page now?",
+                    AutoSize = false, 
+                    Size = new System.Drawing.Size(330, 100),
+                    Location = new System.Drawing.Point(50, 10),
+                    Padding = new Padding(10),
+                };
+
+                var checkBoxOption = new CheckBox()
+                {
+                    Text = "Don't ask me again\nIf this is checked the action will try to continue to run.",
+                    Location = new System.Drawing.Point(50, 110),
+                    Size = new System.Drawing.Size(300, 50)
+                };
+
+                var buttonYes = new Button()
+                {
+                    Text = "Yes",
+                    DialogResult = DialogResult.Yes,
+                    Location = new System.Drawing.Point(75, 160),
+                    Size = new System.Drawing.Size(100, 25)
+                };
+
+                var buttonNo = new Button()
+                {
+                    Text = "No",
+                    DialogResult = DialogResult.No,
+                    Location = new System.Drawing.Point(225, 160),
+                    Size = new System.Drawing.Size(100, 25)
+                };
+
+                form.Controls.Add(pictureBoxIcon);
+                form.Controls.Add(labelMessage);
+                form.Controls.Add(buttonYes);
+                form.Controls.Add(buttonNo);
+                form.Controls.Add(checkBoxOption);
+                
+                form.Focus();
+                var result = form.ShowDialog();
+                bool checkBoxChecked = !checkBoxOption.Checked;
+
+                return (result, checkBoxChecked);
+            }
+        }
     }
     
 

@@ -193,19 +193,35 @@ namespace StreamUP {
                 return false;
             }
 
+            bool? pluginReminder = CPH.GetGlobalVar<bool?>("sup000_ObsPluginReminder", false);
+            if (pluginReminder == false)
+            {
+                CPH.SUWriteLog("User has requested not to be reminded about OBS plugin updates this session", logName);
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return true;
+            }
+
             JObject checkPluginsObj = JObject.Parse(checkPlugins);
             bool isSuccess = checkPluginsObj["responseData"]?["success"]?.Value<bool>() ?? false;
             if (!isSuccess)
             {
-                CPH.SUWriteLog($"OBS has plugins that are required that are out of date.", logName);          
-                DialogResult response = CPH.SUUIShowWarningYesNoMessage("OBS has plugins that are required that are missing or out of date.\nYou can use the StreamUP Pluginstaller to download them all in one go.\n\nWould you like to open the download page now?");       
+                CPH.SUWriteLog($"OBS has plugins that are required that are out of date.", logName);   
+
+                var (response, askAgain) = CPH.SUUIShowObsPluginsUpdateMessage();      
+
                 if (response == DialogResult.Yes)
                 {
                     CPH.SUWriteLog("User selected 'Yes'. Opening StreamUP website in web browser.", logName);
                     Process.Start("https://streamup.tips/product/plugin-installer");
                 }
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return false;
+
+                CPH.SetGlobalVar("sup000_ObsPluginReminder", askAgain, false);
+
+                if (askAgain)
+                {
+                    CPH.SUWriteLog("METHOD FAILED", logName);
+                    return false;
+                }
             }
 
             CPH.SUWriteLog("All plugins are loaded and up to date.", logName);
@@ -404,6 +420,6 @@ namespace StreamUP {
         public string SceneName { get; set; } = string.Empty;
         public string SettingsAction { get; set; } = string.Empty;
         public string SourceNameVersionCheck { get; set; } = string.Empty;
-        public Version SourceNameVersionNumber { get; set; } = new Version(0, 0, 0, 0);
+        public Version SourceNameVersionNumber { get; set; }
     }
 }
