@@ -245,7 +245,7 @@ namespace StreamUP {
 
         public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SULoadSettingsMenu";
+            string logName = $"{productNumber}::SUSetProductObsVersion";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
@@ -266,6 +266,33 @@ namespace StreamUP {
             return true;
         }
     
+        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUGetProductObsVersion";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            // Create sceneItem list
+            List<string> sceneItemNames = new List<string>();
+            CPH.SUObsGetSceneItemNames(productNumber, obsConnection, OBSSceneType.Scene, sceneName, sceneItemNames);
+            CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
+
+            if (sceneItemNames.Count > 0)
+            {
+                string firstItemName = sceneItemNames[0];
+                JObject inputSettings = CPH.SUObsGetInputSettings(productNumber, obsConnection, firstItemName);
+                string versionNumber = inputSettings["product_version"].ToString();
+                CPH.SUWriteLog($"Version for item '{firstItemName}': {versionNumber}", logName);
+                CPH.SUUIShowInformationOKMessage($"{sceneName} is currently product_version: {versionNumber}");
+            }
+            else
+            {
+                CPH.SUWriteLog("No items found in the scene.", logName);
+            }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
         public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUConvertCurrency";
