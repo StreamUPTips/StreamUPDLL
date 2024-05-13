@@ -813,7 +813,7 @@ namespace StreamUP {
         }
 
         // Screenshot current selected source
-        public static void SUObsScreenshotCurrentSource(this IInlineInvokeProxy CPH, int obsConnection, bool customFileName = false)
+        public static string SUObsScreenshotCurrentSource(this IInlineInvokeProxy CPH, int obsConnection, bool customFileName = false)
         {
             // Load vars
             string sourceName = CPH.SUObsGetCurrentSource(obsConnection);
@@ -852,6 +852,7 @@ namespace StreamUP {
                 CPH.SUUIShowToastNotification("Screenshot Saving Error", "No name was selected for the screenshot. Cancelling.");
             }
 
+            return filePath;
         }
     }
 

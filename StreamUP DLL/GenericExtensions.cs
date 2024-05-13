@@ -9,6 +9,8 @@ using Streamer.bot.Plugin.Interface;
 using System.Globalization;
 using System.Net;
 using Newtonsoft.Json;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace StreamUP {
 
@@ -391,6 +393,52 @@ namespace StreamUP {
             return hexColor;
         }
 
+        public static void SUTrimPng(this IInlineInvokeProxy CPH, string filePath)
+        {
+            Image trimmedImage = TrimImage(filePath);
+            trimmedImage.Save(filePath, ImageFormat.Png);
+            trimmedImage.Dispose();
+        }
 
+        private static Image TrimImage(string imagePath)
+        {
+            Bitmap originalImage = new Bitmap(imagePath);
+            Rectangle cropRect = GetImageBounds(originalImage);
+            Bitmap trimmedImage = CropImage(originalImage, cropRect);
+            originalImage.Dispose();
+            return trimmedImage;
+        }    
+
+        private static Rectangle GetImageBounds(Bitmap img)
+        {
+            int x1 = img.Width, x2 = 0, y1 = img.Height, y2 = 0;
+            for (int x = 0; x < img.Width; x++)
+            {
+                for (int y = 0; y < img.Height; y++)
+                {
+                    Color pixel = img.GetPixel(x, y);
+                    if (pixel.A != 0)
+                    {
+                        if (x < x1)
+                            x1 = x;
+                        if (x > x2)
+                            x2 = x;
+                        if (y < y1)
+                            y1 = y;
+                        if (y > y2)
+                            y2 = y;
+                    }
+                }
+            }
+
+            if (x1 > x2 || y1 > y2) 
+                return new Rectangle(0, 0, img.Width, img.Height);
+            return new Rectangle(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+        }
+
+        private static Bitmap CropImage(Bitmap img, Rectangle cropArea)
+        {
+            return img.Clone(cropArea, img.PixelFormat);
+        }
     }
 }
