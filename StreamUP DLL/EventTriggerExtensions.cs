@@ -109,6 +109,8 @@ namespace StreamUP {
                     break;
                 case EventType.StreamDeckAction:
                     break;
+                case EventType.TimedAction:
+                    break;
                 // DONATIONS
                 case EventType.FourthwallDonation:
                     triggerData.Donation = true;
@@ -275,8 +277,23 @@ namespace StreamUP {
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
-
                     break;
+
+                /*
+                case EventType.TwitchAutomaticRewardRedemption:
+                    switch (sbArgs["rewardType"].ToString())
+                    {
+                        case "chosen_sub_emote_unlock":
+                            break;
+                        case "send_highlighted_message":
+                            break;
+                    }
+                    triggerData.Message = sbArgs["rawInput"].ToString();
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
+                    break;
+                */
+                
                 case EventType.TwitchSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.Tier = sbArgs["tier"].ToString();
@@ -504,8 +521,11 @@ namespace StreamUP {
 
             if (!CPH.TryGetArg("userProfileUrl", out string profileImage))
             {
-                CPH.SUWriteLog($"User Profile Url args do not exist. Setting to default YouTube logo", logName);
-                profileImage = "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png";
+                if (!CPH.TryGetArg("profileImageUrl", out profileImage))
+                {
+                    CPH.SUWriteLog($"User Profile Url args do not exist. Setting to default YouTube logo", logName);
+                    profileImage = "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png";
+                }
             }
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);

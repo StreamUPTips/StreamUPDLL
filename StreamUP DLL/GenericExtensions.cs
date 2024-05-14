@@ -9,6 +9,8 @@ using Streamer.bot.Plugin.Interface;
 using System.Globalization;
 using System.Net;
 using Newtonsoft.Json;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace StreamUP {
 
@@ -245,7 +247,7 @@ namespace StreamUP {
 
         public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SULoadSettingsMenu";
+            string logName = $"{productNumber}::SUSetProductObsVersion";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string inputSettings = $"\"product_version\": \"{versionNumber}\"";
@@ -266,6 +268,33 @@ namespace StreamUP {
             return true;
         }
     
+        public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string productNumber = "DLL")
+        {
+            string logName = $"{productNumber}::SUGetProductObsVersion";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            // Create sceneItem list
+            List<string> sceneItemNames = new List<string>();
+            CPH.SUObsGetSceneItemNames(productNumber, obsConnection, OBSSceneType.Scene, sceneName, sceneItemNames);
+            CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
+
+            if (sceneItemNames.Count > 0)
+            {
+                string firstItemName = sceneItemNames[0];
+                JObject inputSettings = CPH.SUObsGetInputSettings(productNumber, obsConnection, firstItemName);
+                string versionNumber = inputSettings["product_version"].ToString();
+                CPH.SUWriteLog($"Version for item '{firstItemName}': {versionNumber}", logName);
+                CPH.SUUIShowInformationOKMessage($"{sceneName} is currently product_version: {versionNumber}");
+            }
+            else
+            {
+                CPH.SUWriteLog("No items found in the scene.", logName);
+            }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+            return true;
+        }
+
         public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUConvertCurrency";
@@ -364,6 +393,52 @@ namespace StreamUP {
             return hexColor;
         }
 
+        public static void SUTrimPng(this IInlineInvokeProxy CPH, string filePath)
+        {
+            Image trimmedImage = TrimImage(filePath);
+            trimmedImage.Save(filePath, ImageFormat.Png);
+            trimmedImage.Dispose();
+        }
 
+        private static Image TrimImage(string imagePath)
+        {
+            Bitmap originalImage = new Bitmap(imagePath);
+            Rectangle cropRect = GetImageBounds(originalImage);
+            Bitmap trimmedImage = CropImage(originalImage, cropRect);
+            originalImage.Dispose();
+            return trimmedImage;
+        }    
+
+        private static Rectangle GetImageBounds(Bitmap img)
+        {
+            int x1 = img.Width, x2 = 0, y1 = img.Height, y2 = 0;
+            for (int x = 0; x < img.Width; x++)
+            {
+                for (int y = 0; y < img.Height; y++)
+                {
+                    Color pixel = img.GetPixel(x, y);
+                    if (pixel.A != 0)
+                    {
+                        if (x < x1)
+                            x1 = x;
+                        if (x > x2)
+                            x2 = x;
+                        if (y < y1)
+                            y1 = y;
+                        if (y > y2)
+                            y2 = y;
+                    }
+                }
+            }
+
+            if (x1 > x2 || y1 > y2) 
+                return new Rectangle(0, 0, img.Width, img.Height);
+            return new Rectangle(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
+        }
+
+        private static Bitmap CropImage(Bitmap img, Rectangle cropArea)
+        {
+            return img.Clone(cropArea, img.PixelFormat);
+        }
     }
 }

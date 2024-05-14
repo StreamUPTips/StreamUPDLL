@@ -191,6 +191,50 @@ namespace StreamUP {
                 return (result, checkBoxChecked);
             }
         }
+    
+        public static string SUUIShowSaveScreenshotDialog(this IInlineInvokeProxy CPH, string sourceName, string dateTime)
+        {
+            string defaultFileName = $"{sourceName}_{dateTime}";
+            string input = CPH.SUUIShowInputBox("Enter a file name to save your screenshot as:", "Save Screenshot (.png)", defaultFileName);
+
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                string fileName = input;
+                return fileName;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static string SUUIShowInputBox(this IInlineInvokeProxy CPH, string message, string caption, string defaultValue)
+        {
+            using (Form form = new Form())
+            {
+                form.Text = caption;
+                form.Width = 300;
+                form.Height = 150;
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.MinimizeBox = false;
+                form.MaximizeBox = false;
+                form.AutoSize = true;
+                form.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+                Label label = new Label() { Left = 20, Top = 20, Text = message, AutoSize = true };
+                TextBox textBox = new TextBox() { Left = 20, Top = 45, Width = 250, Text = defaultValue };
+                Button buttonOk = new Button() { Text = "OK", DialogResult = DialogResult.OK, Left = 100, Width = 100, Top = 80 };
+
+                form.Controls.Add(label);
+                form.Controls.Add(textBox);
+                form.Controls.Add(buttonOk);
+                form.AcceptButton = buttonOk;
+
+                return form.ShowDialog() == DialogResult.OK ? textBox.Text : null;
+            }
+        }
+    
     }
     
 
