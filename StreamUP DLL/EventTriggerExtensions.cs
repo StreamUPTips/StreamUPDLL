@@ -38,7 +38,6 @@ namespace StreamUP {
                 otherSettingsDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(otherSettingsLoad);
             }
 
-
             CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
             switch (CPH.GetEventType())
@@ -563,16 +562,57 @@ namespace StreamUP {
 
         public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount)
         {
-            string logName = $"{productInfo.ProductNumber}::SUSBSendMessage";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
             CPH.SendMessage(message, botAccount);
             CPH.SendYouTubeMessage(message, botAccount);
             //CPH.SendTrovoMessage(message, botAccount);
-            
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
+        public static T SUSBTryGetArgOrDefault<T>(this IInlineInvokeProxy CPH, string key, T defaultValue = default)
+        {
+            if (CPH.TryGetArg(key, out object value))
+            {
+                try
+                {
+                    if (value is T variable)
+                    {
+                        return variable;
+                    }
+                    else if (typeof(T) == typeof(string) && value is Guid guidValue)
+                    {
+                        return (T)(object)guidValue.ToString(); 
+                    }
+                    else if (value is IConvertible)
+                    {
+                        return (T)Convert.ChangeType(value, typeof(T));
+                    }
+                    else
+                    {
+                        CPH.SUWriteLog($"Key '{key}' contains a value of type '{value.GetType()}' which cannot be converted to type '{typeof(T)}'.", "Type Conversion Error");
+                        return defaultValue;
+                    }
+                }
+                catch (InvalidCastException ex)
+                {
+                    CPH.SUWriteLog($"Error converting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Conversion Error");
+                    return defaultValue;
+                }
+                catch (FormatException ex)
+                {
+                    CPH.SUWriteLog($"Error formatting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Format Error");
+                    return defaultValue;
+                }
+                catch (Exception ex)
+                {
+                    CPH.SUWriteLog($"Unexpected error with key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Unexpected Error");
+                    return defaultValue;
+                }
+            }
+            else
+            {
+                CPH.SUWriteLog($"Key '{key}' not found in arguments.", "Key Not Found");
+                return defaultValue;
+            }
+        }
 
 
 
@@ -625,8 +665,9 @@ namespace StreamUP {
             }
         }
 
-
     }
+
+
 
     public enum TwitchProfilePictureUserType
     {
@@ -661,5 +702,7 @@ namespace StreamUP {
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
     }
+
+
 }
 
