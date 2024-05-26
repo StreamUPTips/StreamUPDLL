@@ -301,7 +301,13 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             // Get the exchange rate
-            decimal exchangeRate = SUGetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
+            decimal exchangeRate = CPH.GetGlobalVar<decimal>("sup000_ExchangeRate", false);
+            if (exchangeRate == 0)
+            {
+                CPH.SUWriteLog($"Getting exchange rate", logName);
+                exchangeRate = SUGetExchangeRate(CPH, fromCurrency.ToLower(), toCurrency.ToLower());
+                CPH.SetGlobalVar("sup000_ExchangeRate", exchangeRate, false);
+            }
             CPH.SUWriteLog($"exchangeRate=[{exchangeRate}]", logName);
 
             // Convert the amount
@@ -320,26 +326,43 @@ namespace StreamUP {
             return formattedAmount;
         }
 
-        private static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
+        public static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUGetExchangeRate";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2024.3.25/v1/currencies/{toCurrency}.json";
-
-            string rawJson;
+            string latestVersion = "";
+            string versionUrl = "https://data.jsdelivr.com/v1/package/npm/@fawazahmed0/currency-api";
+            
             using (WebClient client = new WebClient())
             {
                 client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                rawJson = client.DownloadString(url);
+                string rawJson = client.DownloadString(versionUrl);
+                JObject json = JObject.Parse(rawJson);
+                latestVersion = json["tags"]?["latest"]?.ToString();
             }
 
-            JObject json = JObject.Parse(rawJson);
+            if (string.IsNullOrEmpty(latestVersion))
+            {
+                CPH.SUWriteLog("Failed to fetch the latest version.", logName);
+                return 0;
+            }
 
-            decimal exRate = (decimal)json[toCurrency][fromCurrency];
+            // Construct the URL using the latest version
+            string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{latestVersion}/v1/currencies/{toCurrency.ToLower()}.json";
+
+            string exchangeRateJson;
+            using (WebClient client = new WebClient())
+            {
+                client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                exchangeRateJson = client.DownloadString(url);
+            }
+
+            JObject exchangeRateData = JObject.Parse(exchangeRateJson);
+            decimal exchangeRate = (decimal)exchangeRateData[toCurrency][fromCurrency];
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return exRate;
+            return exchangeRate;
         }
 
         public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode, string productNumber = "DLL")
@@ -440,5 +463,18 @@ namespace StreamUP {
         {
             return img.Clone(cropArea, img.PixelFormat);
         }
+   
+        public static T SUGetPropertyValue<T>(this IInlineInvokeProxy CPH, object obj, string propertyName)
+        {
+            return (T)obj.GetType().GetProperty(propertyName).GetValue(obj);
+        }
+
+        public static void SUSetPropertyValue<T>(this IInlineInvokeProxy CPH, object obj, string propertyName, T value)
+        {
+            obj.GetType().GetProperty(propertyName).SetValue(obj, value);
+        }   
+   
+   
+   
     }
 }
