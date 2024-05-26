@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text;
 using Streamer.bot.Plugin.Interface.Model;
+using System.Globalization;
 
 namespace StreamUP {
 
@@ -24,8 +25,10 @@ namespace StreamUP {
 
             // Load misc vars
             decimal amount;
+            double amountCurrencyDouble;
             string currency;
             string localCurrency;
+            string cleanedAmount;
             string defaultDonationImageUrl;
             string triggerType = CPH.GetEventType().ToString();
             triggerData.EventType = triggerType;
@@ -59,6 +62,7 @@ namespace StreamUP {
                     triggerData.MonthsTotal = 88;
                     triggerData.Tier = "tier 3";
                     triggerData.TotalAmount = 420;
+                    triggerData.AmountCurrencyDouble = 4.20;
 
                     List<string> usernames = new List<string> { "Andilippi", "WaldoAndFriends", "Silverlink" };
                     Random random = new Random();
@@ -122,6 +126,11 @@ namespace StreamUP {
                         currency = sbArgs["currency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }    
                     }
 
                     defaultDonationImageUrl = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
@@ -138,6 +147,11 @@ namespace StreamUP {
                         amount = decimal.Parse(sbArgs["amount"].ToString());
                         currency = sbArgs["currency"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://wiki.streamer.bot/ko-fi_icon_rgb_rounded.png";
@@ -154,6 +168,11 @@ namespace StreamUP {
                         currency = sbArgs["tipCurrency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();         
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamelements.png";
@@ -170,6 +189,11 @@ namespace StreamUP {
                         currency = sbArgs["donationCurrency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamlabs.png";
@@ -186,6 +210,11 @@ namespace StreamUP {
                         currency = sbArgs["currency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
@@ -369,6 +398,11 @@ namespace StreamUP {
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                    if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                    {
+                        triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                    }                     
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
@@ -378,6 +412,11 @@ namespace StreamUP {
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                    if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                    {
+                        triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                    }                     
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
@@ -685,6 +724,7 @@ namespace StreamUP {
         public string AlertMessage { get; set; } = null;
         public int Amount { get; set; } = 0;
         public string AmountCurrency { get; set; } = null;
+        public double AmountCurrencyDouble { get; set; } = 0;
         public bool Anonymous { get; set; } = false;
         public int BanDuration { get; set; } = 0;
         public string BanType { get; set; } = null;
