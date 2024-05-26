@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text;
 using Streamer.bot.Plugin.Interface.Model;
+using System.Globalization;
 
 namespace StreamUP {
 
@@ -24,8 +25,10 @@ namespace StreamUP {
 
             // Load misc vars
             decimal amount;
+            double amountCurrencyDouble;
             string currency;
             string localCurrency;
+            string cleanedAmount;
             string defaultDonationImageUrl;
             string triggerType = CPH.GetEventType().ToString();
             triggerData.EventType = triggerType;
@@ -37,7 +40,6 @@ namespace StreamUP {
             {
                 otherSettingsDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(otherSettingsLoad);
             }
-
 
             CPH.SUWriteLog($"Processing trigger type [{triggerType}]", logName);
 
@@ -60,6 +62,7 @@ namespace StreamUP {
                     triggerData.MonthsTotal = 88;
                     triggerData.Tier = "tier 3";
                     triggerData.TotalAmount = 420;
+                    triggerData.AmountCurrencyDouble = 4.20;
 
                     List<string> usernames = new List<string> { "Andilippi", "WaldoAndFriends", "Silverlink" };
                     Random random = new Random();
@@ -123,6 +126,11 @@ namespace StreamUP {
                         currency = sbArgs["currency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }    
                     }
 
                     defaultDonationImageUrl = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
@@ -139,6 +147,11 @@ namespace StreamUP {
                         amount = decimal.Parse(sbArgs["amount"].ToString());
                         currency = sbArgs["currency"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://wiki.streamer.bot/ko-fi_icon_rgb_rounded.png";
@@ -155,6 +168,11 @@ namespace StreamUP {
                         currency = sbArgs["tipCurrency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();         
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamelements.png";
@@ -171,6 +189,11 @@ namespace StreamUP {
                         currency = sbArgs["donationCurrency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamlabs.png";
@@ -187,6 +210,11 @@ namespace StreamUP {
                         currency = sbArgs["currency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
@@ -370,6 +398,11 @@ namespace StreamUP {
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                    if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                    {
+                        triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                    }                     
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
@@ -379,6 +412,11 @@ namespace StreamUP {
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                    cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                    if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                    {
+                        triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                    }                     
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
                     break;
@@ -563,16 +601,57 @@ namespace StreamUP {
 
         public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount)
         {
-            string logName = $"{productInfo.ProductNumber}::SUSBSendMessage";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
             CPH.SendMessage(message, botAccount);
             CPH.SendYouTubeMessage(message, botAccount);
             //CPH.SendTrovoMessage(message, botAccount);
-            
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
+        public static T SUSBTryGetArgOrDefault<T>(this IInlineInvokeProxy CPH, string key, T defaultValue = default)
+        {
+            if (CPH.TryGetArg(key, out object value))
+            {
+                try
+                {
+                    if (value is T variable)
+                    {
+                        return variable;
+                    }
+                    else if (typeof(T) == typeof(string) && value is Guid guidValue)
+                    {
+                        return (T)(object)guidValue.ToString(); 
+                    }
+                    else if (value is IConvertible)
+                    {
+                        return (T)Convert.ChangeType(value, typeof(T));
+                    }
+                    else
+                    {
+                        CPH.SUWriteLog($"Key '{key}' contains a value of type '{value.GetType()}' which cannot be converted to type '{typeof(T)}'.", "Type Conversion Error");
+                        return defaultValue;
+                    }
+                }
+                catch (InvalidCastException ex)
+                {
+                    CPH.SUWriteLog($"Error converting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Conversion Error");
+                    return defaultValue;
+                }
+                catch (FormatException ex)
+                {
+                    CPH.SUWriteLog($"Error formatting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Format Error");
+                    return defaultValue;
+                }
+                catch (Exception ex)
+                {
+                    CPH.SUWriteLog($"Unexpected error with key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Unexpected Error");
+                    return defaultValue;
+                }
+            }
+            else
+            {
+                CPH.SUWriteLog($"Key '{key}' not found in arguments.", "Key Not Found");
+                return defaultValue;
+            }
+        }
 
 
 
@@ -625,8 +704,9 @@ namespace StreamUP {
             }
         }
 
-
     }
+
+
 
     public enum TwitchProfilePictureUserType
     {
@@ -644,6 +724,7 @@ namespace StreamUP {
         public string AlertMessage { get; set; } = null;
         public int Amount { get; set; } = 0;
         public string AmountCurrency { get; set; } = null;
+        public double AmountCurrencyDouble { get; set; } = 0;
         public bool Anonymous { get; set; } = false;
         public int BanDuration { get; set; } = 0;
         public string BanType { get; set; } = null;
@@ -661,5 +742,7 @@ namespace StreamUP {
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
     }
+
+
 }
 

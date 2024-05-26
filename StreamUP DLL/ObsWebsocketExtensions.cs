@@ -143,6 +143,7 @@ namespace StreamUP {
             """, obsConnection);
 
             // Log setting change
+            CPH.Wait(50);
             CPH.SUWriteLog($"Set source filter settings: sourceName=[{sourceName}], filterName=[{filterName}], filterSettings=[{filterSettings}]", logName);
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
@@ -163,6 +164,7 @@ namespace StreamUP {
             """, obsConnection);
 
             // Log setting change
+            CPH.Wait(50);
             CPH.SUWriteLog($"Set source (input) settings: inputName=[{inputName}], inputSettings=[{inputSettings}]", logName);
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
