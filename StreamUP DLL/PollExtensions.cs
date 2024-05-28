@@ -98,24 +98,28 @@ namespace StreamUP {
             settingsForm.Focus();
             settingsForm.ShowDialog();
 
-            // Save poll data to global variable and trigger actions/events
-            pollData.DurationMs = pollData.Duration * 1000;
-            string pollDataJson = JsonConvert.SerializeObject(pollData);
-            CPH.SetGlobalVar($"{productNumber}_PollData", pollDataJson, false);
-            CPH.SetGlobalVar($"{productNumber}_PollActive", true, false);
-
-            SendMessageToChat(CPH, productSettings.PollStartedMessage, productSettings, pollData, args);
-            SendMessageToChat(CPH, productSettings.PollInstructionMessage, productSettings, pollData, args);
-
-            int choiceNumber = 1;
-            foreach (var choice in pollData.Choices)
+            // Check if the poll was started
+            if (pollData.Started)
             {
-                SendMessageToChat(CPH, productSettings.PollChoicesMessage, productSettings, pollData, args, choiceNumber - 1);
-                choiceNumber++;
-            }
+                // Save poll data to global variable and trigger actions/events
+                pollData.DurationMs = pollData.Duration * 1000;
+                string pollDataJson = JsonConvert.SerializeObject(pollData);
+                CPH.SetGlobalVar($"{productNumber}_PollData", pollDataJson, false);
+                CPH.SetGlobalVar($"{productNumber}_PollActive", true, false);
 
-            CPH.SUPollStartCountdown(args, productNumber, pollData.Duration);
-            CPH.TriggerEvent("StreamUP Poll Created", true);
+                SendMessageToChat(CPH, productSettings.PollStartedMessage, productSettings, pollData, args);
+                SendMessageToChat(CPH, productSettings.PollInstructionMessage, productSettings, pollData, args);
+
+                int choiceNumber = 1;
+                foreach (var choice in pollData.Choices)
+                {
+                    SendMessageToChat(CPH, productSettings.PollChoicesMessage, productSettings, pollData, args, choiceNumber - 1);
+                    choiceNumber++;
+                }
+
+                CPH.SUPollStartCountdown(args, productNumber, pollData.Duration);
+                CPH.TriggerEvent("StreamUP Poll Created", true);
+            }
         }
 
         private static void LoadProductSettings(this IInlineInvokeProxy CPH, string productNumber = "sup043")
@@ -275,7 +279,10 @@ namespace StreamUP {
                 Width = 100,
                 Dock = DockStyle.Right
             };
-            cancelButton.Click += (sender, e) => withParent.Close();
+            cancelButton.Click += (sender, e) => {
+                pollData.Started = false;
+                withParent.Close();
+            };
 
             var startButton = new Button
             {
@@ -294,6 +301,7 @@ namespace StreamUP {
                 pollData.Choices = new List<PollChoiceData>();
                 pollData.SendToTwitch = ((CheckBox)withParent.Controls.Find("SendToTwitch", true)[0]).Checked;
                 pollData.SendToYouTube = ((CheckBox)withParent.Controls.Find("SendToYouTube", true)[0]).Checked;
+                pollData.Started = true;
 
                 int choiceNumber = 1;
 
@@ -375,6 +383,13 @@ namespace StreamUP {
             pollData.EventType = "StreamUPPollUpdated";
 
             string userType = CPH.SUSBTryGetArgOrDefault<string>("userType");
+            if (bool.Parse(args["isTest"].ToString()))
+            {
+                Random random = new Random();
+                string[] platforms = { "twitch", "youtube" };
+                userType = platforms[random.Next(platforms.Length)];
+            }
+
             switch (userType)
             {
                 case "twitch":
@@ -418,7 +433,18 @@ namespace StreamUP {
             }
 
             // Check if the vote choice is parsable
-            string voteNumber = CPH.SUSBTryGetArgOrDefault<string>("input0");
+            string voteNumber = "0";
+            if (bool.Parse(args["isTest"].ToString()))
+            {
+                Random random = new Random();
+                int randomVoteNumber = random.Next(1, pollData.ChoiceCount + 1);
+                voteNumber = randomVoteNumber.ToString();
+            }
+            else
+            {
+                voteNumber = CPH.SUSBTryGetArgOrDefault<string>("input0");
+            }
+
             if (!int.TryParse(voteNumber, out int number))
             {
                 // Not a valid vote number
@@ -886,6 +912,7 @@ namespace StreamUP {
         public bool SendToYouTube { get; set; }
         public int TwitchTotalVotes { get; set; }
         public int YouTubeTotalVotes { get; set; }
+        public bool Started { get; set; }
         public override string ToString()
         {
             var choicesString = string.Join(Environment.NewLine, Choices.Select((c, index) => $"    PollChoiceData {index + 1}:\n{c}"));
