@@ -383,7 +383,8 @@ namespace StreamUP {
             pollData.EventType = "StreamUPPollUpdated";
 
             string userType = CPH.SUSBTryGetArgOrDefault<string>("userType");
-            if (bool.Parse(args["isTest"].ToString()))
+            bool isTest = CPH.SUSBTryGetArgOrDefault<bool>("isTest");
+            if (isTest)
             {
                 Random random = new Random();
                 string[] platforms = { "twitch", "youtube" };
@@ -434,7 +435,7 @@ namespace StreamUP {
 
             // Check if the vote choice is parsable
             string voteNumber = "0";
-            if (bool.Parse(args["isTest"].ToString()))
+            if (isTest)
             {
                 Random random = new Random();
                 int randomVoteNumber = random.Next(1, pollData.ChoiceCount + 1);
