@@ -847,7 +847,6 @@ namespace StreamUP {
         String,
     }
 
-
    public static class ProductSettingsBuilder
     {
         public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)

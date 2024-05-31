@@ -50,6 +50,7 @@ namespace StreamUP {
                     triggerData.AlertMessage = "This is a test trigger";
                     triggerData.Amount = 69;
                     triggerData.AmountCurrency = "£4.20";
+                    triggerData.AmountCurrencyDouble = 4.20;
                     triggerData.Anonymous = false;
                     triggerData.BanDuration = 69;
                     triggerData.BanType = "You were too awesome";
@@ -62,7 +63,6 @@ namespace StreamUP {
                     triggerData.MonthsTotal = 88;
                     triggerData.Tier = "tier 3";
                     triggerData.TotalAmount = 420;
-                    triggerData.AmountCurrencyDouble = 4.20;
 
                     List<string> usernames = new List<string> { "Andilippi", "WaldoAndFriends", "Silverlink" };
                     Random random = new Random();
@@ -335,7 +335,7 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     break;
                 case EventType.TwitchUserBanned:
-                    triggerData.BanType = sbArgs["reason"].ToString();
+                    triggerData.BanType = string.IsNullOrEmpty(sbArgs["reason"].ToString()) ? "No Reason" : sbArgs["reason"].ToString();
                     triggerData.Receiver = sbArgs["user"].ToString();
                     triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     triggerData.User = sbArgs["createdByDisplayName"].ToString();
@@ -343,7 +343,7 @@ namespace StreamUP {
                     break;
                 case EventType.TwitchUserTimedOut:
                     triggerData.BanDuration = int.Parse(sbArgs["duration"].ToString());
-                    triggerData.BanType = sbArgs["reason"].ToString();
+                    triggerData.BanType = string.IsNullOrEmpty(sbArgs["reason"].ToString()) ? "No Reason" : sbArgs["reason"].ToString();
                     triggerData.Receiver = sbArgs["user"].ToString();
                     triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     triggerData.User = sbArgs["createdByDisplayName"].ToString();
@@ -570,9 +570,9 @@ namespace StreamUP {
             return profileImage;
         }
 
-        public static string SUSBReplaceAlertMessageVars(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings, string inputMessage)
+        public static string SUSBReplaceMessageVarsFromTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings, string inputMessage)
         {
-            string logName = $"{productInfo.ProductNumber}::SUSBReplaceAlertMessageVars";
+            string logName = $"{productInfo.ProductNumber}::SUSBReplaceMessageVarsFromTriggerData";
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string customMessageValue = inputMessage;
