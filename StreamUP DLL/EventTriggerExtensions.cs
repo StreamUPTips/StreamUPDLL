@@ -117,13 +117,13 @@ namespace StreamUP {
                 // DONATIONS
                 case EventType.FourthwallDonation:
                     triggerData.Donation = true;
-                    triggerData.User = sbArgs["username"].ToString();
-                    triggerData.Message = sbArgs["message"].ToString();
+                    triggerData.User = sbArgs["fw.username"].ToString();
+                    triggerData.Message = sbArgs["fw.message"].ToString();
 
                     if (productSettings.ContainsKey("LocalCurrencyCode"))
                     {
-                        amount = decimal.Parse(sbArgs["amount"].ToString());
-                        currency = sbArgs["currency"].ToString();
+                        amount = decimal.Parse(sbArgs["fw.amount"].ToString());
+                        currency = sbArgs["fw.currency"].ToString();
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                         cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
