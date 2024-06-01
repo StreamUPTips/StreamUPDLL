@@ -64,6 +64,8 @@
     <Compile Include="PollExtensions.cs" />
     <Compile Include="ProductSettingsUIExtensions.cs" />
     <Compile Include="EventTriggerExtensions.cs" />
+    <Compile Include="CurrencyExtensions.cs" />
+    <Compile Include="SettingTriggers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
