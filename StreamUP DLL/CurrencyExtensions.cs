@@ -430,13 +430,9 @@ namespace StreamUP
         }
 
 
-        public static long GetBetSize(this IInlineInvokeProxy CPH, string input, long currentPoints)
+        public static long GetBetSize(this IInlineInvokeProxy CPH, string input, long currentPoints, long minBet, long maxBet, long defaultPoints, long defaultBet)
         {
-            //Get Some Args
-            CPH.TryGetArg("minBet", out long minBet);
-            CPH.TryGetArg("maxBet", out long maxBet);
-            CPH.TryGetArg("defaultPoints", out long defaultPoints);
-
+           
             if (maxBet < 1)
             {
                 maxBet = long.MaxValue;
@@ -479,7 +475,7 @@ namespace StreamUP
             if (betSize == 0)
             {
 
-                CPH.TryGetArg("defaultBet", out betSize);
+                 betSize = defaultBet;
             }
 
             if (betSize > currentPoints)
@@ -512,13 +508,8 @@ namespace StreamUP
             return betSize;
         }
 
-         public static long GetPrizeSize(this IInlineInvokeProxy CPH, string input)
+         public static long GetPrizeSize(this IInlineInvokeProxy CPH, string input, long minPrize, long maxPrize, long defaultPrize)
         {
-            //Get Some Args
-            CPH.TryGetArg("minPrize", out long minPrize);
-            CPH.TryGetArg("maxPrize", out long maxPrize);
-            CPH.TryGetArg("defaultPrize", out long defaultPrize);
-
             if (maxPrize < 1)
             {
                 maxPrize = long.MaxValue;
@@ -546,13 +537,6 @@ namespace StreamUP
             {
                 //Default Bet  if nothing entered
             }
-
-            if (betPrize == 0)
-            {
-
-                CPH.TryGetArg("defaultBet", out betPrize);
-            }
-
 
             //num
             if (betPrize > maxPrize)
