@@ -599,10 +599,17 @@ namespace StreamUP {
             return outputMessage;
         }
 
-        public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount)
+        public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount, StreamingPlatform streamingPlatform = StreamingPlatform.All)
         {
-            CPH.SendMessage(message, botAccount);
-            CPH.SendYouTubeMessage(message, botAccount);
+            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.Twitch)
+            {
+                CPH.SendMessage(message, botAccount);
+            }
+
+            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.YouTube)
+            {
+                CPH.SendYouTubeMessage(message, botAccount);
+            }
             //CPH.SendTrovoMessage(message, botAccount);
         }
 
@@ -706,7 +713,12 @@ namespace StreamUP {
 
     }
 
-
+    public enum StreamingPlatform
+    {
+        All = 0,
+        Twitch = 1,
+        YouTube = 2
+    }
 
     public enum TwitchProfilePictureUserType
     {
