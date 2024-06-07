@@ -31,6 +31,7 @@ namespace StreamUP {
     // - StreamUpSettingType.Secret
     // - StreamUpSettingType.Spacer
     // - StreamUpSettingType.String
+    // - StreamUpSettingType.Link 
     //
     // Name = The variable name, Description = The UI label, Type = See above, Default = The default value as a string.
 
@@ -194,6 +195,15 @@ namespace StreamUP {
                     break;
                 case StreamUpSettingType.String:
                     CPH.AddStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                 case StreamUpSettingType.Link:
+                    CPH.AddLinkSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.Multiline:
+                    CPH.AddMultiStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.TrackBar:
+                    CPH.AddTrackbarSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
             }
             rowIndex++;
@@ -488,6 +498,41 @@ namespace StreamUP {
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
+          private static void AddMultiStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        {
+            var label = new Label
+            {
+                Text = withSetting.Description,
+                Padding = new Padding(0, 4, 0, 0),
+                AutoSize = true,
+                MaximumSize = new System.Drawing.Size(250, 0)
+            };
+            toTable.Controls.Add(label, 0, atIndex);
+            var textbox = new TextBox
+            {
+                Name = withSetting.Name,
+                Multiline = true,
+                Height = 100,
+                Width = 240
+            };
+
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
+            if (!string.IsNullOrEmpty(currentValue)) {
+                textbox.Text = currentValue;
+            }
+            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+                textbox.Text = withSetting.Default;
+            }
+
+            toTable.Controls.Add(textbox, 1, atIndex);
+        }
+
+        
         private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -540,6 +585,7 @@ namespace StreamUP {
             };
             toTable.Controls.Add(button, 1, atIndex);
         }
+
 
         private static void AddBoolSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
@@ -600,6 +646,70 @@ namespace StreamUP {
             toTable.Controls.Add(input, 1, atIndex);
         }
 
+        private static void AddTrackbarSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        {
+             var label = new Label
+            {
+                Text = withSetting.Description,
+                AutoSize = true,
+                Margin = new Padding(10),
+                Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
+                ForeColor = Color.WhiteSmoke,
+            };
+
+            var input = new TrackBar
+            {
+
+                Name = withSetting.Name,
+                Minimum = withSetting.Min,
+                Maximum = withSetting.Max,
+                Padding = new Padding(10),
+                Margin = new Padding(0, 10, 10, 0),
+                Dock = DockStyle.Fill,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                TickFrequency = (withSetting.Max - withSetting.Min) / 2, // Adjust according to your preference
+                TickStyle = TickStyle.TopLeft
+
+            };
+
+            int currentValue = 0;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = int.Parse(settings[withSetting.Name].ToString());
+            }
+ 
+            if (currentValue != 0) {        
+                input.Value = currentValue;
+            }
+            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+                var hasCorrectDefault = int.TryParse(withSetting.Default, out int defaultValue);
+                input.Value = hasCorrectDefault ? defaultValue : 0;
+            }
+
+            var valueLabel = new Label
+            {
+                AutoSize = true,
+                Margin = new Padding(0, 10, 0, 0),
+                Text = input.Value.ToString(),
+                //ForeColor = Color.SkyBlue, // Change text color
+                Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                TextAlign = ContentAlignment.BottomCenter,
+
+            };
+
+
+
+            input.ValueChanged += (sender, e) =>
+            {
+                valueLabel.Text = input.Value.ToString();
+            };
+            toTable.Controls.Add(label, 0, atIndex);
+            toTable.Controls.Add(input, 1, atIndex);
+            toTable.Controls.Add(valueLabel, 2, atIndex);
+
+
+        }
+
         private static void AddLabelSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -608,6 +718,20 @@ namespace StreamUP {
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(498, 0);
 
+            toTable.Controls.Add(label, 0, atIndex);
+            toTable.SetColumnSpan(label, 2);
+        }
+
+        private static void AddLinkSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        {
+            var label = new LinkLabel();
+            label.Text = withSetting.Description;
+            label.Padding = new Padding(0, 4, 0, 0);
+            label.AutoSize = true;
+            label.MaximumSize = new System.Drawing.Size(498, 0);
+            label.LinkColor = ColorTranslator.FromHtml("#FF86BD");
+            label.Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular);
+            label.LinkClicked += (sender, e) => System.Diagnostics.Process.Start(withSetting.Url);
             toTable.Controls.Add(label, 0, atIndex);
             toTable.SetColumnSpan(label, 2);
         }
@@ -827,6 +951,12 @@ namespace StreamUP {
 
         public object Data { get; set; }
         public string TabName { get; set; }
+
+        public string Url {get; set;}
+
+        public int Min {get; set;}
+
+        public int Max {get; set;}
     }
 
     public enum StreamUpSettingType
@@ -845,6 +975,10 @@ namespace StreamUP {
         Secret,
         Spacer,
         String,
+        Link,
+        TrackBar,
+        Multiline,
+    
     }
 
    public static class ProductSettingsBuilder
@@ -963,6 +1097,52 @@ namespace StreamUP {
 
             return settings;
         }
+
+        public static List<StreamUpSetting> SUSettingsCreateLink(this IInlineInvokeProxy CPH, string description, string url, string tabName = "General", bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Link, Url= url, TabName = tabName, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
+            }
+
+            return settings;
+        }
+
+          public static List<StreamUpSetting> SUSettingsCreateMultiline(this IInlineInvokeProxy CPH, string name,string description, string defaultValue, string tabName = "General", bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.Multiline, Default=defaultValue, TabName = tabName, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
+            }
+
+            return settings;
+        }
+
+          public static List<StreamUpSetting> SUSettingsCreateTrackbar(this IInlineInvokeProxy CPH, string name,string description, int min, int max, string defaultValue, string tabName = "General", bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.TrackBar, Min = min, Max = max, Default = defaultValue, TabName = tabName, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
+            }
+
+            return settings;
+        }
+
         public static List<StreamUpSetting> SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>

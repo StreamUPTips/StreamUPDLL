@@ -96,5 +96,20 @@ namespace StreamUP
             CPH.SetCustomTriggers(customTriggers);
 
         }
+
+          public static void SetTriggersForTimedVIP(this IInlineInvokeProxy CPH)
+        {
+            string [] categories = {"Timed VIP"};
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new CustomTrigger("New VIP", "timedVipnewVip", categories),
+                new CustomTrigger("Time Added",  "timedViptimeAdded", categories),
+                new CustomTrigger("Timed VIP Fail", "timedVipFail", categories),
+                new CustomTrigger("Timed VIP Time Left", "timedVipTimeLeft", categories),
+                new CustomTrigger("VIP Removed", "timedVipUserRemoved", categories)
+            };
+            CPH.SetCustomTriggers(customTriggers);
+        }
+
     }
 }
