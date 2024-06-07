@@ -135,7 +135,7 @@ namespace StreamUP {
                 SizingGrip = false
             };
             var statusLabel = new ToolStripStatusLabel();
-            statusLabel.Text = "© StreamUP";
+            statusLabel.Text = $"© StreamUP {DateTime.UtcNow.Year}";
             statusBar.Items.Add(statusLabel);
             settingsForm.Controls.Add(buttonPanel);
             settingsForm.Controls.Add(statusBar);
@@ -652,9 +652,9 @@ namespace StreamUP {
             {
                 Text = withSetting.Description,
                 AutoSize = true,
-                Margin = new Padding(10),
+                Margin = new Padding(4),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                //ForeColor = Color.WhiteSmoke,
             };
 
             var input = new TrackBar
@@ -663,12 +663,13 @@ namespace StreamUP {
                 Name = withSetting.Name,
                 Minimum = withSetting.Min,
                 Maximum = withSetting.Max,
-                Padding = new Padding(10),
-                Margin = new Padding(0, 10, 10, 0),
+                Padding = new Padding(4),
+                //Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 TickFrequency = (withSetting.Max - withSetting.Min) / 2, // Adjust according to your preference
-                TickStyle = TickStyle.TopLeft
+                TickStyle = TickStyle.TopLeft, 
+                Width = 100
 
             };
 
@@ -689,7 +690,7 @@ namespace StreamUP {
             var valueLabel = new Label
             {
                 AutoSize = true,
-                Margin = new Padding(0, 10, 0, 0),
+                //Margin = new Padding(0, 10, 0, 0),
                 Text = input.Value.ToString(),
                 //ForeColor = Color.SkyBlue, // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),

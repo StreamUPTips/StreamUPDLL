@@ -1866,28 +1866,7 @@ namespace StreamUP
 
 
         }
-        //Logging
-        public static void SettingsLog(this IInlineInvokeProxy CPH, string message)
-        {
-            string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-            string formattedDate = DateTime.Now.ToString("yyyy_MM_dd");
-            string dir = Path.Combine(program_Directory, "Extensions", "Log Files");
-            string file_Path = Path.Combine(dir, $"logFile_{formattedDate}.log");
-
-            // Create directory if it doesn't exist
-            Directory.CreateDirectory(dir);
-
-            if (!File.Exists(file_Path))
-            {
-                File.Create(file_Path).Close();
-
-
-            }
-            string timestamp = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] ";
-            File.AppendAllText(file_Path, timestamp + message + Environment.NewLine);
-
-
-        }
+               
 
         #endregion
 
@@ -1895,7 +1874,7 @@ namespace StreamUP
 
         public static void SaveButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout)
         {
-            CPH.SettingsLog("Pressed Save");
+            CPH.SUWriteLog("Pressed Save");
 
             var numericUpDownsAndTextBoxes = layout
          .OfType<TableLayoutPanel>()
@@ -1906,31 +1885,31 @@ namespace StreamUP
                 switch (control)
                 {
                     case Label label:
-                        CPH.SettingsLog($"Save Name: {label.Name}, Value: {label.Text}");
+                        CPH.SUWriteLog($"Save Name: {label.Name}, Value: {label.Text}");
                         CPH.SaveSettingsValue(label.Name, label.Text);
                         break;
                     case NumericUpDown numericUpDown:
-                        CPH.SettingsLog($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
+                        CPH.SUWriteLog($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
                         CPH.SaveSettingsValue(numericUpDown.Name, numericUpDown.Value);
                         break;
                     case TextBox textBox:
-                        CPH.SettingsLog($"Save Name: {textBox.Name}, Text: {textBox.Text}");
+                        CPH.SUWriteLog($"Save Name: {textBox.Name}, Text: {textBox.Text}");
                         CPH.SaveSettingsValue(textBox.Name, textBox.Text);
                         break;
                     case CheckBox checkbox:
-                        CPH.SettingsLog($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
+                        CPH.SUWriteLog($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
                         CPH.SaveSettingsValue(checkbox.Name, checkbox.Checked);
                         break;
                     case TrackBar trackbar:
-                        CPH.SettingsLog($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
+                        CPH.SUWriteLog($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
                         CPH.SaveSettingsValue(trackbar.Name, trackbar.Value);
                         break;
                     case Button button:
-                        CPH.SettingsLog($"Save Name: {button.Name}, Text: {button.Text}");
+                        CPH.SUWriteLog($"Save Name: {button.Name}, Text: {button.Text}");
                         CPH.SaveSettingsValue(button.Name, button.Text);
                         break;
                     case ComboBox comboBox:
-                        CPH.SettingsLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
+                        CPH.SUWriteLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
                         CPH.SaveSettingsValue(comboBox.Name, comboBox.SelectedItem);
                         break;
                     case DataGridView dataGridView:
@@ -1947,7 +1926,7 @@ namespace StreamUP
                             }
 
                         }
-                        CPH.SettingsLog($"Save Name: {dataGridView.Name}, Text: {string.Join(",", dataRows.ToArray())}");
+                        CPH.SUWriteLog($"Save Name: {dataGridView.Name}, Text: {string.Join(",", dataRows.ToArray())}");
                         CPH.SaveSettingsValue(dataGridView.Name, string.Join(",", dataRows.ToArray()));
                         break;
 
@@ -1960,7 +1939,7 @@ namespace StreamUP
         }
         public static void ResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form)
         {
-            CPH.SettingsLog("Pressed Reset");
+            CPH.SUWriteLog("Pressed Reset");
 
             var numericUpDownsAndTextBoxes = layout
          .OfType<TableLayoutPanel>()
@@ -1981,9 +1960,9 @@ namespace StreamUP
 
 
                 string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-                string dir = Path.Combine(program_Directory, "Extensions", "Data");
+                string dir = Path.Combine(program_Directory, "StreamUP", "Data");
                 Directory.CreateDirectory(dir);
-                string file_Path = Path.Combine(dir, "Extension_Database.db");
+                string file_Path = Path.Combine(dir, "Settings_Database.db");
                 using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
                 {
                     var col = db.GetCollection<SaveSettings>("settings");
@@ -2007,9 +1986,9 @@ namespace StreamUP
         public static T GetSettingsValue<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
         {
             string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "Extensions", "Data");
+            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, "Extension_Database.db");
+            string filePath = Path.Combine(dir, "Settings_Database.db");
 
             using (var db = new LiteDatabase($"Filename={filePath}; Connection=shared"))
             {
@@ -2051,9 +2030,9 @@ namespace StreamUP
         {
 
             string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(program_Directory, "Extensions", "Data");
+            string dir = Path.Combine(program_Directory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string file_Path = Path.Combine(dir, "Extension_Database.db");
+            string file_Path = Path.Combine(dir, "Settings_Database.db");
 
             using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
             {
