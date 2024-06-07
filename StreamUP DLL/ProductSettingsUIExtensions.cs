@@ -13,7 +13,8 @@ using Label = System.Windows.Forms.Label;
 using Streamer.bot.Plugin.Interface;
 using System.Linq;
 
-namespace StreamUP {
+namespace StreamUP
+{
 
     // Settings definition
     // Currently support for 11 different settings types:
@@ -37,13 +38,14 @@ namespace StreamUP {
 
 
 
-    public static class ProductSettingsUIExtensions {
+    public static class ProductSettingsUIExtensions
+    {
         public static bool? savePressed = false;
         private static string logName = "DLL::ProductSettingsUI";
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
-            UIResources.closeLoadingWindow = false; 
+            UIResources.closeLoadingWindow = false;
             UIResources.streamUpSettingsCount = streamUpSettings.Count;
             CPH.SUUIShowSettingsLoadingMessage("StreamUP Settings Loading...");
 
@@ -55,36 +57,41 @@ namespace StreamUP {
             }
 
             List<string> sbActions = new List<string>();
-            for (int i = 0; i < streamUpSettings.Count; i++) {
+            for (int i = 0; i < streamUpSettings.Count; i++)
+            {
                 StreamUpSetting item = streamUpSettings[i];
-                if (item.Type == StreamUpSettingType.Action) {
+                if (item.Type == StreamUpSettingType.Action)
+                {
                     sbActions = CPH.GetSBActions(sbArgs);
-                    if (sbActions.Count == 0) {
+                    if (sbActions.Count == 0)
+                    {
                         return false;
                     }
                 }
             }
 
-            var settingsForm = new Form {
+            var settingsForm = new Form
+            {
                 Text = $"StreamUP | {productInfo.ProductName}",
                 Width = 540,
                 Height = 720,
                 FormBorderStyle = FormBorderStyle.Fixed3D,
                 MaximizeBox = false,
                 MinimizeBox = true,
-                StartPosition = FormStartPosition.CenterParent                
+                StartPosition = FormStartPosition.CenterParent
             };
-            
+
             byte[] bytes = Convert.FromBase64String(UIResources.supIconString);
             using var ms = new MemoryStream(bytes);
             settingsForm.Icon = new Icon(ms);
 
-            var tabControl = new TabControl {
+            var tabControl = new TabControl
+            {
                 Dock = DockStyle.Fill
             };
             settingsForm.Controls.Add(tabControl);
-            Dictionary<string, TableLayoutPanel> tabPages = new Dictionary<string, TableLayoutPanel>();            
-            
+            Dictionary<string, TableLayoutPanel> tabPages = new Dictionary<string, TableLayoutPanel>();
+
             var description = new Label();
             description.Text = $"Please provide your preferred settings for {productInfo.ProductName} using the controls below.";
             description.MaximumSize = new System.Drawing.Size(498, 0);
@@ -109,7 +116,7 @@ namespace StreamUP {
                         AutoSizeMode = AutoSizeMode.GrowAndShrink
                     };
 
-                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));     
+                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
                     tabPage.Controls.Add(settingsTable);
@@ -131,7 +138,8 @@ namespace StreamUP {
 
             CPH.AddButtonControls(buttonPanel, withParent: settingsForm, atIndex: streamUpSettings.Count + 1, streamUpSettings, sbArgs, productInfo, settingsGlobalName, tabControl);
 
-            var statusBar = new StatusStrip{
+            var statusBar = new StatusStrip
+            {
                 SizingGrip = false
             };
             var statusLabel = new ToolStripStatusLabel();
@@ -139,7 +147,7 @@ namespace StreamUP {
             statusBar.Items.Add(statusLabel);
             settingsForm.Controls.Add(buttonPanel);
             settingsForm.Controls.Add(statusBar);
-            
+
             UIResources.closeLoadingWindow = true;
             settingsForm.Focus();
             settingsForm.ShowDialog();
@@ -149,11 +157,11 @@ namespace StreamUP {
 
             return savePressed;
         }
-        
+
         private static void AddSettingToTable(this IInlineInvokeProxy CPH, TableLayoutPanel table, StreamUpSetting setting, List<string> actions, Dictionary<string, object> settings, ref int rowIndex)
         {
             switch (setting.Type)
-            {   
+            {
                 case StreamUpSettingType.Action:
                     CPH.AddActionSetting(toTable: table, withSetting: setting, withActions: actions, atIndex: rowIndex, settings);
                     break;
@@ -196,7 +204,7 @@ namespace StreamUP {
                 case StreamUpSettingType.String:
                     CPH.AddStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
-                 case StreamUpSettingType.Link:
+                case StreamUpSettingType.Link:
                     CPH.AddLinkSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
                 case StreamUpSettingType.Multiline:
@@ -216,10 +224,12 @@ namespace StreamUP {
             var sbActions = new List<string>();
 
             var wsuri = sbArgs["websocketURI"].ToString();
-            try {
+            try
+            {
                 ws.ConnectAsync(new Uri(wsuri), CancellationToken.None).Wait();
             }
-            catch {
+            catch
+            {
                 System.Windows.Forms.MessageBox.Show("An error occurred while fetching Streamer.bot actions.\nPlease check your Streamer.bot websocket settings, make sure the internal websocket server is turned on and try again.\n\nThe websocket URL and port should match your Streamer.bot instance.", "StreamUP Settings UI - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return sbActions;
             }
@@ -227,7 +237,8 @@ namespace StreamUP {
             string response = string.Empty;
             string json = string.Empty;
             string data = JsonConvert.SerializeObject(
-                new {
+                new
+                {
                     request = "GetActions",
                     id = "123"
                 }
@@ -242,11 +253,14 @@ namespace StreamUP {
             response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
             json += response;
 
-            if (result.EndOfMessage) {
+            if (result.EndOfMessage)
+            {
                 response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
             }
-            else {
-                while (!result.EndOfMessage) {
+            else
+            {
+                while (!result.EndOfMessage)
+                {
                     result = ws.ReceiveAsync(bufferSegment, CancellationToken.None).Result;
                     response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
                     json = json + response;
@@ -257,7 +271,8 @@ namespace StreamUP {
 
             JObject actionJson = JObject.Parse(json.ToString());
             JArray actionName = actionJson.Value<JArray>("actions");
-            foreach (JObject item in actionName) {
+            foreach (JObject item in actionName)
+            {
                 object name = item["name"].ToString();
                 sbActions.Add(name.ToString());
             }
@@ -289,15 +304,19 @@ namespace StreamUP {
                 currentValue = settings[withSetting.Name].ToString();
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 dropdown.SelectedItem = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 dropdown.SelectedItem = withSetting.Default;
             }
 
-            dropdown.MouseUp += (sender, e) => {
-                if (e.Button == MouseButtons.Right) {
+            dropdown.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
                     dropdown.SelectedItem = null;
                 }
             };
@@ -310,7 +329,8 @@ namespace StreamUP {
             var twitchRewards = CPH.TwitchGetRewards();
             List<string> titleList = new List<string>();
 
-            foreach (var reward in twitchRewards) {
+            foreach (var reward in twitchRewards)
+            {
                 // Extract the "Title" value from the TwitchReward object
                 string title = reward.Title;
 
@@ -337,21 +357,26 @@ namespace StreamUP {
             {
                 currentValue = settings[withSetting.Name].ToString();
             }
-            
+
             string rewardTitle = null;
-            foreach (var reward in twitchRewards) {
-                if (reward.Id == currentValue) {
+            foreach (var reward in twitchRewards)
+            {
+                if (reward.Id == currentValue)
+                {
                     rewardTitle = reward.Title;
                     break;
                 }
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 dropdown.SelectedItem = rewardTitle;
             }
 
-            dropdown.MouseUp += (sender, e) => {
-                if (e.Button == MouseButtons.Right) {
+            dropdown.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
                     dropdown.SelectedItem = null;
                 }
             };
@@ -377,7 +402,8 @@ namespace StreamUP {
 
             var clearButton = new Button();
             clearButton.Text = "Clear";
-            clearButton.Click += (sender, e) => {
+            clearButton.Click += (sender, e) =>
+            {
                 dropdown.SelectedItem = null;
             };
 
@@ -387,15 +413,19 @@ namespace StreamUP {
                 currentValue = settings[withSetting.Name].ToString();
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 dropdown.SelectedItem = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 dropdown.SelectedItem = withSetting.Default;
             }
 
-            dropdown.MouseUp += (sender, e) => {
-                if (e.Button == MouseButtons.Right) {
+            dropdown.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
                     dropdown.SelectedItem = null;
                 }
             };
@@ -407,16 +437,19 @@ namespace StreamUP {
         {
             int calculatedWidth = 0;
             int temp = 0;
-            foreach (var obj in cb.Items) {
+            foreach (var obj in cb.Items)
+            {
                 temp = TextRenderer.MeasureText(obj.ToString(), cb.Font).Width;
-                if (temp > calculatedWidth) {
+                if (temp > calculatedWidth)
+                {
                     calculatedWidth = temp;
                 }
             }
             calculatedWidth += 20; // Add padding
             cb.Width = Math.Max(minWidth, Math.Min(calculatedWidth, maxWidth));
 
-            cb.MouseWheel += (sender, e) => {
+            cb.MouseWheel += (sender, e) =>
+            {
                 ((HandledMouseEventArgs)e).Handled = true;
             };
         }
@@ -441,11 +474,13 @@ namespace StreamUP {
                 currentValue = settings[withSetting.Name].ToString();
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 textbox.Text = currentValue;
             }
             else
-            if (!string.IsNullOrEmpty(withSetting.Default)) {
+            if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 textbox.Text = withSetting.Default;
             }
 
@@ -488,17 +523,19 @@ namespace StreamUP {
                 currentValue = settings[withSetting.Name].ToString();
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 textbox.Text = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 textbox.Text = withSetting.Default;
             }
 
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
-          private static void AddMultiStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        private static void AddMultiStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label
             {
@@ -522,17 +559,19 @@ namespace StreamUP {
                 currentValue = settings[withSetting.Name].ToString();
             }
 
-            if (!string.IsNullOrEmpty(currentValue)) {
+            if (!string.IsNullOrEmpty(currentValue))
+            {
                 textbox.Text = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 textbox.Text = withSetting.Default;
             }
 
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
-        
+
         private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -545,21 +584,25 @@ namespace StreamUP {
             button.Text = "Pick a colour";
             button.AutoSize = true;
             button.Name = withSetting.Name;
-            button.Tag = withSetting.Type;            
+            button.Tag = withSetting.Type;
 
             long currentValue = 0;
             if (settings != null && settings.ContainsKey(withSetting.Name))
             {
                 var colorSetting = settings[withSetting.Name].ToString();
-                if (colorSetting.Contains("#")) {
+                if (colorSetting.Contains("#"))
+                {
                     Color color = ColorTranslator.FromHtml(colorSetting);
                     currentValue = ((long)color.A << 24) | ((long)color.B << 16) | ((long)color.G << 8) | color.R;
-                } else {
+                }
+                else
+                {
                     currentValue = long.Parse(settings[withSetting.Name].ToString());
                 }
             }
-            
-            if (currentValue != 0) {
+
+            if (currentValue != 0)
+            {
                 byte a = (byte)((currentValue & 0xff000000) >> 24);
                 byte b = (byte)((currentValue & 0x00ff0000) >> 16);
                 byte g = (byte)((currentValue & 0x0000ff00) >> 8);
@@ -569,18 +612,24 @@ namespace StreamUP {
                 button.ForeColor = (colour.GetBrightness() < 0.5) ? Color.White : Color.Black;
                 button.BackColor = colour;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 var colour = ColorTranslator.FromHtml(withSetting.Default);
                 button.ForeColor = (colour.GetBrightness() < 0.5) ? Color.White : Color.Black;
                 button.BackColor = colour;
             }
 
-            button.Click += (sender, e) => {
+            button.Click += (sender, e) =>
+            {
                 var colorDialog = new ColorDialog();
                 colorDialog.FullOpen = true;
-                if (colorDialog.ShowDialog() == DialogResult.OK) {
+                if (colorDialog.ShowDialog() == DialogResult.OK)
+                {
                     button.ForeColor = (colorDialog.Color.GetBrightness() < 0.5) ? Color.White : Color.Black;
                     button.BackColor = colorDialog.Color;
+                    var selectedColor = colorDialog.Color;
+                    string hexValue = selectedColor.R.ToString("X2") + selectedColor.G.ToString("X2") + selectedColor.B.ToString("X2");
+                    button.Text = "#" + hexValue;
                 }
             };
             toTable.Controls.Add(button, 1, atIndex);
@@ -603,11 +652,13 @@ namespace StreamUP {
             {
                 currentValue = bool.Parse(settings[withSetting.Name].ToString());
             }
-            
-            if (currentValue != null) {
+
+            if (currentValue != null)
+            {
                 checkbox.Checked = currentValue.Value;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 var hasCorrectDefault = bool.TryParse(withSetting.Default, out bool defaultValue);
                 checkbox.Checked = hasCorrectDefault ? defaultValue : false;
             }
@@ -634,11 +685,13 @@ namespace StreamUP {
             {
                 currentValue = int.Parse(settings[withSetting.Name].ToString());
             }
- 
-            if (currentValue != 0) {        
+
+            if (currentValue != 0)
+            {
                 input.Value = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 var hasCorrectDefault = int.TryParse(withSetting.Default, out int defaultValue);
                 input.Value = hasCorrectDefault ? defaultValue : 0;
             }
@@ -648,15 +701,14 @@ namespace StreamUP {
 
         private static void AddTrackbarSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
-             var label = new Label
+            var label = new Label
             {
                 Text = withSetting.Description,
                 AutoSize = true,
                 Margin = new Padding(4),
-                Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
+                //Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
                 //ForeColor = Color.WhiteSmoke,
             };
-
             var input = new TrackBar
             {
 
@@ -668,8 +720,8 @@ namespace StreamUP {
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 TickFrequency = (withSetting.Max - withSetting.Min) / 2, // Adjust according to your preference
-                TickStyle = TickStyle.TopLeft, 
-                Width = 100
+                TickStyle = TickStyle.TopLeft,
+                Width = 150
 
             };
 
@@ -678,11 +730,13 @@ namespace StreamUP {
             {
                 currentValue = int.Parse(settings[withSetting.Name].ToString());
             }
- 
-            if (currentValue != 0) {        
+
+            if (currentValue != 0)
+            {
                 input.Value = currentValue;
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 var hasCorrectDefault = int.TryParse(withSetting.Default, out int defaultValue);
                 input.Value = hasCorrectDefault ? defaultValue : 0;
             }
@@ -690,11 +744,13 @@ namespace StreamUP {
             var valueLabel = new Label
             {
                 AutoSize = true,
+                Dock = DockStyle.Right,
                 //Margin = new Padding(0, 10, 0, 0),
                 Text = input.Value.ToString(),
                 //ForeColor = Color.SkyBlue, // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.BottomCenter,
+                Width =  60
 
             };
 
@@ -704,9 +760,22 @@ namespace StreamUP {
             {
                 valueLabel.Text = input.Value.ToString();
             };
+          
+            var flow = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(5),
+                AutoSize = true,
+                WrapContents = false
+
+            };
+            flow.Controls.Add(input);
+            flow.Controls.Add(valueLabel);
+            
             toTable.Controls.Add(label, 0, atIndex);
-            toTable.Controls.Add(input, 1, atIndex);
-            toTable.Controls.Add(valueLabel, 2, atIndex);
+            toTable.Controls.Add(flow, 1, atIndex);
+
 
 
         }
@@ -772,11 +841,13 @@ namespace StreamUP {
             {
                 currentValue = double.Parse(settings[withSetting.Name].ToString());
             }
-            
-            if (currentValue != 0) {
+
+            if (currentValue != 0)
+            {
                 input.Value = Convert.ToDecimal(currentValue);
             }
-            else if (!string.IsNullOrEmpty(withSetting.Default)) {
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
                 var hasCorrectDefault = decimal.TryParse(withSetting.Default, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal defaultValue);
                 input.Value = hasCorrectDefault ? defaultValue : 0;
             }
@@ -792,7 +863,7 @@ namespace StreamUP {
                 Text = "🔄 Reset",
                 BackColor = Color.LightCoral
             };
-            
+
             resetButton.Click += (sender, e) =>
             {
                 DialogResult result = MessageBox.Show("Are you sure you want to reset all settings?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -805,7 +876,7 @@ namespace StreamUP {
                     {
                         if (!string.IsNullOrEmpty(setting.Name))
                         {
-                            object value = setting.Default; 
+                            object value = setting.Default;
                             if (!string.IsNullOrEmpty(setting.Default))
                             {
                                 switch (setting.Type)
@@ -824,6 +895,10 @@ namespace StreamUP {
                                         long colourValue = ((long)colour.A << 24) | ((long)colour.B << 16) | ((long)colour.G << 8) | (long)colour.R;
                                         value = colourValue;
                                         break;
+                                    case StreamUpSettingType.TrackBar:
+
+                                        value = int.Parse(setting.Default);
+                                        break;
                                 }
                             }
                             settingsDictionary[setting.Name] = value;
@@ -832,7 +907,7 @@ namespace StreamUP {
 
                     string settingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(settingsDictionary);
                     CPH.SetGlobalVar($"{productInfo.ProductNumber}_{settingsGlobalName}", settingsJson, true);
-                    
+
                     savePressed = null;
                     withParent.Close();
                     CPH.SUWriteLog("Reset button pressed. Resetting settings and loading settings menu again.", logName);
@@ -844,19 +919,23 @@ namespace StreamUP {
             saveButton.Font = new Font("Segoe UI Emoji", 10);
             saveButton.Text = "💾 Save";
             saveButton.BackColor = Color.LightGreen;
-            saveButton.Click += (sender, e) => {
+            saveButton.Click += (sender, e) =>
+            {
                 var twitchRewards = CPH.TwitchGetRewards();
                 Dictionary<string, object> settingsToSave = new Dictionary<string, object>();
-                
-                foreach (TabPage tabPage in tabControl.TabPages) {
+
+                foreach (TabPage tabPage in tabControl.TabPages)
+                {
                     var tableLayout = tabPage.Controls.OfType<TableLayoutPanel>().FirstOrDefault();
 
-                    if (tableLayout != null) {
+                    if (tableLayout != null)
+                    {
                         foreach (Control control in tableLayout.Controls)
-                        {                        
+                        {
                             object value = null;
 
-                            switch (control) {
+                            switch (control)
+                            {
                                 case ComboBox comboBox when control.Tag is StreamUpSettingType.Action:
                                     value = comboBox.SelectedItem?.ToString() ?? string.Empty;
                                     break;
@@ -889,9 +968,14 @@ namespace StreamUP {
                                 case TextBox textBox:
                                     value = textBox.Text;
                                     break;
+                                case TrackBar trackBar:
+
+                                    value = trackBar.Value;
+                                    break;
                             }
 
-                            if (value != null) {
+                            if (value != null)
+                            {
                                 settingsToSave[control.Name] = value;
                             }
                         }
@@ -920,7 +1004,8 @@ namespace StreamUP {
             cancelButton.Font = new Font("Segoe UI Emoji", 10);
             cancelButton.Text = "❌ Cancel";
             cancelButton.BackColor = Color.LightGray;
-            cancelButton.Click += (sender, e) => {
+            cancelButton.Click += (sender, e) =>
+            {
                 savePressed = false;
                 withParent.Close();
             };
@@ -932,10 +1017,10 @@ namespace StreamUP {
             resetButton.Dock = DockStyle.Left;
 
             saveButton.Dock = DockStyle.Right;
-            buttonPanel.Controls.Add(saveButton); 
+            buttonPanel.Controls.Add(saveButton);
 
             cancelButton.Dock = DockStyle.Right;
-            buttonPanel.Controls.Add(cancelButton); 
+            buttonPanel.Controls.Add(cancelButton);
 
             buttonPanel.Controls.Add(resetButton);
         }
@@ -953,11 +1038,11 @@ namespace StreamUP {
         public object Data { get; set; }
         public string TabName { get; set; }
 
-        public string Url {get; set;}
+        public string Url { get; set; }
 
-        public int Min {get; set;}
+        public int Min { get; set; }
 
-        public int Max {get; set;}
+        public int Max { get; set; }
     }
 
     public enum StreamUpSettingType
@@ -979,11 +1064,11 @@ namespace StreamUP {
         Link,
         TrackBar,
         Multiline,
-    
+
     }
 
 
-   public static class ProductSettingsBuilder
+    public static class ProductSettingsBuilder
     {
         public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
         {
@@ -1012,7 +1097,7 @@ namespace StreamUP {
             }
 
             return settings;
-        }    
+        }
         public static List<StreamUpSetting> SUSettingsCreateColour(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false, bool returnHex = false)
         {
             var type = StreamUpSettingType.Colour;
@@ -1061,7 +1146,7 @@ namespace StreamUP {
         {
             var settings = new List<StreamUpSetting>
             {
-                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading, TabName = tabName,}           
+                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Heading, TabName = tabName,}
             };
 
             if (addSpacer)
@@ -1115,7 +1200,7 @@ namespace StreamUP {
             return settings;
         }
 
-          public static List<StreamUpSetting> SUSettingsCreateMultiline(this IInlineInvokeProxy CPH, string name,string description, string defaultValue, string tabName = "General", bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateMultiline(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
@@ -1130,7 +1215,7 @@ namespace StreamUP {
             return settings;
         }
 
-          public static List<StreamUpSetting> SUSettingsCreateTrackbar(this IInlineInvokeProxy CPH, string name,string description, int min, int max, string defaultValue, string tabName = "General", bool addSpacer = false)
+        public static List<StreamUpSetting> SUSettingsCreateTrackbar(this IInlineInvokeProxy CPH, string name, string description, int min, int max, string defaultValue, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
             {
@@ -1210,6 +1295,6 @@ namespace StreamUP {
 
             return settings;
         }
-        
+
     }
 }

@@ -400,7 +400,7 @@ namespace StreamUP
             {
                 Text = text, // Add a space before the text for better spacing
                 AutoSize = true,
-                LinkColor = Color.SkyBlue,
+                LinkColor = ColorTranslator.FromHtml("#FF86BD"),
                 Anchor = AnchorStyles.None,
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Regular),
@@ -547,7 +547,7 @@ namespace StreamUP
             {
                 Text = labelText,
                 AutoSize = true,
-                LinkColor = Color.SkyBlue,
+                LinkColor = ColorTranslator.FromHtml("#FF86BD"),
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
                 Tag = tabName
@@ -1145,7 +1145,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Text = input.Value.ToString(),
-                ForeColor = Color.SkyBlue, // Change text color
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"), // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.BottomCenter,
 
@@ -1465,7 +1465,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Text = CPH.GetSettingsValue<string>(saveName + "OBS", " "),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
 
@@ -1563,7 +1563,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Text = CPH.GetSettingsValue<string>(saveName + "OBS", " "),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
             };
             var defaultColour = CPH.GetSettingsValue<string>(saveName + "HTML", defaultValue);
@@ -1658,7 +1658,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Text = CPH.GetSettingsValue<string>(saveName, " "),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 Multiline = false, // Set Multiline property
             };
@@ -1669,7 +1669,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Size = new System.Drawing.Size(30, 30),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 DialogResult = DialogResult.OK // Set DialogResult
@@ -1761,7 +1761,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
 
             };
             var style = new Label
@@ -1771,7 +1771,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold),
-                ForeColor = Color.SkyBlue,
+                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
 
             };
 
