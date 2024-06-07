@@ -10,6 +10,7 @@ using LiteDB;
 using System.Windows;
 using Streamer.bot.Plugin.Interface;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace StreamUP
 {
@@ -149,7 +150,7 @@ namespace StreamUP
 
         // List to hold controls
         private static readonly List<Control> controls = new List<Control>();
-        public static void BuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
+        public static Form BuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
         {
 
             //CustomSplashScreen splashScreen = new CustomSplashScreen();
@@ -160,11 +161,12 @@ namespace StreamUP
 
             //splashScreen.Close();
 
-            CPH.CreateMainForm(title, layout, imageFilePath);
+            Form form = CPH.CreateMainForm(title, layout, imageFilePath);
 
+            return form;
 
         }
-        public static bool CreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
+        public static Form CreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
         {
 
 
@@ -305,11 +307,11 @@ namespace StreamUP
             form.Controls.Add(tabControl);
             form.Controls.Add(buttonPanel);
             form.Controls.Add(statusBar);
-            form.ShowDialog();
+            //form.ShowDialog();
 
 
 
-            return true;
+            return form;
         }
         private static Panel CreateAboutPanel()
         {
@@ -1625,7 +1627,7 @@ namespace StreamUP
 
             return settings;
         }
-        public static List<Control> SettingsBuilderAddFile(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
+         public static List<Control> SettingsBuilderAddFile(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -1640,8 +1642,8 @@ namespace StreamUP
             };
 
             settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 90));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 10));
 
             var label = new Label
             {
@@ -1652,15 +1654,19 @@ namespace StreamUP
                 ForeColor = Color.WhiteSmoke,
             };
 
-            var valueLabel = new TextBox
+            var valueLabel = new CustomTextBox
             {
                 Name = saveName,
-                AutoSize = true,
-                Margin = new Padding(0, 10, 0, 0),
-                Text = CPH.GetSettingsValue<string>(saveName, " "),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                Text = CPH.GetSettingsValue<string>(saveName, ""),
+                Padding = new Padding(10),
+                Margin = new Padding(0, 10, 10, 0),
+                Dock = DockStyle.Fill,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                BackColor = ColorTranslator.FromHtml("#1F1F23"),
+                ForeColor = Color.White,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
-                Multiline = false, // Set Multiline property
+                BorderStyle = BorderStyle.None,
+                Width = 280
             };
 
             var input = new Button
@@ -1674,12 +1680,34 @@ namespace StreamUP
                 TextAlign = ContentAlignment.MiddleCenter,
                 DialogResult = DialogResult.OK // Set DialogResult
             };
-            var fileContent = string.Empty;
-            var filePath = string.Empty;
-            // Event handler for button click to open file dialog
-            input.Click += (sender, e) =>
-            {
 
+            // Event handler for button click to open file dialog
+            input.Click += async (sender, e) =>
+            {
+                string filePath = await OpenFileDialogAsync();
+                if (filePath != null)
+                {
+                    valueLabel.Text = filePath;
+                    Console.WriteLine(filePath);
+                }
+            };
+
+
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(valueLabel, 1, 0);
+            settingsTable.Controls.Add(input, 2, 0);
+
+            settings.Add(settingsTable);
+
+            return settings;
+        }
+
+        private static Task<string> OpenFileDialogAsync()
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            Thread thread = new Thread(() =>
+            {
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
                     openFileDialog.InitialDirectory = "c:\\";
@@ -1687,29 +1715,23 @@ namespace StreamUP
                     openFileDialog.FilterIndex = 1;
                     openFileDialog.RestoreDirectory = true;
 
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    DialogResult result = openFileDialog.ShowDialog();
+                    if (result == DialogResult.OK)
                     {
-                        Console.WriteLine(openFileDialog.FileName);
-                        valueLabel.Text = openFileDialog.FileName;
-                        Console.WriteLine(openFileDialog.FileName);
+                        tcs.SetResult(openFileDialog.FileName);
                     }
-
-
-
+                    else
+                    {
+                        tcs.SetResult(null);
+                    }
                 }
-            };
+            });
 
+            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
+            thread.Start();
 
-
-            settingsTable.Controls.Add(label, 0, 0);
-            settingsTable.Controls.Add(input, 1, 0);
-            settingsTable.Controls.Add(valueLabel, 2, 0);
-
-            settings.Add(settingsTable);
-
-            return settings;
+            return tcs.Task;
         }
-
         public static List<Control> SettingsBuilderAddFont(this IInlineInvokeProxy CPH, string description, string defaultName, string defaultSize, string defaultStyle, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -1866,7 +1888,28 @@ namespace StreamUP
 
 
         }
-               
+        //Logging
+        public static void SettingsLog(this IInlineInvokeProxy CPH, string message)
+        {
+            string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
+            string formattedDate = DateTime.Now.ToString("yyyy_MM_dd");
+            string dir = Path.Combine(program_Directory, "StreamUP", "Settings Files");
+            string file_Path = Path.Combine(dir, $"logFile_{formattedDate}.log");
+
+            // Create directory if it doesn't exist
+            Directory.CreateDirectory(dir);
+
+            if (!File.Exists(file_Path))
+            {
+                File.Create(file_Path).Close();
+
+
+            }
+            string timestamp = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] ";
+            File.AppendAllText(file_Path, timestamp + message + Environment.NewLine);
+
+
+        }
 
         #endregion
 
@@ -1874,7 +1917,7 @@ namespace StreamUP
 
         public static void SaveButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout)
         {
-            CPH.SUWriteLog("Pressed Save");
+            CPH.SettingsLog("Pressed Save");
 
             var numericUpDownsAndTextBoxes = layout
          .OfType<TableLayoutPanel>()
@@ -1885,31 +1928,31 @@ namespace StreamUP
                 switch (control)
                 {
                     case Label label:
-                        CPH.SUWriteLog($"Save Name: {label.Name}, Value: {label.Text}");
+                        CPH.SettingsLog($"Save Name: {label.Name}, Value: {label.Text}");
                         CPH.SaveSettingsValue(label.Name, label.Text);
                         break;
                     case NumericUpDown numericUpDown:
-                        CPH.SUWriteLog($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
+                        CPH.SettingsLog($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
                         CPH.SaveSettingsValue(numericUpDown.Name, numericUpDown.Value);
                         break;
                     case TextBox textBox:
-                        CPH.SUWriteLog($"Save Name: {textBox.Name}, Text: {textBox.Text}");
+                        CPH.SettingsLog($"Save Name: {textBox.Name}, Text: {textBox.Text}");
                         CPH.SaveSettingsValue(textBox.Name, textBox.Text);
                         break;
                     case CheckBox checkbox:
-                        CPH.SUWriteLog($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
+                        CPH.SettingsLog($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
                         CPH.SaveSettingsValue(checkbox.Name, checkbox.Checked);
                         break;
                     case TrackBar trackbar:
-                        CPH.SUWriteLog($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
+                        CPH.SettingsLog($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
                         CPH.SaveSettingsValue(trackbar.Name, trackbar.Value);
                         break;
                     case Button button:
-                        CPH.SUWriteLog($"Save Name: {button.Name}, Text: {button.Text}");
+                        CPH.SettingsLog($"Save Name: {button.Name}, Text: {button.Text}");
                         CPH.SaveSettingsValue(button.Name, button.Text);
                         break;
                     case ComboBox comboBox:
-                        CPH.SUWriteLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
+                        CPH.SettingsLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
                         CPH.SaveSettingsValue(comboBox.Name, comboBox.SelectedItem);
                         break;
                     case DataGridView dataGridView:
@@ -1926,7 +1969,7 @@ namespace StreamUP
                             }
 
                         }
-                        CPH.SUWriteLog($"Save Name: {dataGridView.Name}, Text: {string.Join(",", dataRows.ToArray())}");
+                        CPH.SettingsLog($"Save Name: {dataGridView.Name}, Text: {string.Join(",", dataRows.ToArray())}");
                         CPH.SaveSettingsValue(dataGridView.Name, string.Join(",", dataRows.ToArray()));
                         break;
 
@@ -1939,7 +1982,7 @@ namespace StreamUP
         }
         public static void ResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form)
         {
-            CPH.SUWriteLog("Pressed Reset");
+            CPH.SettingsLog("Pressed Reset");
 
             var numericUpDownsAndTextBoxes = layout
          .OfType<TableLayoutPanel>()
@@ -1955,14 +1998,14 @@ namespace StreamUP
         }
         public static void SaveSettingsValue(this IInlineInvokeProxy CPH, string settingName, object settingValue)
         {
-            if (settingName != null)
+            if (string.IsNullOrEmpty(settingName))
             {
 
 
                 string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-                string dir = Path.Combine(program_Directory, "StreamUP", "Data");
+                string dir = Path.Combine(program_Directory, "Extensions", "Data");
                 Directory.CreateDirectory(dir);
-                string file_Path = Path.Combine(dir, "Settings_Database.db");
+                string file_Path = Path.Combine(dir, "Extension_Database.db");
                 using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
                 {
                     var col = db.GetCollection<SaveSettings>("settings");
@@ -1986,9 +2029,9 @@ namespace StreamUP
         public static T GetSettingsValue<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
         {
             string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
+            string dir = Path.Combine(programDirectory, "Extensions", "Data");
             Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, "Settings_Database.db");
+            string filePath = Path.Combine(dir, "Extension_Database.db");
 
             using (var db = new LiteDatabase($"Filename={filePath}; Connection=shared"))
             {
@@ -2030,9 +2073,9 @@ namespace StreamUP
         {
 
             string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(program_Directory, "StreamUP", "Data");
+            string dir = Path.Combine(program_Directory, "Extensions", "Data");
             Directory.CreateDirectory(dir);
-            string file_Path = Path.Combine(dir, "Settings_Database.db");
+            string file_Path = Path.Combine(dir, "Extension_Database.db");
 
             using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
             {
