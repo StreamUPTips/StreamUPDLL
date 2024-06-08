@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using Label = System.Windows.Forms.Label;
 using Streamer.bot.Plugin.Interface;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace StreamUP
 {
@@ -212,6 +213,9 @@ namespace StreamUP
                     break;
                 case StreamUpSettingType.TrackBar:
                     CPH.AddTrackbarSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
+                case StreamUpSettingType.FileDialog:
+                    CPH.AddFileSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
             }
             rowIndex++;
@@ -750,7 +754,7 @@ namespace StreamUP
                 //ForeColor = Color.SkyBlue, // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.BottomCenter,
-                Width =  60
+                Width = 60
 
             };
 
@@ -760,7 +764,7 @@ namespace StreamUP
             {
                 valueLabel.Text = input.Value.ToString();
             };
-          
+
             var flow = new FlowLayoutPanel
             {
                 FlowDirection = FlowDirection.LeftToRight,
@@ -772,7 +776,7 @@ namespace StreamUP
             };
             flow.Controls.Add(input);
             flow.Controls.Add(valueLabel);
-            
+
             toTable.Controls.Add(label, 0, atIndex);
             toTable.Controls.Add(flow, 1, atIndex);
 
@@ -853,6 +857,120 @@ namespace StreamUP
             }
 
             toTable.Controls.Add(input, 1, atIndex);
+        }
+
+        public static void AddFileSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        {
+
+            var label = new Label
+            {
+                Text = withSetting.Description,
+                AutoSize = true,
+                Margin = new Padding(10),
+                //Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
+                //ForeColor = Color.WhiteSmoke,
+            };
+
+            var textbox = new TextBox
+            {
+                Name = withSetting.Name,
+                Padding = new Padding(10),
+                //Margin = new Padding(0, 10, 10, 0),
+                Dock = DockStyle.Fill,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                //BackColor = ColorTranslator.FromHtml("#1F1F23"),
+                //ForeColor = Color.White,
+                //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                //BorderStyle = BorderStyle.None,
+                Width = 250
+            };
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
+            if (!string.IsNullOrEmpty(currentValue))
+            {
+                textbox.Text = currentValue;
+            }
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
+                textbox.Text = withSetting.Default;
+            }
+
+            var input = new Button
+            {
+                Text = "...",
+                AutoSize = true,
+                //Margin = new Padding(0, 10, 0, 0),
+                //Size = new System.Drawing.Size(40, 40),
+                //ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                //DialogResult = DialogResult.OK // Set DialogResult
+            };
+
+            // Event handler for button click to open file dialog
+            input.Click += async (sender, e) =>
+            {
+                string filePath = await OpenFileDialogAsync();
+                if (filePath != null)
+                {
+                    textbox.Text = filePath;
+                    //Console.WriteLine(filePath);
+                }
+            };
+
+
+            var flow = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(5),
+                AutoSize = true,
+                WrapContents = false
+
+            };
+            flow.Controls.Add(textbox);
+            flow.Controls.Add(input);
+
+            toTable.Controls.Add(label, 0, atIndex);
+            toTable.Controls.Add(flow, 1, atIndex);
+
+
+        }
+
+
+        private static Task<string> OpenFileDialogAsync()
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            Thread thread = new Thread(() =>
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.InitialDirectory = "c:\\";
+                    openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    openFileDialog.FilterIndex = 1;
+                    openFileDialog.RestoreDirectory = true;
+
+                    DialogResult result = openFileDialog.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        tcs.SetResult(openFileDialog.FileName);
+                    }
+                    else
+                    {
+                        tcs.SetResult(null);
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
+            thread.Start();
+
+            return tcs.Task;
         }
 
         private static void AddButtonControls(this IInlineInvokeProxy CPH, Panel buttonPanel, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName, TabControl tabControl)
@@ -1064,6 +1182,7 @@ namespace StreamUP
         Link,
         TrackBar,
         Multiline,
+        FileDialog
 
     }
 
@@ -1220,6 +1339,21 @@ namespace StreamUP
             var settings = new List<StreamUpSetting>
             {
                 new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.TrackBar, Min = min, Max = max, Default = defaultValue, TabName = tabName, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
+            }
+
+            return settings;
+        }
+
+        public static List<StreamUpSetting> SUSettingsCreateFile(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.FileDialog, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
