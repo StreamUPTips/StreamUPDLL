@@ -1701,6 +1701,11 @@ namespace StreamUP
 
             return settings;
         }
+        //Streamerbot Stuff
+
+        //Add Rewards Dropdown
+        //Add Actions Dropdown
+        //Add Groups Dropdown 
 
         private static Task<string> OpenFileDialogAsync()
         {
@@ -2003,9 +2008,9 @@ namespace StreamUP
 
 
                 string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-                string dir = Path.Combine(program_Directory, "Extensions", "Data");
+                string dir = Path.Combine(program_Directory, "StreamUP", "Data");
                 Directory.CreateDirectory(dir);
-                string file_Path = Path.Combine(dir, "Extension_Database.db");
+                string file_Path = Path.Combine(dir, "Settings_Database.db");
                 using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
                 {
                     var col = db.GetCollection<SaveSettings>("settings");
@@ -2029,9 +2034,9 @@ namespace StreamUP
         public static T GetSettingsValue<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
         {
             string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "Extensions", "Data");
+            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, "Extension_Database.db");
+            string filePath = Path.Combine(dir, "Settings_Database.db");
 
             using (var db = new LiteDatabase($"Filename={filePath}; Connection=shared"))
             {
@@ -2073,9 +2078,9 @@ namespace StreamUP
         {
 
             string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(program_Directory, "Extensions", "Data");
+            string dir = Path.Combine(program_Directory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string file_Path = Path.Combine(dir, "Extension_Database.db");
+            string file_Path = Path.Combine(dir, "Settings_Database.db");
 
             using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
             {
@@ -2091,9 +2096,9 @@ namespace StreamUP
 
 
         }
+        #endregion
     }
 
-    #endregion
 
 
 }
