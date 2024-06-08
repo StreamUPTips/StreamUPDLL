@@ -112,13 +112,14 @@ namespace StreamUP
                     var settingsTable = new TableLayoutPanel
                     {
                         Dock = DockStyle.Fill,
-                        ColumnCount = 2,
+                        ColumnCount = 3,
                         AutoScroll = true,
                         AutoSizeMode = AutoSizeMode.GrowAndShrink
                     };
 
                     settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                    settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
                     tabPage.Controls.Add(settingsTable);
                     tabControl.Controls.Add(tabPage);
@@ -725,7 +726,7 @@ namespace StreamUP
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 TickFrequency = (withSetting.Max - withSetting.Min) / 2, // Adjust according to your preference
                 TickStyle = TickStyle.TopLeft,
-                Width = 150
+                //Width = 150
 
             };
 
@@ -753,8 +754,8 @@ namespace StreamUP
                 Text = input.Value.ToString(),
                 //ForeColor = Color.SkyBlue, // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
-                TextAlign = ContentAlignment.BottomCenter,
-                Width = 60
+                TextAlign = ContentAlignment.MiddleCenter,
+                //Width = 60
 
             };
 
@@ -765,20 +766,10 @@ namespace StreamUP
                 valueLabel.Text = input.Value.ToString();
             };
 
-            var flow = new FlowLayoutPanel
-            {
-                FlowDirection = FlowDirection.LeftToRight,
-                Dock = DockStyle.Fill,
-                Padding = new Padding(5),
-                AutoSize = true,
-                WrapContents = false
-
-            };
-            flow.Controls.Add(input);
-            flow.Controls.Add(valueLabel);
 
             toTable.Controls.Add(label, 0, atIndex);
-            toTable.Controls.Add(flow, 1, atIndex);
+            toTable.Controls.Add(input, 1, atIndex);
+            toTable.Controls.Add(valueLabel, 2, atIndex);
 
 
 
@@ -922,21 +913,9 @@ namespace StreamUP
                 }
             };
 
-
-            var flow = new FlowLayoutPanel
-            {
-                FlowDirection = FlowDirection.LeftToRight,
-                Dock = DockStyle.Fill,
-                Padding = new Padding(5),
-                AutoSize = true,
-                WrapContents = false
-
-            };
-            flow.Controls.Add(textbox);
-            flow.Controls.Add(input);
-
             toTable.Controls.Add(label, 0, atIndex);
-            toTable.Controls.Add(flow, 1, atIndex);
+            toTable.Controls.Add(textbox, 1, atIndex);
+            toTable.Controls.Add(input, 2, atIndex);
 
 
         }
@@ -950,8 +929,8 @@ namespace StreamUP
             {
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
-                    openFileDialog.InitialDirectory = "c:\\";
-                    openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    //openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
                     openFileDialog.FilterIndex = 1;
                     openFileDialog.RestoreDirectory = true;
 
@@ -1087,7 +1066,6 @@ namespace StreamUP
                                     value = textBox.Text;
                                     break;
                                 case TrackBar trackBar:
-
                                     value = trackBar.Value;
                                     break;
                             }
