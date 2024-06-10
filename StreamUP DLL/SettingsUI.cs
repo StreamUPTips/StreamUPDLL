@@ -7,10 +7,13 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using LiteDB;
-using System.Windows;
 using Streamer.bot.Plugin.Interface;
 using System.Net;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Drawing.Drawing2D;
+using System.Data.SqlTypes;
+
 
 namespace StreamUP
 {
@@ -65,6 +68,22 @@ namespace StreamUP
 
     public class BorderlessTabControl : TabControl
     {
+        public Color TabBarBackColor { get; set; } = Color.Gray;
+        public Color ActiveBackground { get; set; } = Color.Yellow;
+        public Color ActiveText { get; set; } = Color.Green;
+        public Color InactiveBackground { get; set; } = Color.Red;
+        public Color InactiveText { get; set; } = Color.Blue;
+        
+
+        public BorderlessTabControl()
+        {
+            this.DrawMode = TabDrawMode.OwnerDrawFixed;
+            this.DrawItem += new DrawItemEventHandler(DrawTab);
+            Console.WriteLine("BorderlessTabControl initialized");
+            this.Padding = new Point(20, 10);
+            this.SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.DoubleBuffer, true);
+        }
+
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
@@ -77,15 +96,90 @@ namespace StreamUP
                 rect.Right += 5;
                 rect.Bottom += 5;
                 Marshal.StructureToPtr(rect, m.LParam, true);
+                Console.WriteLine("WndProc called with TCM_ADJUSTRECT");
             }
         }
-
-
-
 
         private struct RECT
         {
             public int Left, Top, Right, Bottom;
+        }
+
+        private void DrawTab(object sender, DrawItemEventArgs e)
+        {
+            Console.WriteLine("Drawing tab index: " + e.Index);
+            Graphics g = e.Graphics;
+            TabPage tabPage = this.TabPages[e.Index];
+            Rectangle tabBounds = this.GetTabRect(e.Index);
+
+            Brush textBrush;
+            Brush backgroundBrush;
+
+            if (e.State == DrawItemState.Selected)
+            {
+                textBrush = new SolidBrush(ActiveText);
+                backgroundBrush = new SolidBrush(ActiveBackground);
+            }
+            else
+            {
+                textBrush = new SolidBrush(InactiveText);
+                backgroundBrush = new SolidBrush(InactiveBackground);
+            }
+       
+
+            // Draw the tab background with rounded corners (top only)
+            using (GraphicsPath path = CreateTabPath(tabBounds))
+            {
+                g.FillPath(backgroundBrush, path);
+            }
+
+            // Use StringFormat to center the text in the tab
+            StringFormat stringFlags = new StringFormat();
+            stringFlags.Alignment = StringAlignment.Center;
+            stringFlags.LineAlignment = StringAlignment.Center;
+
+            // Draw text
+            g.DrawString(tabPage.Text, this.Font, textBrush, tabBounds, stringFlags);
+
+            // Clean up
+            textBrush.Dispose();
+            backgroundBrush.Dispose();
+        }
+
+        private GraphicsPath CreateTabPath(Rectangle rect)
+        {
+            GraphicsPath path = new GraphicsPath();
+            int radius = 10; // Change this value for more or less rounded corners
+            path.AddLine(rect.Left, rect.Bottom, rect.Left, rect.Top + radius);
+            path.AddArc(rect.Left, rect.Top, radius, radius, 180, 90);
+            path.AddArc(rect.Right - radius, rect.Top, radius, radius, 270, 90);
+            path.AddLine(rect.Right, rect.Top + radius, rect.Right, rect.Bottom);
+            path.CloseFigure();
+            return path;
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            // Draw the background of the tab control
+            using (Brush backBrush = new SolidBrush(this.TabBarBackColor))
+            {
+                e.Graphics.FillRectangle(backBrush, this.ClientRectangle);
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            // Ensure the background of the tab control is painted correctly
+            using (Brush backBrush = new SolidBrush(this.TabBarBackColor))
+            {
+                e.Graphics.FillRectangle(backBrush, this.ClientRectangle);
+            }
+
+            // Custom paint the tabs
+            for (int i = 0; i < this.TabCount; i++)
+            {
+                DrawTab(this, new DrawItemEventArgs(e.Graphics, this.Font, this.GetTabRect(i), i, (this.SelectedIndex == i) ? DrawItemState.Selected : DrawItemState.None));
+            }
         }
     }
 
@@ -144,17 +238,28 @@ namespace StreamUP
     {
         public static TableLayoutPanel settingsTable;
         private static FlowLayoutPanel buttonPanel;
+        private static TabControl tabControl;
         private static Button saveButton;
         private static Button resetButton;
+        private static Random random = new Random();
+
+        private static Color backColour1 = ColorTranslator.FromHtml("#121212");
+        private static Color backColour2 = ColorTranslator.FromHtml("#212121");
+        private static Color forecolour1 = Color.WhiteSmoke;
+        private static Color forecolour2 = Color.SkyBlue;
+        private static Color forecolour3 = Color.Black;
+        private static Color linkColour = ColorTranslator.FromHtml("#FF86BD");
+        private static Color boolTrueColor = Color.SeaGreen;
+        private static Color boolFalseColor = Color.IndianRed;
         //private static SplashScreen splashScreen;
 
         // List to hold controls
         private static readonly List<Control> controls = new List<Control>();
-        public static Form BuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
+        public static Form BuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, int imageFilePath = -1)
         {
 
             //CustomSplashScreen splashScreen = new CustomSplashScreen();
-           // splashScreen.Show();
+            // splashScreen.Show();
 
 
             Thread.Sleep(3000);
@@ -166,7 +271,7 @@ namespace StreamUP
             return form;
 
         }
-        public static Form CreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, string imageFilePath = null)
+        public static Form CreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, int imageFilePath = -1)
         {
 
 
@@ -187,12 +292,15 @@ namespace StreamUP
                 tabControls[tabName].Add(control);
             }
 
-            TabControl tabControl = new BorderlessTabControl
+            tabControl = new BorderlessTabControl()
             {
                 Dock = DockStyle.Fill,
-                //BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                //ForeColor = Color.White,
-                Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                Font = new Font(FontFamily.GenericSansSerif, 11.0F, FontStyle.Bold),
+                ActiveText = forecolour1,
+                ActiveBackground = backColour1,
+                InactiveText = forecolour2,
+                InactiveBackground = backColour2,
+                TabBarBackColor = backColour2,
 
 
             };
@@ -206,7 +314,7 @@ namespace StreamUP
                 Height = 800,
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = GetIconOrDefault(imageFilePath),
-                BackColor = ColorTranslator.FromHtml("#18181B")
+                BackColor = backColour1
             };
 
             // Create and add tab pages
@@ -214,7 +322,9 @@ namespace StreamUP
             {
                 TabPage tabPage = new TabPage(tab.Key)
                 {
-                    BackColor = ColorTranslator.FromHtml("#18181B")
+
+                    BackColor = backColour1,
+
                 };
 
                 TableLayoutPanel tableLayout = new TableLayoutPanel
@@ -243,15 +353,15 @@ namespace StreamUP
             }
 
             // Create "About" tab page
-           // TabPage aboutTabPage = new TabPage("About")
+            // TabPage aboutTabPage = new TabPage("About")
             //{
-           //     BackColor = ColorTranslator.FromHtml("#18181B")
-          //  };
+            //     BackColor = ColorTranslator.FromHtml("#18181B")
+            //  };
 
             // Add your specific controls to the About tab
-           // aboutTabPage.Controls.Add(CreateAboutPanel());
+            // aboutTabPage.Controls.Add(CreateAboutPanel());
 
-           // tabControl.TabPages.Add(aboutTabPage);
+            // tabControl.TabPages.Add(aboutTabPage);
 
             buttonPanel = new FlowLayoutPanel
             {
@@ -259,7 +369,7 @@ namespace StreamUP
                 Dock = DockStyle.Bottom,
                 Padding = new Padding(5),
                 AutoSize = true,
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
 
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular)
             };
@@ -269,8 +379,8 @@ namespace StreamUP
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
                 AutoSize = true,
-                ForeColor = Color.WhiteSmoke,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
+                ForeColor = forecolour1,
+                BackColor = boolTrueColor,
             };
 
             saveButton.Click += (sender, e) => CPH.SaveButton_Click(sender, e, layout);
@@ -280,8 +390,8 @@ namespace StreamUP
                 Text = "🔄 Reset",
                 Padding = new Padding(10),
                 AutoSize = true,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.WhiteSmoke,
+                BackColor = boolFalseColor,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular)
             };
             resetButton.Click += (sender, e) => CPH.ResetButton_Click(sender, e, layout, form);
@@ -333,7 +443,7 @@ namespace StreamUP
 
             Label outtro = new Label
             {
-                Text = "This UI Settings is brought to you by TerrierDarts. \n You can support TerrierDarts through the following methods:",
+                Text = "This UI Settings is brought to you by The StreamUP Team. \n You can support The StreamUP through the following methods:",
                 AutoSize = true,
                 ForeColor = Color.WhiteSmoke,
                 Anchor = AnchorStyles.None,
@@ -353,7 +463,7 @@ namespace StreamUP
 
             Label creditsContent = new Label
             {
-                Text = "This UI would not be possibile with out the help and support of the following people. \n\n ConfuzzedCat, BitGamey, GoWMan, Web_Mage, tawmae, Mustached_Maniac, Rondhi, Lyfesaver74 and Geocym. ",
+                Text = "This UI would not be possibile with out the help and support of the following people. \n\n ConfuzzedCat, BitGamey, GoWMan, Web_Mage, tawmae, Mustached_Maniac, Rondhi, Lyfesaver74 and Geocym.",
                 AutoSize = true,
                 ForeColor = Color.WhiteSmoke,
                 Anchor = AnchorStyles.None,
@@ -402,58 +512,76 @@ namespace StreamUP
             {
                 Text = text, // Add a space before the text for better spacing
                 AutoSize = true,
-                LinkColor = ColorTranslator.FromHtml("#FF86BD"),
+                LinkColor = linkColour,
                 Anchor = AnchorStyles.None,
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Regular),
             };
 
             // Load the image from resources
-           // System.Drawing.Image iconImage = (System.Drawing.Image)SettingsUI.Properties.Resources.ResourceManager.GetObject(iconName);
+            // System.Drawing.Image iconImage = (System.Drawing.Image)SettingsUI.Properties.Resources.ResourceManager.GetObject(iconName);
 
-           /* if (iconImage != null)
-            {
-                int textHeight = TextRenderer.MeasureText(text, linkLabel.Font).Height;
-                System.Drawing.Image resizedImage = new Bitmap(iconImage, new System.Drawing.Size(textHeight, textHeight));
-                linkLabel.Image = resizedImage;
-                linkLabel.ImageAlign = ContentAlignment.MiddleLeft; // Align the image to the left
-                linkLabel.TextAlign = ContentAlignment.MiddleRight; // Align the text to the right
-                linkLabel.Padding = new Padding(resizedImage.Width + 5, 0, 10, 10);
-            }*/
+            /* if (iconImage != null)
+             {
+                 int textHeight = TextRenderer.MeasureText(text, linkLabel.Font).Height;
+                 System.Drawing.Image resizedImage = new Bitmap(iconImage, new System.Drawing.Size(textHeight, textHeight));
+                 linkLabel.Image = resizedImage;
+                 linkLabel.ImageAlign = ContentAlignment.MiddleLeft; // Align the image to the left
+                 linkLabel.TextAlign = ContentAlignment.MiddleRight; // Align the text to the right
+                 linkLabel.Padding = new Padding(resizedImage.Width + 5, 0, 10, 10);
+             }*/
 
             linkLabel.LinkClicked += (sender, e) => System.Diagnostics.Process.Start(url);
             return linkLabel;
         }
-        private static Icon GetIconOrDefault(string imageFilePath)
+        private static Icon GetIconOrDefault(int imageNumber = -1)
         {
-            Icon icon = null;
-            if (!string.IsNullOrEmpty(imageFilePath))
+            
+           
+            byte[] bytes;// = Convert.FromBase64String(UIResources.supIconString); 
+            Icon icon;
+            if(imageNumber == -1) 
             {
-                if (File.Exists(imageFilePath))
-                {
-                    icon = ConvertToIcon(imageFilePath);
-                }
-                else
-                {
-                    DownloadImage(imageFilePath);
-                    string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    string filePath = Path.Combine(programDirectory, "Extensions", "Data", "iconImage.png");
-                    icon = ConvertToIcon(filePath);
-                }
-                //
+                imageNumber = random.Next(1, 8);
+            }
+            switch(imageNumber)
+            {
+                case 1:
+                    bytes = Convert.FromBase64String(UIResources.midnightWhite);
+                    break;
+                case 2:
+                    bytes = Convert.FromBase64String(UIResources.pinkMidnight);
+                    break;
+                case 3:
+                    bytes = Convert.FromBase64String(UIResources.whiteBlack);
+                    break;
+                case 4:
+                    bytes = Convert.FromBase64String(UIResources.creamMidnight);
+                    break;
+                case 5:
+                    bytes = Convert.FromBase64String(UIResources.cyanMidnight);
+                    break;
+                case 6:
+                    bytes = Convert.FromBase64String(UIResources.greyMidnight);
+                    break;
+                case 7:
+                    bytes = Convert.FromBase64String(UIResources.midnightCyan);
+                    break;
+              
+                default:
+                    bytes = Convert.FromBase64String(UIResources.supIconString);
+                    break;
             }
 
-
-
-            if (icon == null)
-            {
-                // Set a default icon if conversion fails or both image files are missing
-                icon = SystemIcons.Application;//SettingsUI.Properties.Resources.sbextlogo;//SystemIcons.Application;
-            }
+             using var ms = new MemoryStream(bytes);
+             icon = new Icon(ms);
 
             return icon;
         }
-        private static Icon ConvertToIcon(string imagePath)
+
+     
+        /*
+        private static Icon ConvertToIcon(Bitmap imagePath)
         {
             try
             {
@@ -490,6 +618,7 @@ namespace StreamUP
                 }
             }
         }
+        */
         public static void SetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -500,6 +629,7 @@ namespace StreamUP
                 button.ForeColor = defaultColor.GetBrightness() < 0.5 ? Color.White : Color.Black;
             }
         }
+
 
         #region Methods
 
@@ -515,7 +645,7 @@ namespace StreamUP
                 AutoSize = true,
                 Padding = new Padding(10),
                 Dock = DockStyle.Fill,
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Tag = tabName
             };
 
@@ -533,7 +663,7 @@ namespace StreamUP
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Tag = tabName
 
             };
@@ -549,7 +679,7 @@ namespace StreamUP
             {
                 Text = labelText,
                 AutoSize = true,
-                LinkColor = ColorTranslator.FromHtml("#FF86BD"),
+                LinkColor = linkColour,
                 Padding = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
                 Tag = tabName
@@ -570,7 +700,7 @@ namespace StreamUP
                 Height = 2,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Tag = tabName
             };
 
@@ -589,7 +719,7 @@ namespace StreamUP
                 AutoSize = true,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Italic),
                 Tag = tabName
             };
@@ -607,7 +737,7 @@ namespace StreamUP
                 Font = new Font(FontFamily.GenericSansSerif, 20.0F, FontStyle.Regular),
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Tag = tabName
             };
 
@@ -641,7 +771,7 @@ namespace StreamUP
                 Text = description,
                 AutoSize = true,
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Margin = new Padding(10),
 
             };
@@ -654,8 +784,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
 
@@ -697,7 +827,7 @@ namespace StreamUP
                 Text = description,
                 AutoSize = true,
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Margin = new Padding(10),
 
             };
@@ -710,8 +840,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
                 Multiline = true,
@@ -755,7 +885,7 @@ namespace StreamUP
                 Text = description,
                 AutoSize = true,
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Margin = new Padding(10),
 
             };
@@ -768,8 +898,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
                 MaxLength = textLimit
@@ -813,7 +943,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
 
             };
 
@@ -824,8 +954,8 @@ namespace StreamUP
                 Height = 200,
                 Dock = DockStyle.Fill,
                 Margin = new Padding(10),
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
                 ColumnHeadersVisible = false,
@@ -834,13 +964,13 @@ namespace StreamUP
                 AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
                 DefaultCellStyle = new DataGridViewCellStyle
                 {
-                    BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                    ForeColor = Color.White,
-                    SelectionBackColor = ColorTranslator.FromHtml("#3E3E42"),
-                    SelectionForeColor = Color.White
+                    BackColor = backColour2,
+                    ForeColor = forecolour1,
+                    SelectionBackColor = backColour1,
+                    SelectionForeColor = forecolour1
                 },
                 EnableHeadersVisualStyles = false,
-                GridColor = ColorTranslator.FromHtml("#1F1F23"),
+                GridColor = backColour2,
                 AllowUserToDeleteRows = true
             };
 
@@ -894,7 +1024,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
 
             };
 
@@ -907,8 +1037,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None
 
@@ -935,7 +1065,7 @@ namespace StreamUP
                 AutoSize = true,
                 Padding = new Padding(0),
                 Margin = new Padding(0),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 Dock = DockStyle.Fill,
                 Tag = tabName
             };
@@ -950,7 +1080,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
 
             };
 
@@ -961,8 +1091,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
 
 
@@ -1008,7 +1138,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke
+                ForeColor = forecolour1
             };
 
             var input = new CustomNumericUpDown
@@ -1021,8 +1151,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
                 TextAlign = HorizontalAlignment.Left,
@@ -1064,7 +1194,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke
+                ForeColor = forecolour1
             };
 
             var input = new CustomNumericUpDown
@@ -1079,8 +1209,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None
 
@@ -1122,7 +1252,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             var input = new TrackBar
@@ -1147,7 +1277,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Text = input.Value.ToString(),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"), // Change text color
+                ForeColor = forecolour2,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.BottomCenter,
 
@@ -1195,7 +1325,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             // Create a new CheckBox control
@@ -1210,9 +1340,9 @@ namespace StreamUP
                 Width = 280,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Appearance = Appearance.Button,
-                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? Color.SeaGreen : Color.IndianRed,
+                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? boolTrueColor : boolFalseColor,
                 Text = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? "True" : "False",
-                ForeColor = Color.Black,
+                ForeColor = forecolour3,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
             };
@@ -1220,7 +1350,7 @@ namespace StreamUP
             input.CheckedChanged += (sender, e) =>
             {
                 // Change the background color of the checkbox button based on its checked state
-                input.BackColor = input.Checked ? Color.SeaGreen : Color.IndianRed;
+                input.BackColor = input.Checked ? boolTrueColor : boolFalseColor;
                 input.Text = input.Checked ? "True" : "False";
             };
 
@@ -1260,7 +1390,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             // Create a new CheckBox control
@@ -1275,9 +1405,9 @@ namespace StreamUP
                 Width = 280,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Appearance = Appearance.Button,
-                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? Color.SeaGreen : Color.IndianRed,
+                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? boolTrueColor : boolFalseColor,
                 Text = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? "Yes" : "No",
-                ForeColor = Color.Black,
+                ForeColor = forecolour3,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
             };
@@ -1285,7 +1415,7 @@ namespace StreamUP
             input.CheckedChanged += (sender, e) =>
             {
                 // Change the background color of the checkbox button based on its checked state
-                input.BackColor = input.Checked ? Color.SeaGreen : Color.IndianRed;
+                input.BackColor = input.Checked ? boolTrueColor : boolFalseColor;
                 input.Text = input.Checked ? "Yes" : "No";
             };
 
@@ -1326,7 +1456,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             // Create a new CheckBox control
@@ -1341,9 +1471,9 @@ namespace StreamUP
                 Width = 280,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Appearance = Appearance.Button,
-                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? Color.SeaGreen : Color.IndianRed,
+                BackColor = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? boolTrueColor : boolFalseColor,
                 Text = CPH.GetSettingsValue<bool>(saveName, defaultValue) ? "On" : "Off",
-                ForeColor = Color.Black,
+                ForeColor = forecolour3,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
             };
@@ -1351,7 +1481,7 @@ namespace StreamUP
             input.CheckedChanged += (sender, e) =>
             {
                 // Change the background color of the checkbox button based on its checked state
-                input.BackColor = input.Checked ? Color.SeaGreen : Color.IndianRed;
+                input.BackColor = input.Checked ? boolTrueColor : boolFalseColor;
                 input.Text = input.Checked ? "On" : "Off";
             };
 
@@ -1365,7 +1495,7 @@ namespace StreamUP
 
             return settings;
         }
-        public static List<Control> SettingsBuilderAddChecklist(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
+        public static List<Control> SettingsBuilderAddChecklist(this IInlineInvokeProxy CPH, string description, string saveName, Dictionary<string, bool> checkListItems, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -1391,7 +1521,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             // Create a new CheckBox control
@@ -1399,12 +1529,11 @@ namespace StreamUP
             var input = new CheckedListBox
             {
                 Name = saveName,
-                // Checked = CPH.GetSettingsValue<bool>(saveName, defaultValue),
                 Padding = new Padding(0),
                 Margin = new Padding(0, 10, 10, 0),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour1,
+                ForeColor = forecolour1,
                 BorderStyle = BorderStyle.None,
                 Height = 250,
                 Width = 280,
@@ -1413,11 +1542,18 @@ namespace StreamUP
 
             };
 
-            input.Items.Add("Item 1", false);  // Add unchecked item
-            input.Items.Add("Item 2", true);   // Add checked item
-            input.Items.Add("Item 3", false);  // Add unchecked item
-            input.Items.Add("Item 4", true);   // Add checked item
-            input.Items.Add("Item 5", false);
+
+
+            Dictionary<string, bool> checkedItemsDict = CPH.GetSettingsValue<Dictionary<string, bool>>(saveName, checkListItems);
+
+
+            foreach (KeyValuePair<string, bool> checkItem in checkedItemsDict)
+            {
+
+                input.Items.Add(checkItem.Key, checkItem.Value);
+
+            }
+
 
 
 
@@ -1458,7 +1594,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             var valueLabel = new Label
@@ -1496,7 +1632,7 @@ namespace StreamUP
                 {
                     var selectedColor = colorDialog.Color;
                     input.BackColor = selectedColor;
-                    input.ForeColor = selectedColor.GetBrightness() < 0.5 ? Color.White : Color.Black;
+                    input.ForeColor = selectedColor.GetBrightness() < 0.5 ? forecolour1 : forecolour3;
                     long alpha = selectedColor.A;
                     long green = selectedColor.G;
                     long blue = selectedColor.B;
@@ -1535,99 +1671,13 @@ namespace StreamUP
         {
             List<Control> settings = new List<Control>();
 
-            TableLayoutPanel settingsTable = new TableLayoutPanel
-            {
-                ColumnCount = 3,
-                AutoSize = true,
-                Padding = new Padding(0),
-                Margin = new Padding(0),
-                Dock = DockStyle.Fill,
-                Tag = tabName
 
-            };
+            settings.AddRange(CPH.SettingsBuilderAddColour(description, defaultValue, saveName, tabName));
 
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-
-            var label = new Label
-            {
-                Text = description,
-                AutoSize = true,
-                Margin = new Padding(10),
-                Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
-            };
-
-            var valueLabel = new Label
-            {
-                Name = saveName + "OBS",
-                AutoSize = true,
-                Margin = new Padding(0, 10, 0, 0),
-                Text = CPH.GetSettingsValue<string>(saveName + "OBS", " "),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
-                Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
-            };
-            var defaultColour = CPH.GetSettingsValue<string>(saveName + "HTML", defaultValue);
-            var input = new Button
-            {
-                Name = saveName + "HTML",
-                Text = defaultColour,
-                AutoSize = true,
-                Margin = new Padding(0, 10, 0, 0),
-                BackColor = ColorTranslator.FromHtml(defaultColour),
-                Size = new System.Drawing.Size(30, 30),
-                Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
-                TextAlign = ContentAlignment.MiddleCenter
-            };
-
-            // Event handler for button click to open color picker
-            input.Click += (sender, e) =>
-            {
-                // Here, you should implement code to open a color picker dialog
-                // and update the button text and value label with the selected color
-                // For example:
-                var colorDialog = new ColorDialog();
-                if (colorDialog.ShowDialog() == DialogResult.OK)
-                {
-                    var selectedColor = colorDialog.Color;
-                    input.BackColor = selectedColor;
-                    input.ForeColor = selectedColor.GetBrightness() < 0.5 ? Color.White : Color.Black;
-                    long alpha = selectedColor.A;
-                    long green = selectedColor.G;
-                    long blue = selectedColor.B;
-                    long red = selectedColor.R;
-                    long obsColour = (alpha * 256 * 256 * 256) + (green * 256 * 256) + (blue * 256) + red;
-                    valueLabel.Text = $"{obsColour}";
-                    string hexValue = selectedColor.R.ToString("X2") + selectedColor.G.ToString("X2") + selectedColor.B.ToString("X2");
-                    input.Text = "#" + hexValue;
-                    Console.WriteLine($"Selected color: ARGB({selectedColor.A}, {selectedColor.R}, {selectedColor.G}, {selectedColor.B})");
-                }
-            };
-
-            valueLabel.Click += (sender, e) =>
-            {
-
-                var text = valueLabel.Text;
-                Thread thread = new Thread(() => Clipboard.SetText(text));
-                thread.SetApartmentState(ApartmentState.STA); //Set the thread to STA
-                thread.Start();
-                thread.Join(); //Wait for the thread to end
-            };
-
-
-
-            SetButtonColor(input, defaultColour);
-
-            settingsTable.Controls.Add(label, 0, 0);
-            settingsTable.Controls.Add(input, 1, 0);
-            settingsTable.Controls.Add(valueLabel, 2, 0);
-
-            settings.Add(settingsTable);
 
             return settings;
         }
-         public static List<Control> SettingsBuilderAddFile(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
+        public static List<Control> SettingsBuilderAddFile(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -1651,7 +1701,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             var valueLabel = new CustomTextBox
@@ -1662,8 +1712,8 @@ namespace StreamUP
                 Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 BorderStyle = BorderStyle.None,
                 Width = 280
@@ -1675,7 +1725,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
                 Size = new System.Drawing.Size(30, 30),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                ForeColor = forecolour2,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 DialogResult = DialogResult.OK // Set DialogResult
@@ -1701,11 +1751,6 @@ namespace StreamUP
 
             return settings;
         }
-        //Streamerbot Stuff
-
-        //Add Rewards Dropdown
-        //Add Actions Dropdown
-        //Add Groups Dropdown 
 
         private static Task<string> OpenFileDialogAsync()
         {
@@ -1764,7 +1809,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
 
@@ -1774,8 +1819,8 @@ namespace StreamUP
                 Text = CPH.GetSettingsValue<string>(saveName + "Name", defaultName),
                 AutoSize = true,
                 Margin = new Padding(0, 10, 0, 0),
-                BackColor = ColorTranslator.FromHtml("#1F1F23"),
-                ForeColor = Color.White,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 Size = new System.Drawing.Size(280, 30),
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -1788,7 +1833,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                ForeColor = forecolour2,
 
             };
             var style = new Label
@@ -1798,7 +1843,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Bold),
-                ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                ForeColor = forecolour2,
 
             };
 
@@ -1861,7 +1906,7 @@ namespace StreamUP
                 AutoSize = true,
                 Margin = new Padding(10),
                 Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
 
@@ -1873,7 +1918,7 @@ namespace StreamUP
                 Size = new System.Drawing.Size(280, 30),
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 AutoSize = true,
-                ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
                 BackColor = ColorTranslator.FromHtml("#1F1F23"),
                 TextAlign = ContentAlignment.MiddleCenter,
             };
@@ -1960,6 +2005,23 @@ namespace StreamUP
                         CPH.SettingsLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
                         CPH.SaveSettingsValue(comboBox.Name, comboBox.SelectedItem);
                         break;
+                    case CheckedListBox checkedListBox:
+
+                        Dictionary<string, bool> checkedItemsDict = new Dictionary<string, bool>();
+
+                        foreach (var item in checkedListBox.Items)
+                        {
+                            string itemName = item.ToString();
+                            bool isChecked = checkedListBox.GetItemChecked(checkedListBox.Items.IndexOf(item));
+                            checkedItemsDict[itemName] = isChecked;
+                        }
+                        CPH.SettingsLog($"{checkedListBox.Name}, Items: {string.Join(", ", checkedItemsDict.Select(kv => $"[{kv.Key}, {kv.Value}]"))}");
+                        // Serialize the dictionary to a JSON string
+                        string jsonData = JsonConvert.SerializeObject(checkedItemsDict);
+
+                        // Save the JSON string
+                        CPH.SaveSettingsValue(checkedListBox.Name, jsonData);
+                        break;
                     case DataGridView dataGridView:
 
                         List<string> dataRows = new List<string>();
@@ -2003,14 +2065,14 @@ namespace StreamUP
         }
         public static void SaveSettingsValue(this IInlineInvokeProxy CPH, string settingName, object settingValue)
         {
-            if (string.IsNullOrEmpty(settingName))
+            if (!string.IsNullOrEmpty(settingName))
             {
 
 
                 string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
                 string dir = Path.Combine(program_Directory, "StreamUP", "Data");
                 Directory.CreateDirectory(dir);
-                string file_Path = Path.Combine(dir, "Settings_Database.db");
+                string file_Path = Path.Combine(dir, "Product_Settings.db");
                 using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
                 {
                     var col = db.GetCollection<SaveSettings>("settings");
@@ -2036,7 +2098,7 @@ namespace StreamUP
             string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, "Settings_Database.db");
+            string filePath = Path.Combine(dir, "Product_Settings.db");
 
             using (var db = new LiteDatabase($"Filename={filePath}; Connection=shared"))
             {
@@ -2063,6 +2125,20 @@ namespace StreamUP
                             return defaultValue;
                         }
                     }
+                    else if (typeof(T) == typeof(Dictionary<string, bool>))
+                    {
+                        if (settings.SettingValue != null)
+                        {
+                            // Parse the JSON string and convert it to a dictionary
+                            Dictionary<string, bool> dictValue = JsonConvert.DeserializeObject<Dictionary<string, bool>>(settings.SettingValue.ToString());
+                            return (T)Convert.ChangeType(dictValue, typeof(T));
+                        }
+                        else
+                        {
+                            // Handle case where the stored value is not a dictionary
+                            return defaultValue;
+                        }
+                    }
                     else
                     {
                         // Handle other types
@@ -2080,7 +2156,7 @@ namespace StreamUP
             string program_Directory = AppDomain.CurrentDomain.BaseDirectory;
             string dir = Path.Combine(program_Directory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            string file_Path = Path.Combine(dir, "Settings_Database.db");
+            string file_Path = Path.Combine(dir, "Product_Settings.db");
 
             using (var db = new LiteDatabase($"Filename={file_Path}; Connection=shared"))
             {
@@ -2096,9 +2172,9 @@ namespace StreamUP
 
 
         }
-        #endregion
     }
 
+    #endregion
 
 
 }

@@ -94,27 +94,8 @@ namespace StreamUP
             return hours;
         }
 
-          /*public static List<StreamUpSetting> AddSettingsToUI(this IInlineInvokeProxy CPH)
-    {
-        List<StreamUpSetting> settings = new List<StreamUpSetting>();
-        settings.AddRange(CPH.SUSettingsCreateHeading());
-        settings.AddRange(CPH.SUSettingsCreateInteger("RaffleDefaultPrize"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleMinPrize"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleMaxPrize"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleLength"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleCost"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleMaxEntries"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleWinnerPerEntries"));
 
-        
-        setting.AddRange(CPH.SUSettingsCreateBoolean("RaffleMultiWinners"));
-        setting.AddRange(CPH.SUSettingsCreateInteger("RaffleSharePrize"));
-        
-        
-        
-        return settings;
-    }
-    */
+    
     }
 
 

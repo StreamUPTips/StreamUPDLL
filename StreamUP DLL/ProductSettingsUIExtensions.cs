@@ -13,6 +13,8 @@ using Label = System.Windows.Forms.Label;
 using Streamer.bot.Plugin.Interface;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Drawing.Text;
+using System.Runtime.InteropServices;
 
 namespace StreamUP
 {
@@ -36,13 +38,18 @@ namespace StreamUP
     // - StreamUpSettingType.Link 
     //
     // Name = The variable name, Description = The UI label, Type = See above, Default = The default value as a string.
-
-
-
     public static class ProductSettingsUIExtensions
     {
         public static bool? savePressed = false;
         private static string logName = "DLL::ProductSettingsUI";
+        private static Color backColour1 = ColorTranslator.FromHtml("#18181B");
+        private static Color backColour2  = ColorTranslator.FromHtml("#444444");
+        private static Color forecolour1 = Color.WhiteSmoke;
+        private static Color forecolour2 = Color.SkyBlue;
+        private static Color linkColour = ColorTranslator.FromHtml("#FF86BD");
+        private static Color boolTrueColor = Color.SeaGreen;
+        private static Color boolFalseColor =  Color.IndianRed;
+
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
@@ -79,14 +86,15 @@ namespace StreamUP
                 FormBorderStyle = FormBorderStyle.Fixed3D,
                 MaximizeBox = false,
                 MinimizeBox = true,
-                StartPosition = FormStartPosition.CenterParent
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = backColour1
             };
 
             byte[] bytes = Convert.FromBase64String(UIResources.supIconString);
             using var ms = new MemoryStream(bytes);
             settingsForm.Icon = new Icon(ms);
 
-            var tabControl = new TabControl
+            TabControl tabControl = new BorderlessTabControl
             {
                 Dock = DockStyle.Fill
             };
@@ -114,13 +122,14 @@ namespace StreamUP
                         Dock = DockStyle.Fill,
                         ColumnCount = 3,
                         AutoScroll = true,
-                        AutoSizeMode = AutoSizeMode.GrowAndShrink
+                        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                        BackColor = backColour1
                     };
 
                     settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-
+                    tabPage.BackColor= backColour1;
                     tabPage.Controls.Add(settingsTable);
                     tabControl.Controls.Add(tabPage);
                     tabPages[tabName] = settingsTable;
@@ -142,10 +151,14 @@ namespace StreamUP
 
             var statusBar = new StatusStrip
             {
-                SizingGrip = false
+                SizingGrip = false,
+                BackColor = backColour2
             };
-            var statusLabel = new ToolStripStatusLabel();
-            statusLabel.Text = $"© StreamUP {DateTime.UtcNow.Year}";
+            var statusLabel = new ToolStripStatusLabel
+            {
+                Text = $"© StreamUP {DateTime.UtcNow.Year}",
+                ForeColor = forecolour1
+            };
             statusBar.Items.Add(statusLabel);
             settingsForm.Controls.Add(buttonPanel);
             settingsForm.Controls.Add(statusBar);
@@ -293,6 +306,7 @@ namespace StreamUP
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(250, 0);
+            label.ForeColor = forecolour1;
             toTable.Controls.Add(label, 0, atIndex);
 
             var dropdown = new ComboBox();
@@ -347,6 +361,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
 
@@ -395,6 +410,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
 
@@ -465,6 +481,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
 
@@ -504,6 +521,7 @@ namespace StreamUP
             rulerLabel.BorderStyle = BorderStyle.Fixed3D;
             rulerLabel.Height = 2;
             rulerLabel.Width = 496;
+            rulerLabel.ForeColor = forecolour1;
             rulerLabel.Margin = new Padding(10, 10, 10, 10);
 
             toTable.Controls.Add(rulerLabel, 0, atIndex);
@@ -516,6 +534,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
             var textbox = new TextBox();
@@ -547,7 +566,8 @@ namespace StreamUP
                 Text = withSetting.Description,
                 Padding = new Padding(0, 4, 0, 0),
                 AutoSize = true,
-                MaximumSize = new System.Drawing.Size(250, 0)
+                MaximumSize = new System.Drawing.Size(250, 0),
+                ForeColor = forecolour1
             };
             toTable.Controls.Add(label, 0, atIndex);
             var textbox = new TextBox
@@ -583,6 +603,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 8, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(270, 0);
             toTable.Controls.Add(label, 0, atIndex);
             var button = new Button();
@@ -647,6 +668,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
             var checkbox = new CheckBox();
@@ -677,6 +699,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
             var input = new NumericUpDown();
@@ -711,8 +734,8 @@ namespace StreamUP
                 Text = withSetting.Description,
                 AutoSize = true,
                 Margin = new Padding(4),
-                //Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                //ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1
+               
             };
             var input = new TrackBar
             {
@@ -752,7 +775,7 @@ namespace StreamUP
                 Dock = DockStyle.Right,
                 //Margin = new Padding(0, 10, 0, 0),
                 Text = input.Value.ToString(),
-                //ForeColor = Color.SkyBlue, // Change text color
+                ForeColor = forecolour2, // Change text color
                 Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 //Width = 60
@@ -781,6 +804,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(498, 0);
 
             toTable.Controls.Add(label, 0, atIndex);
@@ -794,7 +818,7 @@ namespace StreamUP
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
             label.MaximumSize = new System.Drawing.Size(498, 0);
-            label.LinkColor = ColorTranslator.FromHtml("#FF86BD");
+            label.LinkColor = linkColour;
             label.Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular);
             label.LinkClicked += (sender, e) => System.Diagnostics.Process.Start(withSetting.Url);
             toTable.Controls.Add(label, 0, atIndex);
@@ -807,6 +831,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour2;
             label.MaximumSize = new System.Drawing.Size(498, 0);
             label.Font = new Font(label.Font.FontFamily, label.Font.Size + 2, System.Drawing.FontStyle.Bold);
 
@@ -820,6 +845,7 @@ namespace StreamUP
             label.Text = withSetting.Description;
             label.Padding = new Padding(0, 4, 0, 0);
             label.AutoSize = true;
+            label.ForeColor = forecolour1;
             label.MaximumSize = new System.Drawing.Size(250, 0);
             toTable.Controls.Add(label, 0, atIndex);
 
@@ -858,8 +884,7 @@ namespace StreamUP
                 Text = withSetting.Description,
                 AutoSize = true,
                 Margin = new Padding(10),
-                //Font = new Font(FontFamily.GenericSansSerif, 10.0F, FontStyle.Regular),
-                //ForeColor = Color.WhiteSmoke,
+                ForeColor = forecolour1,
             };
 
             var textbox = new TextBox
@@ -896,7 +921,7 @@ namespace StreamUP
                 AutoSize = true,
                 //Margin = new Padding(0, 10, 0, 0),
                 //Size = new System.Drawing.Size(40, 40),
-                //ForeColor = ColorTranslator.FromHtml("#FF86BD"),
+                ForeColor = forecolour2,
                 //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 TextAlign = ContentAlignment.MiddleCenter,
                 //DialogResult = DialogResult.OK // Set DialogResult
@@ -1121,6 +1146,7 @@ namespace StreamUP
             buttonPanel.Controls.Add(resetButton);
         }
     }
+    
     public class StreamUpSetting
     {
         public string Name { get; set; }
