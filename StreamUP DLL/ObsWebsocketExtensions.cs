@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
@@ -60,10 +61,18 @@ namespace StreamUP {
             // Return sceneItemTransform from obsResponse
             JObject transform = obsResponse["sceneItemTransform"] as JObject;
 
+            // Ensure all numbers are integers
+            var keys = transform.Properties().Select(p => p.Name).ToList();
+            foreach (var key in keys) {
+                if (transform[key].Type == JTokenType.Float) {
+                    transform[key] = (int)transform[key];
+                }
+            }
+
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return transform;
         }
-
+ //ayaya
         // PULL SCENE ITEM ID
         public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {
             string logName = $"{productNumber}::SUObsGetSceneItemId";
