@@ -42,8 +42,9 @@ namespace StreamUP
     {
         public static bool? savePressed = false;
         private static string logName = "DLL::ProductSettingsUI";
-        private static Color backColour1 = ColorTranslator.FromHtml("#18181B");
-        private static Color backColour2  = ColorTranslator.FromHtml("#444444");
+     private static readonly Color backColour1 = ColorTranslator.FromHtml("#121212");
+        private static readonly Color backColour2 = ColorTranslator.FromHtml("#676767");
+        private static readonly Color backColour3 = ColorTranslator.FromHtml("#212121");
         private static Color forecolour1 = Color.WhiteSmoke;
         private static Color forecolour2 = Color.SkyBlue;
         private static Color linkColour = ColorTranslator.FromHtml("#FF86BD");
@@ -96,7 +97,12 @@ namespace StreamUP
 
             TabControl tabControl = new BorderlessTabControl
             {
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                ActiveText = forecolour1,
+                ActiveBackground = backColour1,
+                InactiveText = forecolour2,
+                InactiveBackground = backColour3,
+                TabBarBackColor = backColour3,
             };
             settingsForm.Controls.Add(tabControl);
             Dictionary<string, TableLayoutPanel> tabPages = new Dictionary<string, TableLayoutPanel>();
