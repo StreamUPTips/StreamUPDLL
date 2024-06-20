@@ -430,7 +430,7 @@ namespace StreamUP
         }
 
 
-        public static long GetBetSize(this IInlineInvokeProxy CPH, string input, long currentPoints, long minBet, long maxBet, long defaultPoints, long defaultBet)
+        public static long GetBetSize(this IInlineInvokeProxy CPH, string input, long currentPoints, long minBet, long maxBet, long defaultPoints, long defaultBet, bool minError, bool maxError)
         {
            
             if (maxBet < 1)
@@ -486,12 +486,26 @@ namespace StreamUP
             //num
             if (betSize > maxBet)
             {
+                if(maxError)
+                {
+                    return -1;
+                }
+                else
+                {
                 betSize = maxBet;
+                }
             }
 
             if (betSize < minBet)
             {
+                if(minError)
+                {
+                    return -2;
+                }
+                else
+                {
                 betSize = minBet;
+                }
             }
 
             if (betSize > currentPoints)
