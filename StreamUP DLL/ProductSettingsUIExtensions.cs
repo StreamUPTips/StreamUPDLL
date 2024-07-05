@@ -85,10 +85,9 @@ namespace StreamUP
                 Width = 540,
                 Height = 720,
                 FormBorderStyle = FormBorderStyle.Fixed3D,
-                //MaximizeBox = false,
-                //MinimizeBox = false,
-                StartPosition = FormStartPosition.CenterParent,
-                BackColor = backColour1
+                MaximizeBox = false,
+                MinimizeBox = true,
+                StartPosition = FormStartPosition.CenterParent                
             };
 
             byte[] bytes = Convert.FromBase64String(UIResources.supIconString);
@@ -224,21 +223,6 @@ namespace StreamUP
                     break;
                 case StreamUpSettingType.String:
                     CPH.AddStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
-                    break;
-                case StreamUpSettingType.Link:
-                    CPH.AddLinkSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
-                    break;
-                case StreamUpSettingType.Multiline:
-                    CPH.AddMultiStringSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
-                    break;
-                case StreamUpSettingType.TrackBar:
-                    CPH.AddTrackbarSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
-                    break;
-                case StreamUpSettingType.FileDialog:
-                    CPH.AddFileSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
-                    break;
-                case StreamUpSettingType.FolderBrowser:
-                    CPH.AddFolderSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
             }
             rowIndex++;
@@ -891,8 +875,7 @@ namespace StreamUP
             var label = new Label
             {
                 Text = withSetting.Description,
-                //AutoSize = true,
-                Width = 170,
+                AutoSize = true,
                 Margin = new Padding(10),
                 ForeColor = forecolour1,
             };
@@ -902,13 +885,13 @@ namespace StreamUP
                 Name = withSetting.Name,
                 Padding = new Padding(10),
                 //Margin = new Padding(0, 10, 10, 0),
-                //Dock = DockStyle.Fill,
+                Dock = DockStyle.Fill,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 //BackColor = ColorTranslator.FromHtml("#1F1F23"),
                 //ForeColor = Color.White,
                 //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 //BorderStyle = BorderStyle.None,
-                Width = 170
+                Width = 250
             };
             string currentValue = null;
             if (settings != null && settings.ContainsKey(withSetting.Name))
@@ -954,6 +937,40 @@ namespace StreamUP
 
 
         }
+
+
+        private static Task<string> OpenFileDialogAsync()
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            Thread thread = new Thread(() =>
+            {
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
+                {
+                    openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    //openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    openFileDialog.FilterIndex = 1;
+                    openFileDialog.RestoreDirectory = true;
+
+                    DialogResult result = openFileDialog.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        tcs.SetResult(openFileDialog.FileName);
+                    }
+                    else
+                    {
+                        tcs.SetResult(null);
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
+            thread.Start();
+
+            return tcs.Task;
+        }
+
+       
 
          public static void AddFolderSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
@@ -1025,37 +1042,6 @@ namespace StreamUP
             toTable.Controls.Add(input, 2, atIndex);
 
 
-        }
-
-        private static Task<string> OpenFileDialogAsync()
-        {
-            var tcs = new TaskCompletionSource<string>();
-
-            Thread thread = new Thread(() =>
-            {
-                using (OpenFileDialog openFileDialog = new OpenFileDialog())
-                {
-                    openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    //openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    openFileDialog.FilterIndex = 1;
-                    openFileDialog.RestoreDirectory = true;
-
-                    DialogResult result = openFileDialog.ShowDialog();
-                    if (result == DialogResult.OK)
-                    {
-                        tcs.SetResult(openFileDialog.FileName);
-                    }
-                    else
-                    {
-                        tcs.SetResult(null);
-                    }
-                }
-            });
-
-            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
-            thread.Start();
-
-            return tcs.Task;
         }
 
         private static Task<string> OpenFolderDialogAsync()
@@ -1289,12 +1275,6 @@ namespace StreamUP
         Secret,
         Spacer,
         String,
-        Link,
-        TrackBar,
-        Multiline,
-        FileDialog,
-        FolderBrowser
-
     }
 
 
@@ -1414,82 +1394,6 @@ namespace StreamUP
 
             return settings;
         }
-
-        public static List<StreamUpSetting> SUSettingsCreateLink(this IInlineInvokeProxy CPH, string description, string url, string tabName = "General", bool addSpacer = false)
-        {
-            var settings = new List<StreamUpSetting>
-            {
-                new StreamUpSetting { Description = description, Type = StreamUpSettingType.Link, Url= url, TabName = tabName, }
-            };
-
-            if (addSpacer)
-            {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
-            }
-
-            return settings;
-        }
-
-        public static List<StreamUpSetting> SUSettingsCreateMultiline(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
-        {
-            var settings = new List<StreamUpSetting>
-            {
-                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.Multiline, Default=defaultValue, TabName = tabName, }
-            };
-
-            if (addSpacer)
-            {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
-            }
-
-            return settings;
-        }
-
-        public static List<StreamUpSetting> SUSettingsCreateTrackbar(this IInlineInvokeProxy CPH, string name, string description, int min, int max, string defaultValue, string tabName = "General", bool addSpacer = false)
-        {
-            var settings = new List<StreamUpSetting>
-            {
-                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.TrackBar, Min = min, Max = max, Default = defaultValue, TabName = tabName, }
-            };
-
-            if (addSpacer)
-            {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
-            }
-
-            return settings;
-        }
-
-        public static List<StreamUpSetting> SUSettingsCreateFile(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
-        {
-            var settings = new List<StreamUpSetting>
-            {
-                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.FileDialog, Default = defaultValue, TabName = tabName, }
-            };
-
-            if (addSpacer)
-            {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
-            }
-
-            return settings;
-        }
-
-           public static List<StreamUpSetting> SUSettingsCreateFolder(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
-        {
-            var settings = new List<StreamUpSetting>
-            {
-                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.FolderBrowser, Default = defaultValue, TabName = tabName}
-            };
-
-            if (addSpacer)
-            {
-                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
-            }
-
-            return settings;
-        }
-
         public static List<StreamUpSetting> SUSettingsCreateReward(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
         {
             var settings = new List<StreamUpSetting>
