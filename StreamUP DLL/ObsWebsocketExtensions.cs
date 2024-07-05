@@ -179,7 +179,7 @@ namespace StreamUP {
             CPH.ObsSendRaw("SetSceneSceneTransitionOverride", $$"""
             {
                 "sceneName": "{{sceneName}}",
-                "transitionName": {{transitionName}},
+                "transitionName": "{{transitionName}}",
                 "transitionDuration": {{transitionDuration}}
             }
             """, obsConnection);
