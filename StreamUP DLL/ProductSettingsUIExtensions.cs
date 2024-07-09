@@ -237,6 +237,9 @@ namespace StreamUP
                 case StreamUpSettingType.FileDialog:
                     CPH.AddFileSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
                     break;
+                case StreamUpSettingType.FolderBrowser:
+                    CPH.AddFolderSetting(toTable: table, withSetting: setting, atIndex: rowIndex, settings);
+                    break;
             }
             rowIndex++;
         }
@@ -531,7 +534,7 @@ namespace StreamUP
             rulerLabel.Margin = new Padding(10, 10, 10, 10);
 
             toTable.Controls.Add(rulerLabel, 0, atIndex);
-            toTable.SetColumnSpan(rulerLabel, 2);
+            toTable.SetColumnSpan(rulerLabel, 3);
         }
 
         private static void AddStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
@@ -888,7 +891,7 @@ namespace StreamUP
             var label = new Label
             {
                 Text = withSetting.Description,
-                AutoSize = true,
+                Width = 200,
                 Margin = new Padding(10),
                 ForeColor = forecolour1,
             };
@@ -904,7 +907,7 @@ namespace StreamUP
                 //ForeColor = Color.White,
                 //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
                 //BorderStyle = BorderStyle.None,
-                Width = 250
+                Width = 200
             };
             string currentValue = null;
             if (settings != null && settings.ContainsKey(withSetting.Name))
@@ -951,6 +954,75 @@ namespace StreamUP
 
         }
 
+        public static void AddFolderSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
+        {
+
+            var label = new Label
+            {
+                Text = withSetting.Description,
+               Width = 200,
+                Margin = new Padding(10),
+                ForeColor = forecolour1,
+            };
+
+            var textbox = new TextBox
+            {
+                Name = withSetting.Name,
+                Padding = new Padding(10),
+                //Margin = new Padding(0, 10, 10, 0),
+                Dock = DockStyle.Fill,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                //BackColor = ColorTranslator.FromHtml("#1F1F23"),
+                //ForeColor = Color.White,
+                //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                //BorderStyle = BorderStyle.None,
+                Width = 200
+            };
+            string currentValue = null;
+            if (settings != null && settings.ContainsKey(withSetting.Name))
+            {
+                currentValue = settings[withSetting.Name].ToString();
+            }
+
+            if (!string.IsNullOrEmpty(currentValue))
+            {
+                textbox.Text = currentValue;
+            }
+            else if (!string.IsNullOrEmpty(withSetting.Default))
+            {
+                textbox.Text = withSetting.Default;
+            }
+
+            var input = new Button
+            {
+                Text = "...",
+                AutoSize = true,
+                //Margin = new Padding(0, 10, 0, 0),
+                //Size = new System.Drawing.Size(40, 40),
+                ForeColor = forecolour2,
+                //Font = new Font(FontFamily.GenericSansSerif, 12.0F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                //DialogResult = DialogResult.OK // Set DialogResult
+            };
+
+            // Event handler for button click to open file dialog
+            input.Click += async (sender, e) =>
+            {
+                string filePath = await OpenFolderDialogAsync();
+                if (filePath != null)
+                {
+                    textbox.Text = filePath;
+                    //Console.WriteLine(filePath);
+                }
+            };
+
+            toTable.Controls.Add(label, 0, atIndex);
+            toTable.Controls.Add(textbox, 1, atIndex);
+            toTable.Controls.Add(input, 2, atIndex);
+
+
+        }
+
 
         private static Task<string> OpenFileDialogAsync()
         {
@@ -969,6 +1041,32 @@ namespace StreamUP
                     if (result == DialogResult.OK)
                     {
                         tcs.SetResult(openFileDialog.FileName);
+                    }
+                    else
+                    {
+                        tcs.SetResult(null);
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
+            thread.Start();
+
+            return tcs.Task;
+        }
+
+        private static Task<string> OpenFolderDialogAsync()
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            Thread thread = new Thread(() =>
+            {
+                using (FolderBrowserDialog openFolderDialog = new FolderBrowserDialog())
+                {
+                    DialogResult result = openFolderDialog.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        tcs.SetResult(openFolderDialog.SelectedPath);
                     }
                     else
                     {
@@ -1192,7 +1290,8 @@ namespace StreamUP
         Link,
         TrackBar,
         Multiline,
-        FileDialog
+        FileDialog,
+        FolderBrowser
 
     }
 
@@ -1364,6 +1463,21 @@ namespace StreamUP
             var settings = new List<StreamUpSetting>
             {
                 new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.FileDialog, Default = defaultValue, TabName = tabName, }
+            };
+
+            if (addSpacer)
+            {
+                settings.Add(new StreamUpSetting { Type = StreamUpSettingType.Spacer, TabName = tabName, });
+            }
+
+            return settings;
+        }
+        
+        public static List<StreamUpSetting> SUSettingsCreateFolder(this IInlineInvokeProxy CPH, string name, string description, string defaultValue, string tabName = "General", bool addSpacer = false)
+        {
+            var settings = new List<StreamUpSetting>
+            {
+                new StreamUpSetting {Name=name, Description = description, Type = StreamUpSettingType.FolderBrowser, Default = defaultValue, TabName = tabName, }
             };
 
             if (addSpacer)
