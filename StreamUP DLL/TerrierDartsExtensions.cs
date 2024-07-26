@@ -32,49 +32,42 @@ namespace StreamUP
             return count;
 
         }
-        public static bool TimedVipUserCheck(this IInlineInvokeProxy CPH, string userId, bool mod, bool vip, int maxVips, bool allowAdding, bool usePoints, int cost)
+        public static bool TimedVipUserCheck(this IInlineInvokeProxy CPH, string userId, bool inGroup, bool mod, bool allowMods, bool vip, bool allowVIPs, int maxVips, bool allowAdding, bool usePoints, long cost, long points)
         {
 
 
-            long points = CPH.GetUserPointsById(userId, Platform.Twitch);
+           if (inGroup && !allowAdding)
+        {
+            CPH.TimedVipError(1, "User can not add anymore time.");
+            return false;
+        }
 
+        if (mod && !allowMods)
+        {
+            CPH.TimedVipError(2, "User is a Moderator and Moderators are not allowed to redeem.");
+            return false;
+        }
 
-            if (CPH.UserIdInGroup(userId, Platform.Twitch, "Timed VIPs") && !allowAdding)
-            {
+        if (!inGroup && vip && !allowVIPs)
+        {
+            CPH.TimedVipError(3, "User is already a Vip Permanently and VIPs are not allowed to redeem.");
+            return false;
+        }
 
-                CPH.TimedVipError(1, "User can not add anymore time.");
-                return false;
+        int vips = CPH.CurrentVipCount();
+        if (vips >= maxVips)
+        {
+            CPH.TimedVipError(4, "You already have the max number of Allowed Users in the Group.");
+            return false;
+        }
 
-            }
+        if (usePoints && (cost > points))
+        {
+            CPH.TimedVipError(5, "You can not afford to redeem this.");
+            return false;
+        }
 
-            if (mod)
-            {
-                CPH.TimedVipError(2, "User is a Moderator so can not redeem");
-                return false;
-            }
-
-            if (!CPH.UserIdInGroup(userId, Platform.Twitch, "Timed VIPs") && vip)
-            {
-                CPH.TimedVipError(3, "User is already a Vip Permanently so can not redeem");
-                return false;
-            }
-
-
-            int vips = CPH.CurrentVipCount();
-            if (vips >= maxVips)
-            {
-
-                CPH.TimedVipError(4, "You already have the max number of Vips.");
-                return false;
-            }
-
-            if (usePoints && cost > points)
-            {
-                CPH.TimedVipError(5, "You can not afford to redeem this.");
-                return false;
-            }
-
-            return true;
+        return true;
         }
         public static int TimedVipDaysLeft(this IInlineInvokeProxy CPH, DateTime expireDate)
         {
