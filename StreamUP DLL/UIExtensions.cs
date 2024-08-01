@@ -315,7 +315,8 @@ namespace StreamUP {
                                                     "%receiver% = User That Is Banned\n" +
                                                     "%user% = User Executing The Timeout";
 
-                                            
+        public static string TwitchWatchStreak = "%amount% = Current stream streak amount";
+        
         // YouTube                                    
         public static string YouTubeFirstWords =    "%message% = Chat Message\n" +
                                                     "%user% = Chatters Name";
