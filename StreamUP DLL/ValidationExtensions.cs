@@ -407,6 +407,12 @@ namespace StreamUP {
         }
         CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         return false;
+    }
+
+    public static void SBLogSettingsToString(this IInlineInvokeProxy CPH, string productNumber)
+    {
+        string productSettings = CPH.GetGlobalVar<string?>($"{productNumber}_ProductSettings", true) ?? $"Settings for Product '{productNumber}' Not Found";
+        CPH.SUWriteLog("[Settings Logger] " + productSettings);
     }    
 }
 
