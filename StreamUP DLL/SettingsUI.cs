@@ -666,7 +666,7 @@ namespace StreamUP
                 CornerRadius = 8,
                 Cursor = Cursors.Hand,
             };
-            resetButton.Click += (sender, e) => CPH.SUResetButton_Click(sender, e, layout, form);
+            resetButton.Click += (sender, e) => CPH.SUResetButton_Click(sender, e, layout, form, productInfo);
 
             saveButton.FlatAppearance.BorderSize = 0;
 
@@ -792,8 +792,8 @@ namespace StreamUP
             };
 
 
-
-            Label lblProductName = SUSBCreateInfoLabel("Product Name:", productInfo.ProductName);
+ Label lblProductName = SUSBCreateInfoLabel("Product Name:", productInfo.ProductName);
+            Label lblProductVersionNumber = SUSBCreateInfoLabel("Product Version:", productInfo.ProductVersionNumber.ToString());
             Label lblProductNumber = SUSBCreateInfoLabel("Product Number:", productInfo.ProductNumber);
             Label lblRequiredLibraryVersion = SUSBCreateInfoLabel("Required Library Version:", productInfo.RequiredLibraryVersion.ToString());
             Label lblSceneName = SUSBCreateInfoLabel("Scene Name:", productInfo.SceneName);
@@ -817,6 +817,7 @@ namespace StreamUP
 
             flowLayout.Controls.Add(productInfoLabel);
             flowLayout.Controls.Add(lblProductName);
+            flowLayout.Controls.Add(lblProductVersionNumber);
             flowLayout.Controls.Add(lblProductNumber);
             flowLayout.Controls.Add(lblRequiredLibraryVersion);
             flowLayout.Controls.Add(lblSceneName);
@@ -2012,6 +2013,79 @@ namespace StreamUP
             return settings;
 
         }
+        public static List<Control> SUSBAddCustomBool(this IInlineInvokeProxy CPH, string description, bool defaultValue,string trueName, string trueColor, string falseName,string falseColor, string saveName, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            Color boolCustomTrueColor = ColorTranslator.FromHtml(trueColor);
+            Color boolCustomFalseColor = ColorTranslator.FromHtml(falseColor);
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 2,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                // Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+            };
+
+            // Create a new CheckBox control
+
+            var input = new RoundedCheckBox
+            {
+                Name = saveName,
+                Checked = CPH.SUGetSetting<bool>(saveName, defaultValue),
+                //Padding = new Padding(0),
+                //Margin = new Padding(0, 10, 10, 0),
+                Height = 30,
+                Width = 280,
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                Appearance = Appearance.Button,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                CornerRadius = 10,
+                BoolFalseColor = boolCustomFalseColor,
+                BoolTrueColor = boolCustomTrueColor,
+                BackColor = CPH.SUGetSetting<bool>(saveName, defaultValue) ? boolCustomTrueColor : boolCustomFalseColor,
+                Text = CPH.SUGetSetting<bool>(saveName, defaultValue) ? trueName : falseName,
+                ForeColor = forecolour3,
+                Font = buttonFont,
+                TextAlign = ContentAlignment.MiddleCenter,
+            };
+
+            input.CheckedChanged += (sender, e) =>
+            {
+                // Change the background color of the checkbox button based on its checked state
+                input.BackColor = input.Checked ? boolCustomTrueColor : boolCustomFalseColor;
+                input.Text = input.Checked ? trueName : falseName;
+            };
+            input.FlatAppearance.BorderSize = 0;
+            toolTip.SetToolTip(input, "Click to Change");
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 1, 0);
+
+            // Add the table layout to the list of controls
+            settings.Add(settingsTable);
+
+            return settings;
+        }
         //OTHERS
         public static List<Control> SUSBAddColour(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
         {
@@ -2651,7 +2725,7 @@ namespace StreamUP
 
             MessageBox.Show("Settings have been saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        public static void SUResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form)
+        public static void SUResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form, ProductInfo productInfo)
         {
             CPH.SUSBSettingsLog("Pressed Reset");
 
@@ -2665,7 +2739,8 @@ namespace StreamUP
             }
             // Implement reset logic here
             MessageBox.Show("Settings have been reset.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            form.Hide();
+            form.Close();
+            CPH.RunAction(productInfo.SettingsAction, false);
         }
         public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object settingValue)
         {

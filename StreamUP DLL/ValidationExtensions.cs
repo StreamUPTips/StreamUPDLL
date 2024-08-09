@@ -427,5 +427,7 @@ namespace StreamUP {
         public string SettingsAction { get; set; } = string.Empty;
         public string SourceNameVersionCheck { get; set; } = string.Empty;
         public Version SourceNameVersionNumber { get; set; }
+
+        public Version ProductVersionNumber {get; set;} = new Version (0,0,0);
     }
 }
