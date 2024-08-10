@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
 using System.Reflection;
-using Streamer.bot.Plugin.Interface.Model;
+using System.Reflection.Emit;
+using Label = System.Windows.Forms.Label;
 
 namespace StreamUP
 {
@@ -554,7 +555,7 @@ namespace StreamUP
 
             tabControl = new BorderlessTabControl()
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Top | DockStyle.Fill,
                 Font = tabFont,
                 ActiveText = forecolour1,
                 ActiveBackground = backColour1,
@@ -574,7 +575,8 @@ namespace StreamUP
                 Height = 800,
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = SUSBGetIconOrDefault(imageFilePath),
-                BackColor = backColour1
+                BackColor = backColour1,
+
             };
 
             // Create and add tab pages
@@ -589,16 +591,14 @@ namespace StreamUP
 
                 TableLayoutPanel tableLayout = new TableLayoutPanel
                 {
-                    ColumnCount = 2,
+                    ColumnCount = 1,
                     AutoSize = true,
-                    Dock = DockStyle.Fill,
+                    Dock = DockStyle.Top | DockStyle.Fill,
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    GrowStyle = TableLayoutPanelGrowStyle.AddRows,
                     AutoScroll = true
                 };
 
-                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+
 
                 int modValue = 0;
                 foreach (Control control in tab.Value)
@@ -607,12 +607,15 @@ namespace StreamUP
                     tableLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                     tableLayout.Controls.Add(control, 0, rowIndex);
                     tableLayout.SetColumnSpan(control, 2);
-                    if (control.Text == "thisisjustaline")
+                    if (control.Name == "thisisjustaline")
                     {
                         modValue = modValue == 0 ? 1 : 0;
                     }
                     control.BackColor = (rowIndex % 2) == modValue ? backColour1 : backColour3;
                 }
+
+
+
 
                 tabPage.Controls.Add(tableLayout);
                 tabControl.TabPages.Add(tabPage);
@@ -666,7 +669,7 @@ namespace StreamUP
                 CornerRadius = 8,
                 Cursor = Cursors.Hand,
             };
-            resetButton.Click += (sender, e) => CPH.SUResetButton_Click(sender, e, layout, form, productInfo);
+            resetButton.Click += (sender, e) => CPH.SUResetButton_Click(sender, e, layout, form);
 
             saveButton.FlatAppearance.BorderSize = 0;
 
@@ -792,7 +795,8 @@ namespace StreamUP
             };
 
 
- Label lblProductName = SUSBCreateInfoLabel("Product Name:", productInfo.ProductName);
+
+            Label lblProductName = SUSBCreateInfoLabel("Product Name:", productInfo.ProductName);
             Label lblProductVersionNumber = SUSBCreateInfoLabel("Product Version:", productInfo.ProductVersionNumber.ToString());
             Label lblProductNumber = SUSBCreateInfoLabel("Product Number:", productInfo.ProductNumber);
             Label lblRequiredLibraryVersion = SUSBCreateInfoLabel("Required Library Version:", productInfo.RequiredLibraryVersion.ToString());
@@ -1058,6 +1062,7 @@ namespace StreamUP
                 Font = headingFont,
                 AutoSize = true,
                 Padding = new Padding(10),
+                Margin = new Padding(0),
                 Dock = DockStyle.Fill,
                 ForeColor = forecolour2,
                 Tag = tabName
@@ -1076,6 +1081,7 @@ namespace StreamUP
                 AutoSize = true,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
+                Margin = new Padding(0),
                 Font = labelFont,
                 ForeColor = forecolour1,
                 Tag = tabName
@@ -1085,6 +1091,7 @@ namespace StreamUP
             settings.Add(label);
             return settings;
         }
+
         public static List<Control> SUSBAddLink(this IInlineInvokeProxy CPH, string labelText, string url, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -1096,6 +1103,7 @@ namespace StreamUP
                 Dock = DockStyle.Fill,
                 LinkColor = linkColour,
                 Padding = new Padding(10),
+                Margin = new Padding(0),
                 Font = linkFont,
                 Tag = tabName
             };
@@ -1111,13 +1119,15 @@ namespace StreamUP
 
             var rule = new Label
             {
-                Text = "thisisjustaline",
+                Name = "thisisjustaline",
                 BorderStyle = BorderStyle.Fixed3D,
                 Height = 2,
-                Dock = DockStyle.Fill,
-                Padding = new Padding(10),
+                Dock = DockStyle.Top,
                 ForeColor = forecolour1,
-                Tag = tabName
+                Tag = tabName,
+                Margin = new Padding(0),
+                Padding = new Padding(0),
+                AutoSize = false,
             };
 
             settings.Add(rule);
@@ -1135,6 +1145,7 @@ namespace StreamUP
                 AutoSize = true,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
+                Margin = new Padding(0),
                 ForeColor = forecolour1,
                 Font = descriptionFont,
                 Tag = tabName
@@ -1149,18 +1160,46 @@ namespace StreamUP
 
             var space = new Label
             {
+                Name = "thisisjustaline",
                 Text = Environment.NewLine,
                 Font = spaceFont,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
+                Margin = new Padding(0),
                 ForeColor = forecolour1,
-                Tag = tabName
+                Tag = tabName,
+               
+
             };
 
             settings.Add(space);
             return settings;
 
         }
+        public static List<Control> SUSBAddEnd(this IInlineInvokeProxy CPH, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            var space = new Label
+            {
+                
+                Text = Environment.NewLine,
+                Font = spaceFont,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                ForeColor = forecolour1,
+                Tag = tabName,
+            
+
+            };
+
+            settings.Add(space);
+            return settings;
+
+        }
+
+
         //TEXT
         public static List<Control> SUSBAddTextBox(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
         {
@@ -1941,79 +1980,7 @@ namespace StreamUP
 
             return settings;
         }
-        public static List<Control> SUSBAddChecklist(this IInlineInvokeProxy CPH, string description, Dictionary<string, bool> checkListItems, string saveName, string tabName = "General")
-        {
-            List<Control> settings = new List<Control>();
-
-            // Create a TableLayoutPanel to hold the label and NumericUpDown
-            TableLayoutPanel settingsTable = new TableLayoutPanel
-            {
-                ColumnCount = 2,
-                AutoSize = true,
-                Padding = new Padding(10),
-                Margin = new Padding(0),
-                Dock = DockStyle.Fill,
-                Tag = tabName
-
-            };
-
-            // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-            var label = new Label
-            {
-                Text = description,
-                AutoSize = true,
-                //Margin = new Padding(10),
-                Font = labelFont,
-                ForeColor = forecolour1,
-            };
-
-            // Create a new CheckBox control
-
-            var input = new CheckedListBox
-            {
-                Name = saveName,
-                //Padding = new Padding(0),
-                //Margin = new Padding(0, 10, 10, 0),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = backColour1,
-                ForeColor = forecolour1,
-                BorderStyle = BorderStyle.None,
-                Width = 280,
-                CheckOnClick = true,
-                Font = entryFont,
-
-            };
-
-
-
-            Dictionary<string, bool> checkedItemsDict = CPH.SUGetSetting<Dictionary<string, bool>>(saveName, checkListItems);
-
-
-            foreach (KeyValuePair<string, bool> checkItem in checkedItemsDict)
-            {
-
-                input.Items.Add(checkItem.Key, checkItem.Value);
-
-            }
-            input.Height = checkedItemsDict.Count * 20;
-
-
-
-
-            // Add the label and input to the table
-            settingsTable.Controls.Add(label, 0, 0);
-            settingsTable.Controls.Add(input, 1, 0);
-
-            // Add the table layout to the list of controls
-            settings.Add(settingsTable);
-
-            return settings;
-
-        }
-        public static List<Control> SUSBAddCustomBool(this IInlineInvokeProxy CPH, string description, bool defaultValue,string trueName, string trueColor, string falseName,string falseColor, string saveName, string tabName = "General")
+        public static List<Control> SUSBAddCustomBool(this IInlineInvokeProxy CPH, string description, bool defaultValue, string trueName, string trueColor, string falseName, string falseColor, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -2085,6 +2052,80 @@ namespace StreamUP
             settings.Add(settingsTable);
 
             return settings;
+        }
+        public static List<Control> SUSBAddChecklist(this IInlineInvokeProxy CPH, string description, Dictionary<string, bool> checkListItems, string saveName, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 2,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                //Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+            };
+
+            // Create a new CheckBox control
+
+            var input = new CheckedListBox
+            {
+                Name = saveName,
+                //Padding = new Padding(0),
+                //Margin = new Padding(0, 10, 10, 0),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                BackColor = backColour1,
+                ForeColor = forecolour1,
+                BorderStyle = BorderStyle.None,
+
+                Width = 280,
+                CheckOnClick = true,
+                Font = entryFont,
+
+            };
+
+
+
+            Dictionary<string, bool> checkedItemsDict = CPH.SUGetSetting<Dictionary<string, bool>>(saveName, checkListItems);
+
+
+            foreach (KeyValuePair<string, bool> checkItem in checkedItemsDict)
+            {
+
+                input.Items.Add(checkItem.Key, checkItem.Value);
+
+            }
+            input.Height = checkedItemsDict.Count * 20;
+
+
+
+
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 1, 0);
+
+            // Add the table layout to the list of controls
+            settings.Add(settingsTable);
+
+            return settings;
+
         }
         //OTHERS
         public static List<Control> SUSBAddColour(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
@@ -2288,6 +2329,90 @@ namespace StreamUP
 
             return settings;
         }
+        public static List<Control> SUSBAddFolder(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 3,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+            };
+
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+            };
+
+            var valueLabel = new CustomTextBox
+            {
+                Name = saveName,
+                Text = CPH.SUGetSetting<string>(saveName, ""),
+                //Padding = new Padding(10),
+                Margin = new Padding(0, 10, 10, 0),
+                Dock = DockStyle.Bottom,
+                Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                BackColor = backColour2,
+                ForeColor = forecolour1,
+                Font = entryFont,
+                BorderStyle = BorderStyle.None,
+                AutoSize = false,
+                Height = 23,
+
+            };
+
+            var input = new RoundedButton
+            {
+                Text = "🗁",
+                AutoSize = true,
+                //Margin = new Padding(10, 10, 0, 0),
+                Size = new System.Drawing.Size(20, 20),
+                ForeColor = forecolour2,
+                Font = buttonFileFont,
+                FlatStyle = FlatStyle.Flat,
+                TextAlign = ContentAlignment.TopLeft,
+                CornerRadius = 8,
+                Cursor = Cursors.Hand,
+                DialogResult = DialogResult.OK // Set DialogResult
+            };
+            input.FlatAppearance.BorderSize = 0;
+            //input.FlatAppearance.MouseOverBackColor = backColour2; // Hover color
+            //input.FlatAppearance.MouseDownBackColor = backColour1; // Click color
+
+            toolTip.SetToolTip(input, "Click to open explorer");
+
+            // Event handler for button click to open file dialog
+            input.Click += async (sender, e) =>
+            {
+                string filePath = await OpenFolderDialogAsync();
+                if (filePath != null)
+                {
+                    valueLabel.Text = filePath;
+                    Console.WriteLine(filePath);
+                }
+            };
+
+
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(valueLabel, 1, 0);
+            settingsTable.Controls.Add(input, 2, 0);
+
+            settings.Add(settingsTable);
+
+            return settings;
+        }
 
         private static Task<string> OpenFileDialogAsync()
         {
@@ -2306,6 +2431,31 @@ namespace StreamUP
                     if (result == DialogResult.OK)
                     {
                         tcs.SetResult(openFileDialog.FileName);
+                    }
+                    else
+                    {
+                        tcs.SetResult(null);
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
+            thread.Start();
+
+            return tcs.Task;
+        }
+        private static Task<string> OpenFolderDialogAsync()
+        {
+            var tcs = new TaskCompletionSource<string>();
+
+            Thread thread = new Thread(() =>
+            {
+                using (FolderBrowserDialog openFolderDialog = new FolderBrowserDialog())
+                {
+                    DialogResult result = openFolderDialog.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        tcs.SetResult(openFolderDialog.SelectedPath);
                     }
                     else
                     {
@@ -2487,135 +2637,25 @@ namespace StreamUP
 
 
         }
-        //Streamerbot Methods
-        public static List<Control> SUSBAddActions(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
-        {
-            List<Control> settings = new List<Control>();
+        //Streamerbot Base Stuff
+        /* public static List<Control> SUSBAddActionDrop(this IInlineInvokeProxy CPH, string description,string defaultValue, string saveName, string tabName = "General")
+         {
+             List<ActionData> actions = CPH.GetActions();
+             List<string> actionDropDown = new List<string>();
+             foreach (ActionData action in actions)
+             {
+                 actionDropDown.Add(action.Name);
+             }
+             List<Control> settings = new List<Control>();
 
-            // Create a TableLayoutPanel to hold the label and ComboBox
-            TableLayoutPanel settingsTable = new TableLayoutPanel
-            {
-                ColumnCount = 2,
-                AutoSize = true,
-                Padding = new Padding(10),
-                Margin = new Padding(0),
-                ForeColor = forecolour1,
-                Dock = DockStyle.Fill,
-                Tag = tabName
-            };
-
-            // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-
-            var label = new Label
-            {
-                Text = description,
-                AutoSize = true,
-                Font = labelFont,
-                ForeColor = forecolour1,
-            };
-
-            var input = new ComboBox
-            {
-                Name = saveName,
-                Dock = DockStyle.Fill,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = backColour2,
-                ForeColor = forecolour1,
-                Font = entryFont,
-            };
-            List<ActionData> actions = CPH.GetActions();
-            // Sort actions by Group and then by Name
-            var sortedActions = actions.OrderBy(a => a.Name);//.ThenBy(a => a.Name).ToList();
-
-            foreach (var action in sortedActions)
-            {
-                input.Items.Add(action.Name);
-            }
+             string[] actionsArray = actionDropDown.ToArray();
+             actionsArray.Sort();
+             settings.AddRange(CPH.SUSBAddDropDown(description, actionsArray, defaultValue, saveName, tabName));
 
 
-            // Set the selected item based on the saved setting or default value
-            string savedValue = CPH.SUGetSetting<string>(saveName, defaultValue);
-            if (!string.IsNullOrEmpty(savedValue) && input.Items.Contains(savedValue))
-            {
-                input.SelectedItem = savedValue;
-            }
-
-            // Add the label and input to the table
-            settingsTable.Controls.Add(label, 0, 0);
-            settingsTable.Controls.Add(input, 1, 0);
-
-            // Add the table layout to the list of controls
-            settings.Add(settingsTable);
-
-            return settings;
-        }
-
-        public static List<Control> SUSBAddRewards(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
-        {
-            List<Control> settings = new List<Control>();
-
-            // Create a TableLayoutPanel to hold the label and ComboBox
-            TableLayoutPanel settingsTable = new TableLayoutPanel
-            {
-                ColumnCount = 2,
-                AutoSize = true,
-                Padding = new Padding(10),
-                Margin = new Padding(0),
-                ForeColor = forecolour1,
-                Dock = DockStyle.Fill,
-                Tag = tabName
-            };
-
-            // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-
-            var label = new Label
-            {
-                Text = description,
-                AutoSize = true,
-                Font = labelFont,
-                ForeColor = forecolour1,
-            };
-
-            var input = new ComboBox
-            {
-                Name = saveName,
-                Dock = DockStyle.Fill,
-                Anchor = AnchorStyles.Top | AnchorStyles.Left,
-                BackColor = backColour2,
-                ForeColor = forecolour1,
-                Font = entryFont,
-            };
-            List<TwitchReward> actions = CPH.TwitchGetRewards();
-            // Sort actions by Group and then by Name
-            var sortedActions = actions.OrderBy(a => a.Title);//.ThenBy(a => a.Name).ToList();
-
-            foreach (var action in sortedActions)
-            {
-                input.Items.Add(action.Title);
-            }
-
-
-            // Set the selected item based on the saved setting or default value
-            string savedValue = CPH.SUGetSetting<string>(saveName, defaultValue);
-            if (!string.IsNullOrEmpty(savedValue) && input.Items.Contains(savedValue))
-            {
-                input.SelectedItem = savedValue;
-            }
-
-            // Add the label and input to the table
-            settingsTable.Controls.Add(label, 0, 0);
-            settingsTable.Controls.Add(input, 1, 0);
-
-            // Add the table layout to the list of controls
-            settings.Add(settingsTable);
-
-            return settings;
-        }
-
+             return settings;
+         }
+         */
         //Logging
         public static void SUSBSettingsLog(this IInlineInvokeProxy CPH, string message)
         {
@@ -2725,7 +2765,7 @@ namespace StreamUP
 
             MessageBox.Show("Settings have been saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        public static void SUResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form, ProductInfo productInfo)
+        public static void SUResetButton_Click(this IInlineInvokeProxy CPH, object sender, EventArgs e, List<Control> layout, Form form)
         {
             CPH.SUSBSettingsLog("Pressed Reset");
 
@@ -2739,8 +2779,7 @@ namespace StreamUP
             }
             // Implement reset logic here
             MessageBox.Show("Settings have been reset.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            form.Close();
-            CPH.RunAction(productInfo.SettingsAction, false);
+            form.Hide();
         }
         public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object settingValue)
         {
