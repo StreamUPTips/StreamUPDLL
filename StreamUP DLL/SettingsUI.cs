@@ -2787,6 +2787,23 @@ namespace StreamUP
 
             return settings;
         }
+            public static List<Control> SUSBAddRewardDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
+        {
+            List<TwitchReward> rewards = CPH.TwitchGetRewards();
+            List<string> rewardDropdown = new List<string>();
+            foreach (TwitchReward reward in rewards)
+            {
+                rewardDropdown.Add(reward.Title);
+            }
+
+            string[] rewardArray = rewardDropdown.ToArray();
+            Array.Sort(rewardArray);
+            List<Control> settings = new List<Control>();
+            settings.AddRange(CPH.SUSBAddDropDown(description, rewardArray, defaultValue, saveName, tabName));
+
+
+            return settings;
+        }
 
         //Logging
         public static void SUSBSettingsLog(this IInlineInvokeProxy CPH, string message)
