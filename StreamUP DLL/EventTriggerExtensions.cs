@@ -11,12 +11,13 @@ using Streamer.bot.Plugin.Interface.Model;
 using System.Globalization;
 using Streamer.bot.Plugin.Interface.Enums;
 
-namespace StreamUP {
+namespace StreamUP
+{
 
-    public static class EventTriggerExtensions 
+    public static class EventTriggerExtensions
     {
         // Process SB events
-        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings, string settingsGlobalName = "ProductSettings") 
+        public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings, string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productInfo.ProductNumber}::SUSBProcessEvent";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -33,7 +34,7 @@ namespace StreamUP {
             string defaultDonationImageUrl;
             string triggerType = CPH.GetEventType().ToString();
             triggerData.EventType = triggerType;
-            
+
             // Try load other product settings
             string otherSettingsLoad = CPH.GetGlobalVar<string>($"{productInfo.ProductNumber}_{settingsGlobalName}", true);
             Dictionary<string, object> otherSettingsDict = null;
@@ -74,8 +75,8 @@ namespace StreamUP {
 
                     index = random.Next(usernames.Count);
                     triggerData.Receiver = usernames[index];
-                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.recipientId, productSettings, triggerData.Receiver);                   
-                    break;                
+                    triggerData.ReceiverImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.recipientId, productSettings, triggerData.Receiver);
+                    break;
                 // CORE
                 case EventType.CommandTriggered:
                     triggerData.Message = sbArgs["rawInput"].ToString();
@@ -83,7 +84,7 @@ namespace StreamUP {
                     if (triggerData.Message.StartsWith(command))
                     {
                         triggerData.Message = triggerData.Message.Substring(command.Length + 1).TrimStart();
-                    }           
+                    }
                     triggerData.User = sbArgs["user"].ToString();
                     switch (sbArgs["commandSource"].ToString())
                     {
@@ -91,11 +92,11 @@ namespace StreamUP {
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                             break;
                         case "youtube":
-                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                             break;
                     }
                     break;
-                case EventType.HotKeyPress:                   
+                case EventType.HotKeyPress:
                     break;
                 case EventType.ChatWindowAction:
                 case 0:
@@ -107,7 +108,7 @@ namespace StreamUP {
                             triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                             break;
                         case "youtube":
-                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                            triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                             break;
                     }
                     break;
@@ -131,11 +132,11 @@ namespace StreamUP {
                         if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                         {
                             triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                        }    
+                        }
                     }
 
                     defaultDonationImageUrl = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
-                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);
                     break;
                 case EventType.KofiDonation:
                     triggerData.Donation = true;
@@ -152,11 +153,11 @@ namespace StreamUP {
                         if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                         {
                             triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                        }                     
+                        }
                     }
 
                     defaultDonationImageUrl = "https://wiki.streamer.bot/ko-fi_icon_rgb_rounded.png";
-                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);
                     break;
                 case EventType.StreamElementsTip:
                     triggerData.Donation = true;
@@ -167,17 +168,17 @@ namespace StreamUP {
                     {
                         amount = decimal.Parse(sbArgs["tipAmount"].ToString());
                         currency = sbArgs["tipCurrency"].ToString();
-                        localCurrency = productSettings["LocalCurrencyCode"].ToString();         
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
                         cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
                         if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                         {
                             triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                        }                     
+                        }
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamelements.png";
-                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);
                     break;
                 case EventType.StreamlabsDonation:
                     triggerData.Donation = true;
@@ -194,11 +195,11 @@ namespace StreamUP {
                         if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                         {
                             triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                        }                     
+                        }
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/streamlabs.png";
-                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);
                     break;
                 case EventType.TipeeeStreamDonation:
                     triggerData.Donation = true;
@@ -215,11 +216,11 @@ namespace StreamUP {
                         if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                         {
                             triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                        }                     
+                        }
                     }
 
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
-                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
+                    triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);
                     break;
                 // TWITCH
                 case EventType.TwitchAnnouncement:
@@ -293,7 +294,7 @@ namespace StreamUP {
                     triggerData.Amount = int.Parse(sbArgs["viewers"].ToString());
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
-                    break;         
+                    break;
                 case EventType.TwitchReSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.MonthsTotal = int.Parse(sbArgs["cumulative"].ToString());
@@ -322,7 +323,7 @@ namespace StreamUP {
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
                 */
-                
+
                 case EventType.TwitchSub:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.Tier = sbArgs["tier"].ToString();
@@ -359,43 +360,43 @@ namespace StreamUP {
                 case EventType.YouTubeFirstWords:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeGiftMembershipReceived:
                     triggerData.Receiver = sbArgs["user"].ToString();
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["gifterUser"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeMembershipGift:
                     triggerData.Amount = int.Parse(sbArgs["count"].ToString());
                     triggerData.Tier = sbArgs["tier"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeMemberMileStone:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.MonthsTotal = int.Parse(sbArgs["months"].ToString());
                     triggerData.Tier = sbArgs["levelName"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeMessage:
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeNewSponsor:
                     triggerData.Tier = sbArgs["levelName"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeNewSubscriber:
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeSuperChat:
-                    amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
+                    amount = decimal.Parse(sbArgs["microAmount"].ToString()) / 1000000;
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
@@ -403,13 +404,13 @@ namespace StreamUP {
                     if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                     {
                         triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                    }                     
+                    }
                     triggerData.Message = sbArgs["message"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeSuperSticker:
-                    amount = decimal.Parse(sbArgs["microAmount"].ToString())/1000000;
+                    amount = decimal.Parse(sbArgs["microAmount"].ToString()) / 1000000;
                     currency = sbArgs["currencyCode"].ToString();
                     localCurrency = productSettings["LocalCurrencyCode"].ToString();
                     triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
@@ -417,15 +418,15 @@ namespace StreamUP {
                     if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
                     {
                         triggerData.AmountCurrencyDouble = amountCurrencyDouble;
-                    }                     
+                    }
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 case EventType.YouTubeUserBanned:
                     triggerData.BanDuration = int.Parse(sbArgs["banDuration"].ToString());
                     triggerData.BanType = sbArgs["banType"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
-                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);                
+                    triggerData.UserImage = SUSBCheckYouTubeProfileImageArgs(CPH, productInfo.ProductNumber);
                     break;
                 default:
                     CPH.SUWriteLog($"The trigger method [{triggerType}] is not supported. Feel free to open a ticket in the StreamUP Discord and the StreamUP team will try and add it.");
@@ -439,7 +440,8 @@ namespace StreamUP {
             }
 
             // Escape message string for OBS
-            if (!string.IsNullOrEmpty(triggerData.Message)) {
+            if (!string.IsNullOrEmpty(triggerData.Message))
+            {
                 triggerData.Message = triggerData.Message
                     .Replace("\\n", "")
                     .Replace("\\r", "")
@@ -451,7 +453,7 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return triggerData;
         }
-        
+
         private static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
         {
             string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVarsTriggerData";
@@ -462,7 +464,7 @@ namespace StreamUP {
             {
                 triggerType = "Donation";
             }
-            
+
             string eventTypeKey = triggerType + "AlertMessage";
             if (productSettings.TryGetValue(eventTypeKey, out object value))
             {
@@ -485,7 +487,7 @@ namespace StreamUP {
                 .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
 
                 triggerData.AlertMessage = builder.ToString();
-                
+
             }
             else
             {
@@ -504,7 +506,7 @@ namespace StreamUP {
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return userImage;
-        }               
+        }
 
         public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, TwitchProfilePictureUserType userType, Dictionary<string, object> productSettings, string testUser = "")
         {
@@ -552,7 +554,7 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return image;
         }
-            
+
         private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH, string productNumber)
         {
             string logName = $"{productNumber}::SUSBCheckYouTubeProfileImageArgs";
@@ -595,7 +597,7 @@ namespace StreamUP {
 
             string outputMessage = builder.ToString();
             triggerData.AlertMessage = outputMessage;
-            
+
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return outputMessage;
         }
@@ -616,38 +618,62 @@ namespace StreamUP {
 
         public static void SUSBSendPlatformMessage(this IInlineInvokeProxy CPH, string platform, string message, bool botAccount)
         {
-            if(platform == "twitch")
+            if (platform == "twitch")
             {
                 CPH.SendMessage(message, botAccount);
             }
-            if(platform == "youtube")
+            if (platform == "youtube")
             {
                 CPH.SendYouTubeMessage(message, botAccount);
             }
         }
 
-        
+
         public static string SURawInputWithInputsRemoved(this IInlineInvokeProxy CPH, int inputsToRemove)
         {
             string textRemove = "";
             for (int i = inputsToRemove; CPH.TryGetArg("input" + i, out string moreInput); i++)
+
+
             {
                 textRemove += " " + moreInput;
             }
-            return textRemove.Remove(0,1);
+            return textRemove.Remove(0, 1);
         }
 
-         public static string SURawInputWithInputsRemovedEncoded(this IInlineInvokeProxy CPH, int inputsToRemove)
+        public static string SURawInputWithInputsRemovedEncoded(this IInlineInvokeProxy CPH, int inputsToRemove)
         {
             string textRemove = "";
             for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
             {
                 textRemove += " " + moreInput;
             }
-            return textRemove.Remove(0,1);
+            return textRemove.Remove(0, 1);
+        }
+        public static string SURawInputWithInputsRemovedMAC(this IInlineInvokeProxy CPH, int inputsToRemove)
+        {
+            StringBuilder combinedInputs = new StringBuilder();
+
+            for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
+            {   
+                string textToAppend = "";
+                if (moreInput.StartsWith("!"))
+                {
+                        textToAppend = moreInput;
+                }
+                else
+                {
+                    CPH.TryGetArg("input" + i, out string plainInput);
+                    textToAppend = plainInput;
+                }
+
+                combinedInputs.Append(" ").Append(textToAppend);
+            }
+
+            return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
         }
 
-          public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
+        public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
         {
             CPH.TryGetArg("rewardId", out string reward);
             CPH.TryGetArg("redemptionId", out string redemption);
@@ -664,10 +690,10 @@ namespace StreamUP {
             return true;
         }
 
-          public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false)
+        public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false)
         {
 
-           
+
             CPH.TryGetArg("rewardId", out string reward);
             CPH.TryGetArg("redemptionId", out string redemption);
             if (reward == null || redemption == null)
@@ -697,7 +723,7 @@ namespace StreamUP {
                     }
                     else if (typeof(T) == typeof(string) && value is Guid guidValue)
                     {
-                        return (T)(object)guidValue.ToString(); 
+                        return (T)(object)guidValue.ToString();
                     }
                     else if (value is IConvertible)
                     {
@@ -794,7 +820,7 @@ namespace StreamUP {
 
     public enum TwitchProfilePictureUserType
     {
-        userId = 0,   
+        userId = 0,
         recipientId = 1,
         createdById = 2,
         targetUserId = 3,
@@ -803,7 +829,7 @@ namespace StreamUP {
 
 
     // SB events trigger data
-    public class TriggerData 
+    public class TriggerData
     {
         public string AlertMessage { get; set; } = null;
         public int Amount { get; set; } = 0;

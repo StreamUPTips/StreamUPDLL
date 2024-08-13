@@ -3034,7 +3034,7 @@ namespace StreamUP
             }
             // Implement reset logic here
             MessageBox.Show("Settings have been reset.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            form.Hide();
+            form.Close();
         }
         public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object settingValue)
         {
