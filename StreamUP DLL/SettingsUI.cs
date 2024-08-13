@@ -1,7 +1,4 @@
-//extern alias LiteDBAlias;
-//using LiteDBAlias::LiteDB;
 using System;
-using LiteDB;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -9,11 +6,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using LiteDB;
 using Streamer.bot.Plugin.Interface;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using System.Reflection.Emit;
 using Label = System.Windows.Forms.Label;
 
 namespace StreamUP
@@ -517,7 +516,7 @@ namespace StreamUP
 
         // List to hold controls
         private static readonly List<Control> controls = new List<Control>();
-        public static Form SUSBBuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
+        public static Form SUSBBuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1, int width = 800)
         {
             Image background = SUSBGetRandomImageIcon();
             CustomSplashScreen splashScreen = new CustomSplashScreen(background);
@@ -528,12 +527,12 @@ namespace StreamUP
 
             splashScreen.Close();
 
-            Form form = CPH.SUSBCreateMainForm(title, layout, productInfo, imageFilePath);
+            Form form = CPH.SUSBCreateMainForm(title, layout, productInfo, imageFilePath, width);
 
             return form;
 
         }
-        public static Form SUSBCreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
+        public static Form SUSBCreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1, int width = 800)
         {
 
 
@@ -572,7 +571,7 @@ namespace StreamUP
             var form = new Form
             {
                 Text = title,
-                Width = 800,
+                Width = width,
                 Height = 800,
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = SUSBGetIconOrDefault(imageFilePath),
@@ -1461,6 +1460,7 @@ namespace StreamUP
 
             return settings;
         }
+
         public static List<Control> SUSBAddPassword(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -1578,6 +1578,91 @@ namespace StreamUP
 
 
 
+        }
+        public static List<Control> SUSBAddStringDictionary(this IInlineInvokeProxy CPH, string description, string columnOneName, string columnTwoName, Dictionary<string,string> defaultValue, string saveName, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 1,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                //Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+
+            };
+
+
+            var input = new CustomDataGridView
+            {
+                Name = saveName,
+                Height = 200,
+                //Margin = new Padding(10),
+                BackColor = backColour2,
+                ForeColor = forecolour1,
+                Font = entryFont,
+                BorderStyle = BorderStyle.None,
+                ColumnHeadersVisible = true,
+                RowHeadersVisible = true,
+                RowHeadersWidth = 25,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = backColour2,
+                    ForeColor = forecolour1,
+                    SelectionBackColor = backColour1,
+                    SelectionForeColor = forecolour1
+                },
+                EnableHeadersVisualStyles = false,
+                GridColor = backColour2,
+                AllowUserToDeleteRows = true,
+                Dock = DockStyle.Bottom,
+                Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                AutoSize = false,
+
+            };
+
+
+
+
+
+
+            input.Columns.Add("columnOne", columnOneName);
+
+            input.Columns.Add("columnTwo", columnTwoName);
+            Dictionary<string,string> rowsToAdd = CPH.SUGetSetting<Dictionary<string,string>>(saveName, defaultValue);
+            foreach (KeyValuePair<string,string> entry in rowsToAdd)
+            {
+                input.Rows.Add(entry.Key, entry.Value); // Add each string directly, assuming input.Rows.Add() accepts individual objects
+            }
+
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 0, 1);
+
+            // Add the table layout to the list of controls
+            settings.Add(settingsTable);
+
+            return settings;
         }
         //NUMBERS
         public static List<Control> SUSBAddInt(this IInlineInvokeProxy CPH, string description, int defaultValue, int min, int max, string saveName, string tabName = "General")
@@ -1759,6 +1844,91 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
             settingsTable.Controls.Add(valueLabel, 2, 0);
+
+            // Add the table layout to the list of controls
+            settings.Add(settingsTable);
+
+            return settings;
+        }
+        public static List<Control> SUSBAddIntDictionary(this IInlineInvokeProxy CPH, string description, string columnOneName, string columnTwoName, Dictionary<string, int> defaultValue, string saveName, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 1,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                //Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+
+            };
+
+
+            var input = new CustomDataGridView
+            {
+                Name = saveName,
+                Height = 200,
+                //Margin = new Padding(10),
+                BackColor = backColour2,
+                ForeColor = forecolour1,
+                Font = entryFont,
+                BorderStyle = BorderStyle.None,
+                ColumnHeadersVisible = true,
+                RowHeadersVisible = true,
+                RowHeadersWidth = 25,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = backColour2,
+                    ForeColor = forecolour1,
+                    SelectionBackColor = backColour1,
+                    SelectionForeColor = forecolour1
+                },
+                EnableHeadersVisualStyles = false,
+                GridColor = backColour2,
+                AllowUserToDeleteRows = true,
+                Dock = DockStyle.Bottom,
+                Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                AutoSize = false,
+
+            };
+
+
+
+
+
+
+            input.Columns.Add("columnOne", columnOneName);
+
+            input.Columns.Add("columnTwo", columnTwoName);
+            Dictionary<string, int> rowsToAdd = CPH.SUGetSetting<Dictionary<string, int>>(saveName, defaultValue);
+            foreach (KeyValuePair<string, int> entry in rowsToAdd)
+            {
+                input.Rows.Add(entry.Key, entry.Value); // Add each string directly, assuming input.Rows.Add() accepts individual objects
+            }
+
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 0, 1);
 
             // Add the table layout to the list of controls
             settings.Add(settingsTable);
@@ -2742,21 +2912,105 @@ namespace StreamUP
                         CPH.SUSaveSetting(checkedListBox.Name, jsonData);
                         break;
                     case DataGridView dataGridView:
-
-                        List<string> dataRows = new List<string>();
-
-                        foreach (DataGridViewRow row in dataGridView.Rows)
+                       
+                        if (dataGridView.Columns.Count == 1)
                         {
-                            if (!row.IsNewRow) // Skip the new row at the end
-                            {
-                                string item = row.Cells[0].Value?.ToString(); // Assuming there's only one column
-                                dataRows.Add(item);
+                            // Handle as List<string>
+                            List<string> dataRows = new List<string>();
 
+                            foreach (DataGridViewRow row in dataGridView.Rows)
+                            {
+                                if (!row.IsNewRow) // Skip the new row at the end
+                                {
+                                    string item = row.Cells[0].Value?.ToString();
+                                    if (!string.IsNullOrEmpty(item)) // Ensure the item is not null or empty
+                                    {
+                                        dataRows.Add(item);
+                                    }
+                                }
                             }
 
+                            // Log the action
+                            CPH.SUSBSettingsLog($"Save Name: {dataGridView.Name}, Data: {string.Join(",", dataRows.ToArray())}");
+
+                            // Save the List<string> as a comma-separated string
+                            CPH.SUSaveSetting(dataGridView.Name, string.Join(",", dataRows.ToArray()));
                         }
-                        CPH.SUSBSettingsLog($"Save Name: {dataGridView.Name}, Text: {string.Join(",", dataRows.ToArray())}");
-                        CPH.SUSaveSetting(dataGridView.Name, string.Join(",", dataRows.ToArray()));
+
+
+
+                        else if (dataGridView.Columns.Count >= 2)
+                        {
+                            bool isIntDict = true;
+                            Dictionary<string, string> dataDictString = new Dictionary<string, string>();
+                            Dictionary<string, int> dataDictInt = new Dictionary<string, int>();
+
+                            foreach (DataGridViewRow row in dataGridView.Rows)
+                            {
+                                if (!row.IsNewRow) // Skip the new row at the end
+                                {
+                                    string key = row.Cells[0].Value?.ToString();
+                                    string value = row.Cells[1].Value?.ToString();
+
+                                    if (!string.IsNullOrEmpty(key)) // Ensure the key is not null or empty
+                                    {
+                                        if (int.TryParse(value, out int intValue))
+                                        {
+                                            dataDictInt[key] = intValue;
+                                        }
+                                        else
+                                        {
+                                            isIntDict = false;
+                                            dataDictString[key] = value ?? string.Empty; // Use an empty string if the value is null
+                                        }
+                                    }
+                                }
+                            }
+                           
+                            if (isIntDict)
+                            {
+                                // Convert the dictionary to a JSON string
+                                jsonData = JsonConvert.SerializeObject(dataDictInt);
+
+                                // Log the action
+                                CPH.SUSBSettingsLog($"Save Name: {dataGridView.Name}, Data: {jsonData}");
+
+                                // Save the JSON string as a setting
+                                CPH.SUSaveSetting(dataGridView.Name, jsonData);
+                            }
+                            else
+                            {
+                                // Convert the dictionary to a JSON string
+                                jsonData = JsonConvert.SerializeObject(dataDictString);
+
+                                // Log the action
+                                CPH.SUSBSettingsLog($"Save Name: {dataGridView.Name}, Data: {jsonData}");
+
+                                // Save the JSON string as a setting
+                                CPH.SUSaveSetting(dataGridView.Name, jsonData);
+                            }
+                        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         break;
 
 
@@ -2844,13 +3098,20 @@ namespace StreamUP
                             return defaultValue;
                         }
                     }
-                    else if (typeof(T) == typeof(Dictionary<string, bool>))
+                    else if (typeof(T) == typeof(Dictionary<string, bool>) || typeof(T) == typeof(Dictionary<string, string>) || typeof(T) == typeof(Dictionary<string, int>))
                     {
                         if (settings.SettingValue != null)
                         {
-                            // Parse the JSON string and convert it to a dictionary
-                            Dictionary<string, bool> dictValue = JsonConvert.DeserializeObject<Dictionary<string, bool>>(settings.SettingValue.ToString());
-                            return (T)Convert.ChangeType(dictValue, typeof(T));
+                            try
+                            {
+                                var dictValue = JsonConvert.DeserializeObject(settings.SettingValue.ToString(), typeof(T));
+                                return (T)dictValue;
+                            }
+                            catch (JsonException)
+                            {
+                                // Handle deserialization error
+                                return defaultValue;
+                            }
                         }
                         else
                         {
@@ -2858,6 +3119,7 @@ namespace StreamUP
                             return defaultValue;
                         }
                     }
+
                     else
                     {
                         // Handle other types

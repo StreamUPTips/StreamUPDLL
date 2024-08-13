@@ -632,9 +632,19 @@ namespace StreamUP {
             string textRemove = "";
             for (int i = inputsToRemove; CPH.TryGetArg("input" + i, out string moreInput); i++)
             {
-                textRemove += moreInput;
+                textRemove += " " + moreInput;
             }
-            return textRemove;
+            return textRemove.Remove(0,1);
+        }
+
+         public static string SURawInputWithInputsRemovedEncoded(this IInlineInvokeProxy CPH, int inputsToRemove)
+        {
+            string textRemove = "";
+            for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
+            {
+                textRemove += " " + moreInput;
+            }
+            return textRemove.Remove(0,1);
         }
 
           public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
