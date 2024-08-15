@@ -112,6 +112,9 @@ namespace StreamUP
                             break;
                     }
                     break;
+                case EventType.SpeechToTextCommand:
+                    triggerData.Message = sbArgs["spokenText"].ToString();
+                    break;
                 case EventType.StreamDeckAction:
                     break;
                 case EventType.TimedAction:
@@ -351,6 +354,11 @@ namespace StreamUP
                     triggerData.User = sbArgs["createdByDisplayName"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.createdById, productSettings);
                     break;
+                case EventType.TwitchWatchStreak:
+                    triggerData.Amount = int.Parse(sbArgs["watchStreak"].ToString());
+                    triggerData.User = sbArgs["user"].ToString();
+                    triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
+                    break;
                 case EventType.TwitchWhisper:
                     triggerData.Message = sbArgs["rawInput"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
@@ -555,7 +563,7 @@ namespace StreamUP
             return image;
         }
 
-        private static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH, string productNumber)
+        public static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH, string productNumber)
         {
             string logName = $"{productNumber}::SUSBCheckYouTubeProfileImageArgs";
             CPH.SUWriteLog("METHOD STARTED!", logName);
