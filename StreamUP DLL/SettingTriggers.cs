@@ -97,19 +97,32 @@ namespace StreamUP
 
         }
 
-          public static void SetTriggersForTimedVIP(this IInlineInvokeProxy CPH)
+        public static void SetTriggersForTimedVIP(this IInlineInvokeProxy CPH)
         {
             string [] categories = {"Timed VIP"};
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
-                new CustomTrigger("New VIP", "timedVipnewVip", categories),
+                new CustomTrigger("New User", "timedVipnewVip", categories),
                 new CustomTrigger("Time Added",  "timedViptimeAdded", categories),
-                new CustomTrigger("Timed VIP Fail", "timedVipFail", categories),
-                new CustomTrigger("Timed VIP Time Left", "timedVipTimeLeft", categories),
-                new CustomTrigger("VIP Removed", "timedVipUserRemoved", categories)
+                new CustomTrigger("Fail", "timedVipFail", categories),
+                new CustomTrigger("Time Left", "timedVipTimeLeft", categories),
+                new CustomTrigger("User Removed", "timedVipUserRemoved", categories)
             };
             CPH.SetCustomTriggers(customTriggers);
         }
 
+        public static void SetTriggersForFreeForAll(this IInlineInvokeProxy CPH)
+        {
+             string [] categories =  { "Currency", "Free For All" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new CustomTrigger("Fight Start", "ffaFightStart", categories),
+                new CustomTrigger("Fight End",  "ffaFightEnd", categories),
+                new CustomTrigger("User Joined", "ffaUserJoin", categories),
+                new CustomTrigger("User Lost", "ffaUserLost", categories),
+                new CustomTrigger("User Won", "ffaUserWon", categories)
+            };
+            CPH.SetCustomTriggers(customTriggers);
+        }
     }
 }

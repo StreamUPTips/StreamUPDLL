@@ -407,6 +407,12 @@ namespace StreamUP {
         }
         CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         return false;
+    }
+
+    public static void SBLogSettingsToString(this IInlineInvokeProxy CPH, string productNumber)
+    {
+        string productSettings = CPH.GetGlobalVar<string?>($"{productNumber}_ProductSettings", true) ?? $"Settings for Product '{productNumber}' Not Found";
+        CPH.SUWriteLog("[Settings Logger] " + productSettings);
     }    
 }
 
@@ -421,5 +427,7 @@ namespace StreamUP {
         public string SettingsAction { get; set; } = string.Empty;
         public string SourceNameVersionCheck { get; set; } = string.Empty;
         public Version SourceNameVersionNumber { get; set; }
+
+        public Version ProductVersionNumber {get; set;} = new Version (0,0,0);
     }
 }
