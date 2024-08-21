@@ -91,6 +91,139 @@ namespace StreamUP
     
     }
 
+    public static class TerrierDartsHelperMethods
+    {
+        
+        public static void SUSBSendPlatformMessage(this IInlineInvokeProxy CPH, string platform, string message, bool botAccount)
+        {
+            if (platform == "twitch")
+            {
+                CPH.SendMessage(message, botAccount);
+            }
+            if (platform == "youtube")
+            {
+                CPH.SendYouTubeMessage(message, botAccount);
+            }
+        }
+
+
+        public static string SURawInputWithInputsRemoved(this IInlineInvokeProxy CPH, int inputsToRemove)
+        {
+            StringBuilder combinedInputs = new StringBuilder();
+            for (int i = inputsToRemove; CPH.TryGetArg("input" + i, out string moreInput); i++)
+
+
+            {
+                combinedInputs.Append(" ").Append(moreInput);
+            }
+           return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+        }
+
+        public static string SURawInputWithInputsRemovedEncoded(this IInlineInvokeProxy CPH, int inputsToRemove)
+        {
+             StringBuilder combinedInputs = new StringBuilder();
+            for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
+
+
+            {
+                combinedInputs.Append(" ").Append(moreInput);
+            }
+           return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+        }
+        public static string SURawInputWithInputsRemovedMAC(this IInlineInvokeProxy CPH, int inputsToRemove)
+        {
+            StringBuilder combinedInputs = new StringBuilder();
+
+            for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
+            {   
+                string textToAppend = "";
+                if (moreInput.StartsWith("!"))
+                {
+                        textToAppend = moreInput;
+                }
+                else
+                {
+                    CPH.TryGetArg("input" + i, out string plainInput);
+                    textToAppend = plainInput;
+                }
+
+                combinedInputs.Append(" ").Append(textToAppend);
+            }
+
+            return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+        }
+
+        public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
+        {
+            CPH.TryGetArg("rewardId", out string reward);
+            CPH.TryGetArg("redemptionId", out string redemption);
+            if (reward == null || redemption == null)
+            {
+                return true;
+            }
+            if (refund)
+            {
+
+                CPH.TwitchRedemptionCancel(reward, redemption);
+            }
+
+            return true;
+        }
+
+        public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false)
+        {
+
+
+            CPH.TryGetArg("rewardId", out string reward);
+            CPH.TryGetArg("redemptionId", out string redemption);
+            if (reward == null || redemption == null)
+            {
+                return true;
+            }
+            if (fulfill)
+            {
+
+                CPH.TwitchRedemptionFulfill(reward, redemption);
+            }
+
+            return true;
+        }
+
+        public static string SUpwnyyReplacement(this IInlineInvokeProxy CPH, string message)
+    {
+        Regex regex = new Regex("%(.*?)(?::(.*?))?%");
+        // Use Regex.Replace with a MatchEvaluator to replace each match
+        string result = regex.Replace(message, match =>
+        {
+            // Extract the word inside the % symbols
+            string word = match.Groups[1].Value;
+            string format = match.Groups[2].Value;
+
+            // Attempt to get the argument for this word
+            if (CPH.TryGetArg(word, out object arg))
+            {
+                if (arg is IFormattable formattable)
+                {
+                    // Use the specified format if provided, otherwise use the default format
+                    return formattable.ToString(format, CultureInfo.CurrentCulture);
+                }
+                else
+                {
+                    // Return the argument value without formatting
+                    return arg.ToString();
+                }
+            }
+            else
+            {
+                return match.Value; // Return the original %word% if no argument is found
+            }
+        });
+        return result;
+    }
+
+
+    }
+
 
 
 

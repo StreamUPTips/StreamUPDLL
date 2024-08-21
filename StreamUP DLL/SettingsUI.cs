@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows.Forms;
 using LiteDB;
 using Streamer.bot.Plugin.Interface;
+using Streamer.bot.Plugin.Interface.Model;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
@@ -481,6 +482,7 @@ namespace StreamUP
         }
     }
 
+
     public static class StreamUpSettingsBuilder
     {
         public static TableLayoutPanel settingsTable;
@@ -516,7 +518,7 @@ namespace StreamUP
 
         // List to hold controls
         private static readonly List<Control> controls = new List<Control>();
-        public static Form SUSBBuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1, int width = 800)
+        public static Form SUSBBuildForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
             Image background = SUSBGetRandomImageIcon();
             CustomSplashScreen splashScreen = new CustomSplashScreen(background);
@@ -527,12 +529,12 @@ namespace StreamUP
 
             splashScreen.Close();
 
-            Form form = CPH.SUSBCreateMainForm(title, layout, productInfo, imageFilePath, width);
+            Form form = CPH.SUSBCreateMainForm(title, layout, productInfo, imageFilePath);
 
             return form;
 
         }
-        public static Form SUSBCreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1, int width = 800)
+        public static Form SUSBCreateMainForm(this IInlineInvokeProxy CPH, string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
 
 
@@ -571,7 +573,7 @@ namespace StreamUP
             var form = new Form
             {
                 Text = title,
-                Width = width,
+                Width = 800,
                 Height = 800,
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = SUSBGetIconOrDefault(imageFilePath),
@@ -972,46 +974,6 @@ namespace StreamUP
             return icon;
         }
 
-
-        /*
-        private static Icon ConvertToIcon(Bitmap imagePath)
-        {
-            try
-            {
-                using (System.Drawing.Image img = System.Drawing.Image.FromFile(imagePath))
-                {
-                    // Convert the image to an icon
-                    return Icon.FromHandle(((Bitmap)img).GetHicon());
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions (e.g., file not found, invalid image format)
-                Console.WriteLine("Error converting image to icon: " + ex.Message);
-                return null;
-            }
-        }
-        private static void DownloadImage(string imageUrl)
-        {
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string filePath = Path.Combine(programDirectory, "Extensions", "Data", "iconImage.png");
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    // Download the image data
-                    byte[] imageData = client.DownloadData(imageUrl);
-
-                    // Write the byte array to a file
-                    File.WriteAllBytes(filePath, imageData);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Failed to retrieve the image. Exception: " + ex.Message);
-                }
-            }
-        }
-        */
         public static void SUSBSetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -1168,7 +1130,7 @@ namespace StreamUP
                 Margin = new Padding(0),
                 ForeColor = forecolour1,
                 Tag = tabName,
-               
+
 
             };
 
@@ -1182,7 +1144,7 @@ namespace StreamUP
 
             var space = new Label
             {
-                
+
                 Text = Environment.NewLine,
                 Font = spaceFont,
                 Dock = DockStyle.Fill,
@@ -1190,7 +1152,7 @@ namespace StreamUP
                 Margin = new Padding(0),
                 ForeColor = forecolour1,
                 Tag = tabName,
-            
+
 
             };
 
@@ -1579,7 +1541,7 @@ namespace StreamUP
 
 
         }
-        public static List<Control> SUSBAddStringDictionary(this IInlineInvokeProxy CPH, string description, string columnOneName, string columnTwoName, Dictionary<string,string> defaultValue, string saveName, string tabName = "General")
+        public static List<Control> SUSBAddStringDictionary(this IInlineInvokeProxy CPH, string description, string columnOneName, string columnTwoName, Dictionary<string, string> defaultValue, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -1648,8 +1610,8 @@ namespace StreamUP
             input.Columns.Add("columnOne", columnOneName);
 
             input.Columns.Add("columnTwo", columnTwoName);
-            Dictionary<string,string> rowsToAdd = CPH.SUGetSetting<Dictionary<string,string>>(saveName, defaultValue);
-            foreach (KeyValuePair<string,string> entry in rowsToAdd)
+            Dictionary<string, string> rowsToAdd = CPH.SUGetSetting<Dictionary<string, string>>(saveName, defaultValue);
+            foreach (KeyValuePair<string, string> entry in rowsToAdd)
             {
                 input.Rows.Add(entry.Key, entry.Value); // Add each string directly, assuming input.Rows.Add() accepts individual objects
             }
@@ -2808,25 +2770,24 @@ namespace StreamUP
 
 
         }
-        //Streamerbot Base Stuff
-        /* public static List<Control> SUSBAddActionDrop(this IInlineInvokeProxy CPH, string description,string defaultValue, string saveName, string tabName = "General")
-         {
-             List<ActionData> actions = CPH.GetActions();
-             List<string> actionDropDown = new List<string>();
-             foreach (ActionData action in actions)
-             {
-                 actionDropDown.Add(action.Name);
-             }
-             List<Control> settings = new List<Control>();
+        public static List<Control> SUSBAddActionDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
+        {
+            List<ActionData> actions = CPH.GetActions();
+            List<string> actionDropDown = new List<string>();
+            foreach (ActionData action in actions)
+            {
+                actionDropDown.Add(action.Name);
+            }
 
-             string[] actionsArray = actionDropDown.ToArray();
-             actionsArray.Sort();
-             settings.AddRange(CPH.SUSBAddDropDown(description, actionsArray, defaultValue, saveName, tabName));
+            string[] actionsArray = actionDropDown.ToArray();
+            Array.Sort(actionsArray);
+            List<Control> settings = new List<Control>();
+            settings.AddRange(CPH.SUSBAddDropDown(description, actionsArray, defaultValue, saveName, tabName));
 
 
-             return settings;
-         }
-         */
+            return settings;
+        }
+
         //Logging
         public static void SUSBSettingsLog(this IInlineInvokeProxy CPH, string message)
         {
@@ -2912,7 +2873,7 @@ namespace StreamUP
                         CPH.SUSaveSetting(checkedListBox.Name, jsonData);
                         break;
                     case DataGridView dataGridView:
-                       
+
                         if (dataGridView.Columns.Count == 1)
                         {
                             // Handle as List<string>
@@ -2966,7 +2927,7 @@ namespace StreamUP
                                     }
                                 }
                             }
-                           
+
                             if (isIntDict)
                             {
                                 // Convert the dictionary to a JSON string
