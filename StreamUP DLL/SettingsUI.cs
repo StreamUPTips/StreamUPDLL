@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
+using Streamer.bot.Plugin.Interface.Model;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
@@ -482,6 +483,7 @@ namespace StreamUP
         }
     }
 
+
     public static class StreamUpSettingsBuilder
     {
         public static TableLayoutPanel settingsTable;
@@ -571,7 +573,7 @@ namespace StreamUP
             var form = new Form
             {
                 Text = title,
-                Width = 850,
+                Width = 800,
                 Height = 800,
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = SUSBGetIconOrDefault(imageFilePath),
@@ -972,46 +974,6 @@ namespace StreamUP
             return icon;
         }
 
-
-        /*
-        private static Icon ConvertToIcon(Bitmap imagePath)
-        {
-            try
-            {
-                using (System.Drawing.Image img = System.Drawing.Image.FromFile(imagePath))
-                {
-                    // Convert the image to an icon
-                    return Icon.FromHandle(((Bitmap)img).GetHicon());
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions (e.g., file not found, invalid image format)
-                Console.WriteLine("Error converting image to icon: " + ex.Message);
-                return null;
-            }
-        }
-        private static void DownloadImage(string imageUrl)
-        {
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string filePath = Path.Combine(programDirectory, "Extensions", "Data", "iconImage.png");
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    // Download the image data
-                    byte[] imageData = client.DownloadData(imageUrl);
-
-                    // Write the byte array to a file
-                    File.WriteAllBytes(filePath, imageData);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Failed to retrieve the image. Exception: " + ex.Message);
-                }
-            }
-        }
-        */
         public static void SUSBSetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -2769,80 +2731,6 @@ namespace StreamUP
 
             return settings;
         }
-        public static List<Control> SUSBAddRewardDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
-        {
-            List<TwitchReward> rewards = CPH.TwitchGetRewards();
-            List<string> rewardDropdown = new List<string>();
-            foreach (TwitchReward reward in rewards)
-            {
-                rewardDropdown.Add(reward.Title);
-            }
-
-            string[] rewardArray = rewardDropdown.ToArray();
-            Array.Sort(rewardArray);
-            List<Control> settings = new List<Control>();
-            settings.AddRange(CPH.SUSBAddDropDown(description, rewardArray, defaultValue, saveName, tabName));
-
-
-            return settings;
-        }
-
-        private static Task<string> OpenFileDialogAsync()
-        {
-            var tcs = new TaskCompletionSource<string>();
-
-            Thread thread = new Thread(() =>
-            {
-                using (OpenFileDialog openFileDialog = new OpenFileDialog())
-                {
-                    openFileDialog.InitialDirectory = "c:\\";
-                    openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    openFileDialog.FilterIndex = 1;
-                    openFileDialog.RestoreDirectory = true;
-
-                    DialogResult result = openFileDialog.ShowDialog();
-                    if (result == DialogResult.OK)
-                    {
-                        tcs.SetResult(openFileDialog.FileName);
-                    }
-                    else
-                    {
-                        tcs.SetResult(null);
-                    }
-                }
-            });
-
-            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
-            thread.Start();
-
-            return tcs.Task;
-        }
-        private static Task<string> OpenFolderDialogAsync()
-        {
-            var tcs = new TaskCompletionSource<string>();
-
-            Thread thread = new Thread(() =>
-            {
-                using (FolderBrowserDialog openFolderDialog = new FolderBrowserDialog())
-                {
-                    DialogResult result = openFolderDialog.ShowDialog();
-                    if (result == DialogResult.OK)
-                    {
-                        tcs.SetResult(openFolderDialog.SelectedPath);
-                    }
-                    else
-                    {
-                        tcs.SetResult(null);
-                    }
-                }
-            });
-
-            thread.SetApartmentState(ApartmentState.STA); // Set the thread to STA
-            thread.Start();
-
-            return tcs.Task;
-        }
-
 
         //Logging
         public static void SUSBSettingsLog(this IInlineInvokeProxy CPH, string message)
