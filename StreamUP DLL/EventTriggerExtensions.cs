@@ -224,6 +224,24 @@ namespace StreamUP {
                     defaultDonationImageUrl = "https://streamer.bot/img/integrations/tipeestream.png";
                     triggerData.UserImage = SUSBGetDonationUserImage(CPH, productInfo, triggerType, defaultDonationImageUrl);                
                     break;
+                case EventType.DonorDriveDonation:
+                    triggerData.Donation = true;
+                    triggerData.User = sbArgs["donorName"].ToString();
+                    triggerData.Message = sbArgs["donorMessage"].ToString();
+                    triggerData.UserImage = sbArgs["donorAvatarUrl"].ToString();
+                    if (productSettings.ContainsKey("LocalCurrencyCode"))
+                    {
+                        amount = decimal.Parse(sbArgs["amount"].ToString());
+                        currency = "USD"; // I'm forcing this to USD as I assume that all currency is in USD from DonorDrive
+                        localCurrency = productSettings["LocalCurrencyCode"].ToString();
+                        triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
+                        cleanedAmount = Regex.Replace(triggerData.AmountCurrency, @"[^\d.-]", "");
+                        if (double.TryParse(cleanedAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out amountCurrencyDouble))
+                        {
+                            triggerData.AmountCurrencyDouble = amountCurrencyDouble;
+                        }                     
+                    }
+                    break;
                 // TWITCH
                 case EventType.TwitchAnnouncement:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
