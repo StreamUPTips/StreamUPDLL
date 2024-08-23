@@ -1,77 +1,36 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38806BCB-0167-4A7E-AC8E-EDE4E72F380C}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFramework>net48</TargetFramework>
     <RootNamespace>StreamUP</RootNamespace>
     <AssemblyName>StreamUP</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup>
     <LangVersion>preview</LangVersion>
+    <Deterministic>true</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\StreamUP DLL\dlls\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Streamer.bot.Plugin.Interface">
-      <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Plugin.Interface.dll</HintPath>
-    </Reference>
-    <Reference Include="Streamer.bot.Common">
-      <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
-    </Reference>
-        <Reference Include="LiteDB">
-      <HintPath>..\StreamUP DLL\dlls\LiteDB.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <Reference Include="..\StreamUP DLL\dlls\LiteDB.dll" />
+    <Reference Include="..\StreamUP DLL\dlls\Streamer.bot.Plugin.Interface.dll" />
+    <Reference Include="..\StreamUP DLL\dlls\Streamer.bot.Common.dll" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Drawing" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="GenericExtensions.cs" />
-    <Compile Include="ObsWebSocketExtensions.cs" />
-    <Compile Include="ValidationExtensions.cs" />
-    <Compile Include="UIExtensions.cs" />
-    <Compile Include="PollExtensions.cs" />
-    <Compile Include="ProductSettingsUIExtensions.cs" />
-    <Compile Include="EventTriggerExtensions.cs" />
-    <Compile Include="CurrencyExtensions.cs" />
-    <Compile Include="SettingTriggers.cs" />
-    <Compile Include="SettingsUI.cs" />
-    <Compile Include="TerrierDartsExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
