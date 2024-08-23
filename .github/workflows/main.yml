@@ -13,9 +13,12 @@ jobs:
      
     - name: Setup MSBuild Path
       uses: microsoft/setup-msbuild@v2
- 
+
+    - name: Restore NuGet packages
+      run: nuget restore "StreamUP DLL.sln"
+
     - name: Build Library
-      run: msbuild "StreamUP DLL.sln" -t:rebuild -verbosity:diag -property:Configuration=Release
+      run: msbuild "StreamUP DLL.sln" -t:rebuild -property:Configuration=Release
 
     - name: Extract Version Number
       id: version
@@ -29,7 +32,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: StreamUP Library
-        path: ${{ github.workspace }}\StreamUP DLL\bin\Release\StreamUP.dll
+        path: ${{ github.workspace }}\StreamUP DLL\bin\Release\net48\StreamUP.dll
 
     - name: Release Library
       if: github.ref == 'refs/heads/master'
@@ -37,4 +40,4 @@ jobs:
       with:
         tag_name: v${{ steps.version.outputs.VERSION }}
         files: |
-          D:/a/StreamUPDLL/StreamUPDLL/StreamUP DLL/bin/Release/StreamUP.dll
+          D:/a/StreamUPDLL/StreamUPDLL/StreamUP DLL/bin/Release/net48/StreamUP.dll
