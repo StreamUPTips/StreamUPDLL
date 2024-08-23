@@ -230,7 +230,7 @@ namespace StreamUP {
                     triggerData.Message = sbArgs["donorMessage"].ToString();
                     if (productSettings.ContainsKey("LocalCurrencyCode"))
                     {
-                        amount = decimal.Parse(sbArgs["amount"].ToString());
+                        amount = decimal.Parse(sbArgs["donorAmount"].ToString());
                         currency = "USD"; // I'm forcing this to USD as I assume that all currency is in USD from DonorDrive
                         localCurrency = productSettings["LocalCurrencyCode"].ToString();
                         triggerData.AmountCurrency = CPH.SUConvertCurrency(amount, currency, localCurrency);
@@ -241,9 +241,9 @@ namespace StreamUP {
                         }                     
                     }
 
-                    string donorAvatarUrl = CPH.TryGetArg("donorAvatarUrl",out string donorAvatarUrlInput) ? donorAvatarUrlInput : "https://static.donordrive.com/clients/try/img/avatar-constituent-default.gif";
+                    CPH.TryGetArg("donorAvatarUrl", out string donorAvatarUrlInput);
+                    string donorAvatarUrl = (!string.IsNullOrEmpty(donorAvatarUrlInput)) ? donorAvatarUrlInput : "https://static.donordrive.com/clients/try/img/avatar-constituent-default.gif";
                     triggerData.UserImage = donorAvatarUrl;
-                    
                     break;
                 // TWITCH
                 case EventType.TwitchAnnouncement:
