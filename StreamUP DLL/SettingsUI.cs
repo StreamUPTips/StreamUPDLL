@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Label = System.Windows.Forms.Label;
 using Streamer.bot.Plugin.Interface.Model;
-using SettingsUI;
 
 namespace StreamUP
 {
@@ -973,45 +972,6 @@ namespace StreamUP
         }
 
 
-        /*
-        private static Icon ConvertToIcon(Bitmap imagePath)
-        {
-            try
-            {
-                using (System.Drawing.Image img = System.Drawing.Image.FromFile(imagePath))
-                {
-                    // Convert the image to an icon
-                    return Icon.FromHandle(((Bitmap)img).GetHicon());
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions (e.g., file not found, invalid image format)
-                Console.WriteLine("Error converting image to icon: " + ex.Message);
-                return null;
-            }
-        }
-        private static void DownloadImage(string imageUrl)
-        {
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string filePath = Path.Combine(programDirectory, "Extensions", "Data", "iconImage.png");
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    // Download the image data
-                    byte[] imageData = client.DownloadData(imageUrl);
-
-                    // Write the byte array to a file
-                    File.WriteAllBytes(filePath, imageData);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Failed to retrieve the image. Exception: " + ex.Message);
-                }
-            }
-        }
-        */
         public static void SUSBSetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -3011,49 +2971,35 @@ namespace StreamUP
         }
 
 
-        public static T SUGetSetting<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
-        {
-            CPH.TryGetArg("saveFile", out string saveFile);
-            
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
-            Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, $"Product_Settings_{saveFile}.json");
-            var database = new SimpleDatabase(filePath);
-            var value = database.Get(settingName, defaultValue);
-            return value;
+    private static void InitializeDatabase(IInlineInvokeProxy CPH, out string filePath)
+    {
+        CPH.TryGetArg("saveFile", out string saveFile);
 
-        }
-        public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object newValue)
-        {
-            CPH.TryGetArg("saveFile", out string saveFile);
-            
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
-            Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, $"Product_Settings_{saveFile}.json");
-            var database = new SimpleDatabase(filePath);
+        string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        string dir = Path.Combine(programDirectory, "StreamUP", "Data");
+        Directory.CreateDirectory(dir);
+        filePath = Path.Combine(dir, $"{saveFile}_Product_Settings.json");
 
+        SimpleDatabase.Initialize(CPH, filePath);
+    }
 
-            database.Update(settingName, newValue);
+    public static T SUGetSetting<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
+    {
+        InitializeDatabase(CPH, out string filePath);
+        return CPH.StreamUpInternalGet(settingName, defaultValue);
+    }
 
+    public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object newValue)
+    {
+        InitializeDatabase(CPH, out string filePath);
+        CPH.StreamUpInternalUpdate(settingName, newValue);
+    }
 
-        }
-        public static void SUDeleteSetting(this IInlineInvokeProxy CPH, string settingName)
-        {
-            CPH.TryGetArg("saveFile", out string saveFile);
-            
-            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
-            Directory.CreateDirectory(dir);
-            string filePath = Path.Combine(dir, $"Product_Settings_{saveFile}.json");
-            var database = new SimpleDatabase(filePath);
-
-
-            database.Delete(settingName);
-
-
-        }
+    public static void SUDeleteSetting(this IInlineInvokeProxy CPH, string settingName)
+    {
+        InitializeDatabase(CPH, out string filePath);
+        CPH.StreamUpInternalDelete(settingName);
+    }
     }
 
     #endregion
