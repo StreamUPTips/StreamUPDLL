@@ -1,136 +1,112 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP
 {
-    public class SimpleDatabase
+    public static class SimpleDatabase
     {
-        private readonly string _filePath;
-        private Dictionary<string, object> _data;
+        private static string _filePath;
+        private static string _saveName;
+        private static Dictionary<string, object> _data = new Dictionary<string, object>();
 
-        public SimpleDatabase(string filePath)
+        // Static method to initialize the database
+        public static void Initialize(IInlineInvokeProxy CPH, string filePath)
         {
             _filePath = filePath;
-            _data = Load();
+            _saveName = Path.GetFileNameWithoutExtension(_filePath);
+            _data = CPH.StreamUpInternalLoad(_saveName);
         }
 
-        private Dictionary<string, object> Load()
+        private static Dictionary<string, object> StreamUpInternalLoad(this IInlineInvokeProxy CPH, string saveFile)
         {
-            if (!File.Exists(_filePath))
-                return new Dictionary<string, object>();
 
-            var json = File.ReadAllText(_filePath);
-            return JsonConvert.DeserializeObject<Dictionary<string, object>>(json) ?? new Dictionary<string, object>();
+            //CPH.LogInfo($"string({saveFile})2:" + CPH.GetGlobalVar<string>(saveFile, true));
+            string json = CPH.GetGlobalVar<string>(saveFile, true);
+            //CPH.LogInfo(json.ToString());
+            return (Dictionary<string, object>)JsonConvert.DeserializeObject(json);
         }
 
-        private void Save()
+        private static void StreamUpInternalSave(this IInlineInvokeProxy CPH)
         {
-            var json = JsonConvert.SerializeObject(_data, Formatting.Indented);
+            _saveName = Path.GetFileNameWithoutExtension(_filePath);
+            var json = JsonConvert.SerializeObject(_data);
             File.WriteAllText(_filePath, json);
+            CPH.SetGlobalVar(_saveName, json, true);
         }
 
-        public void Add(string key, object value)
+        public static void StreamUpInternalAdd(this IInlineInvokeProxy CPH, string key, object value)
         {
-
-            if (value is string || value is int || value is decimal)
-            {
-                _data[key] = value;
-
-            }
-            else
-            {
-                _data[key] = value;
-
-            }
-
-            Save();
+            _data[key] = value;
+            CPH.StreamUpInternalSave();
         }
 
-        public void Update(string key, object newValue)
+        public static void StreamUpInternalUpdate(this IInlineInvokeProxy CPH, string key, object newValue)
         {
             if (_data.ContainsKey(key))
             {
-
-                if (newValue is string || newValue is int || newValue is decimal)
-                {
-                    _data[key] = newValue;
-
-                }
-                else
-                {
-                    _data[key] = newValue;
-
-                }
-            Save();
+                _data[key] = newValue;
             }
             else
             {
-                Add(key, newValue);
+                CPH.StreamUpInternalAdd(key, newValue);
             }
-           
-            
+
+            CPH.StreamUpInternalSave();
         }
 
-        public T Get<T>(string key, T defaultValue)
+        public static T StreamUpInternalGet<T>(this IInlineInvokeProxy CPH, string key, T defaultValue)
         {
+            CPH.LogInfo($"Trying to Get {key} from {_data} with default of {defaultValue} Type = {typeof(T)}");
             if (_data.TryGetValue(key, out var jsonValue))
             {
-                if (typeof(T) == typeof(string))
+                try
                 {
-                    return (T)Convert.ChangeType(jsonValue, typeof(T));
+                    // Handle string, int, and decimal types
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal))
+                    {
+                        return (T)Convert.ChangeType(jsonValue, typeof(T));
+                    }
+                    // Handle Dictionary and List types
+                    else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Dictionary<,>))
+                    {
+                        return JsonConvert.DeserializeObject<T>(jsonValue.ToString());
+                    }
+                    else if (typeof(T) == typeof(List<string>))
+                    {
+                        var jArray = jsonValue as JArray;
+                        return jArray != null ? jArray.ToObject<T>() : defaultValue;
+                    }
+                    else if (typeof(T) == typeof(JArray) || typeof(T) == typeof(JObject))
+                    {
+                        // If the expected type is JArray or JObject, return it directly
+                        return (T)(object)jsonValue;
+                    }
                 }
-                else if (typeof(T) == typeof(int))
+                catch (Exception ex)
                 {
-                    //return int.Parse(jsonValue);
-                    return (T)Convert.ChangeType(jsonValue, typeof(T));
+                    // Handle or log the exception as needed
+                    CPH.LogError($"Error deserializing value for key '{key}': {ex.Message}");
                 }
-                else if (typeof(T) == typeof(decimal))
-                {
-                    //return decimal.Parse(jsonValue);
-                    return (T)Convert.ChangeType(jsonValue, typeof(T));
-                }
-                else if (typeof(T) == typeof(Dictionary<string, bool>) || typeof(T) == typeof(Dictionary<string, string>) || typeof(T) == typeof(Dictionary<string, int>))
-                {
-                    var dictValue = JsonConvert.DeserializeObject(jsonValue.ToString(), typeof(T));
-                    return (T)dictValue;
-
-                }
-                else if(typeof(T) == typeof(List<string>))
-                {
-                  
-                    var listValue = JsonConvert.DeserializeObject(jsonValue.ToString(), typeof(T));
-                    return (T)Convert.ChangeType(listValue, typeof(T));
-
-
-                }
-                else
-                {
-
-                    return defaultValue;
-                }
-                
             }
+
             return defaultValue;
         }
 
 
-
-
-
-        public void Delete(string key)
+        public static void StreamUpInternalDelete(this IInlineInvokeProxy CPH, string key)
         {
             if (_data.Remove(key))
             {
-                Save();
+                CPH.StreamUpInternalSave();
             }
-        
         }
 
-        public IEnumerable<string> GetAllKeys()
+        public static IEnumerable<string> StreamUpInternalGetAllKeys(this IInlineInvokeProxy CPH)
         {
             return _data.Keys;
         }
