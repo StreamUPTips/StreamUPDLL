@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
@@ -24,77 +25,102 @@ namespace StreamUP
 
         private static Dictionary<string, object> StreamUpInternalLoad(this IInlineInvokeProxy CPH, string saveFile)
         {
+            CPH.LogInfo($"string({saveFile})2:" + CPH.GetGlobalVar<string>(saveFile, true));
 
-            //CPH.LogInfo($"string({saveFile})2:" + CPH.GetGlobalVar<string>(saveFile, true));
-            string json = CPH.GetGlobalVar<string>(saveFile, true);
-            //CPH.LogInfo(json.ToString());
-            return (Dictionary<string, object>)JsonConvert.DeserializeObject(json);
+            // Initialize the dictionary safely
+            Dictionary<string, object> json = CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
+
+            CPH.LogInfo($"Loaded JSON: {json}");
+            return json;
         }
+
 
         private static void StreamUpInternalSave(this IInlineInvokeProxy CPH)
         {
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
             var json = JsonConvert.SerializeObject(_data);
-            File.WriteAllText(_filePath, json);
             CPH.SetGlobalVar(_saveName, json, true);
-        }
 
-        public static void StreamUpInternalAdd(this IInlineInvokeProxy CPH, string key, object value)
-        {
-            _data[key] = value;
-            CPH.StreamUpInternalSave();
+
+            //string jsonString = JsonConvert.SerializeObject(_data, Formatting.Indented);
+            var cleanedDict = DeserializeDictionary(json);
+string jsonString = ConvertDictionaryToJsonString(cleanedDict);
+            File.WriteAllText(_filePath, jsonString, Encoding.UTF8);
         }
 
         public static void StreamUpInternalUpdate(this IInlineInvokeProxy CPH, string key, object newValue)
         {
-            if (_data.ContainsKey(key))
+            // Convert JArray to a serializable List<string> before storing
+            if (newValue is JArray jArray)
             {
-                _data[key] = newValue;
+                // Convert to a List<string>
+                List<string> serializedList = jArray.ToObject<List<string>>();
+                _data[key] = serializedList;
+            }
+            // Convert JObject to a Dictionary<string, object> if needed
+            else if (newValue is JObject jObject)
+            {
+                // Convert to a Dictionary<string, object>
+                Dictionary<string, object> serializedDict = jObject.ToObject<Dictionary<string, object>>();
+                _data[key] = serializedDict;
+            }
+            // If it's a complex type, consider storing it as a JSON string
+            else if (newValue is not string && !newValue.GetType().IsPrimitive)
+            {
+                string jsonString = JsonConvert.SerializeObject(newValue);
+                _data[key] = jsonString;
             }
             else
             {
-                CPH.StreamUpInternalAdd(key, newValue);
+                // Store primitive types or strings directly
+                _data[key] = newValue;
             }
 
+            // Save the updated _data dictionary
             CPH.StreamUpInternalSave();
         }
-
         public static T StreamUpInternalGet<T>(this IInlineInvokeProxy CPH, string key, T defaultValue)
         {
-            CPH.LogInfo($"Trying to Get {key} from {_data} with default of {defaultValue} Type = {typeof(T)}");
+            CPH.LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
+
             if (_data.TryGetValue(key, out var jsonValue))
             {
                 try
                 {
-                    // Handle string, int, and decimal types
                     if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }
-                    // Handle Dictionary and List types
-                    else if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(Dictionary<,>))
+                    else if (typeof(T) == typeof(Dictionary<string, bool>) ||
+                             typeof(T) == typeof(Dictionary<string, string>) ||
+                             typeof(T) == typeof(Dictionary<string, int>))
                     {
                         return JsonConvert.DeserializeObject<T>(jsonValue.ToString());
                     }
                     else if (typeof(T) == typeof(List<string>))
                     {
-                        var jArray = jsonValue as JArray;
-                        return jArray != null ? jArray.ToObject<T>() : defaultValue;
+                        // Deserialize JSON to List<string>
+                        JArray jArray = JArray.Parse(jsonValue.ToString());
+                        List<string> returnedList = jArray.ToObject<List<string>>();
+                        return (T)(object)returnedList;
                     }
-                    else if (typeof(T) == typeof(JArray) || typeof(T) == typeof(JObject))
+                    else
                     {
-                        // If the expected type is JArray or JObject, return it directly
-                        return (T)(object)jsonValue;
+                        CPH.LogInfo($"Unsupported type: {typeof(T)}. Returning default value.");
+                        return defaultValue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Handle or log the exception as needed
-                    CPH.LogError($"Error deserializing value for key '{key}': {ex.Message}");
+                    CPH.LogError($"Error during conversion or deserialization: {ex.Message}");
+                    return defaultValue;
                 }
             }
-
-            return defaultValue;
+            else
+            {
+                CPH.LogInfo($"Key '{key}' not found. Returning default value.");
+                return defaultValue;
+            }
         }
 
 
@@ -110,5 +136,42 @@ namespace StreamUP
         {
             return _data.Keys;
         }
+
+
+        public static Dictionary<string, object> DeserializeDictionary(string jsonString)
+        {
+            // Deserialize the outer dictionary
+            var outerDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonString);
+
+            // Deserialize nested JSON strings within the dictionary
+            var result = new Dictionary<string, object>();
+            foreach (var kvp in outerDict)
+            {
+                if (kvp.Value is string strValue && IsJson(strValue))
+                {
+                    // Deserialize the nested JSON string
+                    var nestedObject = JsonConvert.DeserializeObject<object>(strValue);
+                    result[kvp.Key] = nestedObject;
+                }
+                else
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+            }
+            return result;
+        }
+
+        // Helper function to check if a string is JSON
+        private static bool IsJson(string value)
+        {
+            // Basic check for JSON format
+            return value.StartsWith("{") || value.StartsWith("[");
+        }
+
+        public static string ConvertDictionaryToJsonString(Dictionary<string, object> dictionary)
+        {
+            return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
+        }
+
     }
 }
