@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -45,9 +45,11 @@
     <Reference Include="Streamer.bot.Common">
       <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
     </Reference>
-        <Reference Include="LiteDB">
-      <HintPath>..\StreamUP DLL\dlls\LiteDB.dll</HintPath>
-    </Reference>
+      <Reference Include="LiteDB">
+   
+    <HintPath>..\StreamUP DLL\dlls\LiteDB.dll</HintPath>
+</Reference>
+
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -70,6 +72,8 @@
     <Compile Include="CurrencyExtensions.cs" />
     <Compile Include="SettingTriggers.cs" />
     <Compile Include="SettingsUI.cs" />
+    <Compile Include="SettingsSaving.cs" />
+    <Compile Include="UIResources.cs" />
     <Compile Include="TerrierDartsExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
