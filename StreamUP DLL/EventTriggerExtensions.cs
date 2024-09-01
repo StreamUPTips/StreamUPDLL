@@ -642,66 +642,7 @@ namespace StreamUP {
             }
             //CPH.SendTrovoMessage(message, botAccount);
         }
-
-        public static void SUSBSendPlatformMessage(this IInlineInvokeProxy CPH, string platform, string message, bool botAccount)
-        {
-            if(platform == "twitch")
-            {
-                CPH.SendMessage(message, botAccount);
-            }
-            if(platform == "youtube")
-            {
-                CPH.SendYouTubeMessage(message, botAccount);
-            }
-        }
-
         
-        public static string SURawInputWithInputsRemoved(this IInlineInvokeProxy CPH, int inputsToRemove)
-        {
-            string textRemove = "";
-            for (int i = inputsToRemove; CPH.TryGetArg("input" + i, out string moreInput); i++)
-            {
-                textRemove += moreInput;
-            }
-            return textRemove;
-        }
-
-          public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
-        {
-            CPH.TryGetArg("rewardId", out string reward);
-            CPH.TryGetArg("redemptionId", out string redemption);
-            if (reward == null || redemption == null)
-            {
-                return true;
-            }
-            if (refund)
-            {
-
-                CPH.TwitchRedemptionCancel(reward, redemption);
-            }
-
-            return true;
-        }
-
-          public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false)
-        {
-
-           
-            CPH.TryGetArg("rewardId", out string reward);
-            CPH.TryGetArg("redemptionId", out string redemption);
-            if (reward == null || redemption == null)
-            {
-                return true;
-            }
-            if (fulfill)
-            {
-
-                CPH.TwitchRedemptionFulfill(reward, redemption);
-            }
-
-            return true;
-        }
-
 
 
         public static T SUSBTryGetArgOrDefault<T>(this IInlineInvokeProxy CPH, string key, T defaultValue = default)
