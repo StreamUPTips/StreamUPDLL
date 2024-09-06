@@ -2746,7 +2746,7 @@ namespace StreamUP
 
             return settings;
         }
-          public static List<Control> SUSBAddGroupsdDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
+          public static List<Control> SUSBAddGroupsDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<string> groups = CPH.GetGroups();
           
