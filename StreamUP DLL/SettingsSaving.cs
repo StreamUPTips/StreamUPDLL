@@ -87,7 +87,7 @@ string jsonString = ConvertDictionaryToJsonString(cleanedDict);
             {
                 try
                 {
-                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal))
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal) || typeof(T) == typeof(bool))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }

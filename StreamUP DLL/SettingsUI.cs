@@ -2746,6 +2746,19 @@ namespace StreamUP
 
             return settings;
         }
+          public static List<Control> SUSBAddGroupsdDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
+        {
+            List<string> groups = CPH.GetGroups();
+          
+
+            string[] groupsArray = groups.ToArray();
+            Array.Sort(groupsArray);
+            List<Control> settings = new List<Control>();
+            settings.AddRange(CPH.SUSBAddDropDown(description, groupsArray, defaultValue, saveName, tabName));
+
+
+            return settings;
+        }
 
         private static Task<string> OpenFileDialogAsync()
         {
