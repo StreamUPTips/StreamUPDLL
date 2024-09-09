@@ -73,6 +73,7 @@
     <Compile Include="SettingTriggers.cs" />
     <Compile Include="SettingsUI.cs" />
     <Compile Include="SettingsSaving.cs" />
+    <Compile Include="StreamUP.cs" />
     <Compile Include="UIResources.cs" />
     <Compile Include="TerrierDartsExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
