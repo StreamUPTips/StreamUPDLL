@@ -5,7 +5,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public bool ObsTryGetVideoSettings(int obsConnection, out JObject settings)
+        public bool TryGetObsVideoSettings(int obsConnection, out JObject settings)
         {
             LogInfo("Requesting OBS video settings");
 

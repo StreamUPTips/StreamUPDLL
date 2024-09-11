@@ -10,24 +10,24 @@ namespace StreamUP {
     public static class ObsWebsocketExtensions {
 
         // GET VIDEO SETTINGS
+        [Obsolete]
         public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection) {
-            string logName = $"{productNumber}::SUObsGetVideoSettings";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
+            // Create an instance of StreamUpLib
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
 
-            // Pull obs video settings
-            string jsonResponse = CPH.ObsSendRaw("GetVideoSettings", "{}", obsConnection);
-            if (jsonResponse == null) {
-                CPH.SUWriteLog("Scene Item ID not found", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return null;
+            // Try to get the OBS video settings
+            if (sup.TryGetObsVideoSettings(obsConnection, out JObject settings))
+            {
+                return settings;
             }
 
-            // Parse as JObject and return
-            JObject obsResponse = JObject.Parse(jsonResponse);
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return obsResponse;
+            return null;
         }
+
+
+
+
+
 
         // PULL SCENE ITEM TRANSFORM
         public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {

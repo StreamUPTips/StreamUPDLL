@@ -77,8 +77,9 @@
     <Compile Include="UIResources.cs" />
     <Compile Include="TerrierDartsExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ObsExtensions\ObsTryGet.cs" />
+    <Compile Include="ObsExtensions\GetObsData.cs" />
     <Compile Include="CoreExtensions\Logger.cs" />
+    <Compile Include="CoreExtensions\Utilities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

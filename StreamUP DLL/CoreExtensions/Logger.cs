@@ -10,7 +10,7 @@ namespace StreamUP
         private void WriteToLog(string logMessage)
         {
             // Get log folder
-            string logFolder = Path.Combine(_CPH.SUGetStreamerBotFolder(), "StreamUP", "logs");
+            string logFolder = Path.Combine(GetStreamerBotFolder(), "StreamUP", "logs");
             Directory.CreateDirectory(logFolder);
 
             string todayFileName = $"{DateTime.Now:yyyyMMdd} - StreamUP.log";
