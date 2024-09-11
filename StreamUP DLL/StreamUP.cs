@@ -1,38 +1,23 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json.Linq;
-using System.Windows.Forms;
 using Streamer.bot.Plugin.Interface;
-using System.Globalization;
-using System.Net;
-using Newtonsoft.Json;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Streamer.bot.Plugin.Interface.Model;
-using LiteDB.Engine;
-using System.CodeDom;
-using System.Data.Common;
 
 namespace StreamUP
 {
 
-    public partial class StreamUPExtensions {
-        public IInlineInvokeProxy _CPH;
+    public partial class StreamUpLib
+    {
+        private IInlineInvokeProxy _CPH;
+        private string _ProductIdentifier;
 
-        public StreamUPExtensions (IInlineInvokeProxy CPH) {
-            _CPH = CPH;
+        public StreamUpLib(IInlineInvokeProxy cph, string productIdentifier)
+        {
+            _CPH = cph;
+            _ProductIdentifier = productIdentifier;
         }
 
-        public bool TestMe (out string banana) {
-            banana = "Hello!";
-            _CPH.LogInfo(banana);
-            return true;
+        public StreamUpLib(IInlineInvokeProxy cph)
+            : this(cph, "UNKNOWN") // Calls the other constructor with a default value
+        {
         }
-        
-    }    
+    }
 }
