@@ -59,7 +59,7 @@ namespace StreamUP
 
 
             filePath = responseObj["responseData"]["outputFilePath"].ToString();
-            LogInfo("Successfully retrieved source filter list");
+            LogInfo("Successfully retrieved output filepath");
             return true;
         }
 

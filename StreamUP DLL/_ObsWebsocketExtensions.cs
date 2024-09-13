@@ -7,8 +7,14 @@ using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 using static StreamUP.StreamUpLib;
 
-namespace StreamUP {
-    public static class ObsWebsocketExtensions {
+namespace StreamUP
+{
+    public static class ObsWebsocketExtensions
+    {
+    
+
+
+
 
         // GET SCENE ITEM ID
         [Obsolete]
@@ -233,6 +239,7 @@ namespace StreamUP {
         }
     
         // GET SCENE ITEM TRANSFORM
+        [Obsolete]
         public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
         {
             StreamUpLib sup = new StreamUpLib(CPH, productNumber);
@@ -699,48 +706,6 @@ namespace StreamUP {
             CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
         }
 
-        // Screenshot current selected source
-        public static string SUObsScreenshotCurrentSource(this IInlineInvokeProxy CPH, int obsConnection, bool customFileName = false)
-        {
-            // Load vars
-            string sourceName = CPH.SUObsGetCurrentSource(obsConnection);
-            CPH.SUWriteLog($"sourceName=[{sourceName}]");
-            string filePath;
-            string fileName;
-
-            string obsOutputFilePath = SUObsGetOutputFilePath(CPH, obsConnection).Replace("\\", "\\\\");
-            CPH.SUWriteLog($"obsOutputFilePath=[{obsOutputFilePath}]");
-
-            DateTime currentTime = DateTime.Now;
-            string dateTimeString = currentTime.ToString("yyyyMMdd_HHmmss");
-            CPH.SUWriteLog($"dateTimeString=[{dateTimeString}]");
-
-            if (customFileName)
-            {
-                fileName = CPH.SUUIShowSaveScreenshotDialog(sourceName, dateTimeString); 
-                filePath = $"{obsOutputFilePath}\\\\{fileName}.png";       
-            }
-            else
-            {
-                fileName = dateTimeString;
-                filePath = $"{obsOutputFilePath}\\\\{sourceName}_{fileName}.png";       
-            }
-
-            if (!string.IsNullOrEmpty(fileName))
-            {
-                string screenshotJson = $"{{\"sourceName\":\"{sourceName}\",\"imageFormat\":\"png\",\"imageFilePath\":\"{filePath}\"}}";
-                CPH.SUWriteLog($"screenshotJson=[{screenshotJson}]");
-
-                CPH.ObsSendRaw("SaveSourceScreenshot", screenshotJson, obsConnection);
-                CPH.SUUIShowToastNotification("Screenshot Saved", "File saved to your OBS recording output folder.");
-            }
-            else
-            {
-                CPH.SUUIShowToastNotification("Screenshot Saving Error", "No name was selected for the screenshot. Cancelling.");
-            }
-
-            return filePath;
-        }
     }
 
 }

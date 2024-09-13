@@ -82,8 +82,10 @@
     <Compile Include="ObsExtensions\GetObsSettings.cs" />
     <Compile Include="ObsExtensions\GetObsFilterData.cs" />
     <Compile Include="ObsExtensions\ObsEnums.cs" />
+    <Compile Include="ObsExtensions\ObsTools.cs" />
     <Compile Include="CoreExtensions\Logger.cs" />
     <Compile Include="CoreExtensions\Utilities.cs" />
+    <Compile Include="UIExtensions\UINotifications.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
