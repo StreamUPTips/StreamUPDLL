@@ -44,7 +44,7 @@ namespace StreamUP
 
             //string jsonString = JsonConvert.SerializeObject(_data, Formatting.Indented);
             var cleanedDict = DeserializeDictionary(json);
-string jsonString = ConvertDictionaryToJsonString(cleanedDict);
+            string jsonString = ConvertDictionaryToJsonString(cleanedDict);
             File.WriteAllText(_filePath, jsonString, Encoding.UTF8);
         }
 
@@ -87,7 +87,7 @@ string jsonString = ConvertDictionaryToJsonString(cleanedDict);
             {
                 try
                 {
-                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal) || typeof(T) == typeof(bool))
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }

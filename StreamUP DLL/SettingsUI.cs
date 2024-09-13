@@ -1681,7 +1681,7 @@ namespace StreamUP
 
             return settings;
         }
-        public static List<Control> SUSBAddDecimal(this IInlineInvokeProxy CPH, string description, decimal defaultValue, int decimalPlaces, decimal increments, string saveName, string tabName = "General")
+        public static List<Control> SUSBAddDecimal(this IInlineInvokeProxy CPH, string description, double defaultValue, int decimalPlaces, double increments, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
 
@@ -1713,10 +1713,10 @@ namespace StreamUP
             {
                 Name = saveName,
                 DecimalPlaces = decimalPlaces,
-                Increment = increments,
+                Increment = (decimal)increments,
                 Minimum = int.MinValue,
                 Maximum = int.MaxValue,
-                Value = CPH.SUGetSetting<decimal>(saveName, defaultValue),
+                Value = CPH.SUGetSetting<decimal>(saveName, (decimal)defaultValue),
                 //Padding = new Padding(10),
                 //Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
@@ -2292,7 +2292,7 @@ namespace StreamUP
                 Name = saveName + "OBS",
                 AutoSize = true,
                 Margin = new Padding(0, 6, 10, 0),
-                Text = CPH.SUGetSetting<string>(saveName + "OBS", " "),
+                Text = CPH.SUGetSetting<string>(saveName + "OBS", CPH.ObsConvertColorHex(defaultValue).ToString()),
                 ForeColor = forecolour2,
                 Font = valueFont,
                 TextAlign = ContentAlignment.BottomCenter,
