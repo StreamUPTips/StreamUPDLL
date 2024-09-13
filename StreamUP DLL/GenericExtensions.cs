@@ -121,9 +121,9 @@ namespace StreamUP {
         public static string SUGetStreamerBotFolder(this IInlineInvokeProxy CPH) {
             return AppDomain.CurrentDomain.BaseDirectory;
         }
-        
+        //MARK AS OBSOLETE
         public static void SUWriteLog(this IInlineInvokeProxy CPH, string logMessage, string productName = "General") {
-            StreamUpLib sup = new StreamUpLib(CPH);
+            StreamUpLib sup = new StreamUpLib(CPH, productName);
             sup.LogInfo(logMessage);
         }
    

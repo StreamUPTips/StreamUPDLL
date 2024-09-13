@@ -9,20 +9,216 @@ using Streamer.bot.Plugin.Interface;
 namespace StreamUP {
     public static class ObsWebsocketExtensions {
 
-        // GET VIDEO SETTINGS
+        // GET SCENE ITEM ID
         [Obsolete]
-        public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection) {
-            // Create an instance of StreamUpLib
+        public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
+        {
             StreamUpLib sup = new StreamUpLib(CPH, productNumber);
-
-            // Try to get the OBS video settings
-            if (sup.TryGetObsVideoSettings(obsConnection, out JObject settings))
+            if (!sup.GetObsSceneItemId(parentSource, parentSourceType, childSource, obsConnection, out int sceneItemId))
             {
-                return settings;
+                return -1;
             }
 
-            return null;
+            return sceneItemId;
         }
+
+        // SEARCH FOR SCENE ITEM ID
+        [Obsolete]
+        private static int SUObsFindSceneItemId(this IInlineInvokeProxy CPH, string productNumber, JArray sceneItems, string childSource) 
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.FindObsSceneItemIdBySourceName(sceneItems, childSource, out int sceneItemId))
+            {
+                return -1;
+            }
+
+            return sceneItemId;
+        }
+
+        // GET VIDEO SETTINGS
+        [Obsolete]
+        public static JObject SUObsGetVideoSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsVideoSettings(obsConnection, out JObject settings))
+            {
+                return null;
+            }
+
+            return settings;
+        }
+
+        // GET CURRENT SOURCE
+        [Obsolete]
+        public static string SUObsGetCurrentSource(this IInlineInvokeProxy CPH, int obsConnection) 
+        {
+            StreamUpLib sup = new StreamUpLib(CPH);
+            if (!sup.GetObsCurrentSource(obsConnection, out string source))
+            {
+                return null;
+            }
+
+            return source;
+        }
+
+        // GET SOURCE FILTER
+        [Obsolete]
+        public static JObject SUObsGetSourceFilter(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName) 
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSourceFilterData(sourceName, filterName, obsConnection, out JObject filterData))
+            {
+                return null;
+            }
+
+            return filterData;
+        }
+    
+        // GET SOURCE FILTER LIST
+        [Obsolete]
+        public static JArray SUObsGetSourceFilterList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSourceFilterList(sourceName, obsConnection, out JArray filterArray))
+            {
+                return null;
+            }
+
+            return filterArray;
+        }
+    
+        // GET OUTPUT FILEPATH
+        [Obsolete]
+        public static string SUObsGetOutputFilePath(this IInlineInvokeProxy CPH, int obsConnection) 
+        {
+            StreamUpLib sup = new StreamUpLib(CPH);
+            if (!sup.GetObsOutputFilePath(obsConnection, out string filePath))
+            {
+                return null;
+            }
+
+            return filePath;
+        }
+
+        // GET SOURCE SETTINGS
+        [Obsolete]
+        public static JObject SUObsGetInputSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSourceSettings(sourceName, obsConnection, out JObject sourceSettings))
+            {
+                return null;
+            }
+
+            return sourceSettings;
+        }
+
+        // GET SCENE ITEM LIST
+        [Obsolete]
+        public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSceneItemList(sceneName, obsConnection, out JArray sceneItemList))
+            {
+                return null;
+            }
+
+            return sceneItemList;
+        }
+        
+        // GET SOURCE SHOW TRANSITION
+        [Obsolete]
+        public static JObject SUObsGetShowTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH);
+            if (!sup.GetObsSourceShowTransition(sceneName, sourceName, obsConnection, out JObject showTransition))
+            {
+                return null;
+            }
+
+            return showTransition;
+        }
+
+        // GET SOURCE HIDE TRANSITION
+        [Obsolete]
+        public static JObject SUObsGetHideTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH);
+            if (!sup.GetObsSourceHideTransition(sceneName, sourceName, obsConnection, out JObject hideTransition))
+            {
+                return null;
+            }
+
+            return hideTransition;
+        }
+
+        // GET CANVAS SCALE FACTOR
+        [Obsolete]
+        public static double SUObsGetCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, int obsConnection)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsCanvasScaleFactor(obsConnection, out double scaleFactor))
+            {
+                return 0.0;
+            }
+
+            return scaleFactor;
+        }
+
+        // GET CURRENT DSK SCENE
+        [Obsolete]
+        public static string SUObsGetCurrentDSKScene(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string dskName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsCurrentDSKScene(dskName, obsConnection, out string sceneName))
+            {
+                return null;
+            }
+
+            return sceneName;
+        }
+
+        // GET SCENE ITEM ENABLED
+        [Obsolete]
+        public static bool? SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSourceVisibility(parentSource, parentSourceType, childSource, obsConnection, out bool? sourceState))
+            {
+                return null;
+            }
+
+            return sourceState;
+        }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -70,68 +266,6 @@ namespace StreamUP {
 
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return transform;
-        }
-
-        // PULL SCENE ITEM ID
-        public static int SUObsGetSceneItemId(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productNumber}::SUObsGetSceneItemId";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Pull sceneItemLists (Group or Scene)
-            string jsonResponse = "";
-            switch (parentSourceType) {
-                case OBSSceneType.Scene:
-                    jsonResponse = CPH.ObsSendRaw("GetSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
-                    break;
-                case OBSSceneType.Group:
-                    jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", "{\"sceneName\":\"" + parentSource + "\"}", obsConnection);
-                    break;
-                default:
-                    CPH.SUWriteLog($"parentSourceType is incorrectly set to '{parentSourceType}'. 0=Scene, 1=Group", logName);
-                    CPH.SUWriteLog("METHOD FAILED", logName);
-                    return -1;
-            }
-            CPH.SUWriteLog("Received JSON response from OBS", logName);
-
-            // Save and parse jsonResponse
-            var json = JObject.Parse(jsonResponse);
-            var sceneItems = json["sceneItems"] as JArray;
-            if (sceneItems == null || sceneItems.Count == 0) {
-                // Log if no scene items are found
-                CPH.SUWriteLog("No scene items found in the response", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return -1;
-            } 
-            CPH.SUWriteLog($"Found {sceneItems.Count} scene item(s) in jsonResponse", logName);
-
-            // Pull sceneItemId and return
-            int sceneItemId = CPH.SUObsFindSceneItemId(productNumber, sceneItems, childSource);
-            CPH.SUWriteLog($"Returning sceneItemId: childSource=[{childSource}], sceneItemId=[{sceneItemId}]", logName);
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return sceneItemId;
-        }
-
-        private static int SUObsFindSceneItemId(this IInlineInvokeProxy CPH, string productNumber, JArray sceneItems, string childSource) 
-        {
-            string logName = $"{productNumber}::SUObsFindSceneItemId";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Find sceneItemId from all sources on scene
-            CPH.SUWriteLog($"Searching for sceneItemId: childSource=[{childSource}]", logName);
-            foreach (var item in sceneItems) {
-                string currentItemName = item["sourceName"].ToString();
-                if (currentItemName == childSource) {
-                    int sceneItemId = int.Parse(item["sceneItemId"].ToString());
-                    CPH.SUWriteLog($"Found sceneItemId: childSource=[{childSource}], sceneItemId=[{sceneItemId}]", logName);
-                    CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-                    return sceneItemId;
-                }
-            }
-
-            // If sceneItemId couldn't be found
-            CPH.SUWriteLog($"Couldn't find sceneItemId for {childSource}. The source might not exist on the scene", logName);
-            CPH.SUWriteLog("METHOD FAILED", logName);
-            return -1;
         }
 
         // SET SOURCE FILTER SETTINGS
@@ -196,53 +330,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
-        // GET SOURCE FILTER
-        public static JObject SUObsGetSourceFilter(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName) 
-        {
-            string logName = $"{productNumber}::SUObsGetSourceFilter";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Pull source filter
-            string jsonResponse = CPH.ObsSendRaw("GetSourceFilter", "{\"sourceName\":\"" + sourceName + "\",\"filterName\":\"" + filterName + "\"}", obsConnection);
-            var obsResponse = JObject.Parse(jsonResponse);
-            // Check if the data is null
-            if (obsResponse == null) {
-                CPH.SUWriteLog($"No data found in obsResponse", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return null;
-            }
-
-            // Return obsResponse
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return obsResponse;
-        }
-    
-        // GET SOURCE FILTER LIST
-        public static JArray SUObsGetSourceFilterList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
-        {
-            string logName = $"{productNumber}::SUObsGetSourceFilterList";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            string jsonResponse = CPH.ObsSendRaw("GetSourceFilterList", $"{{\"sourceName\":\"{sourceName}\"}}", obsConnection);
-            JObject responseObj = JObject.Parse(jsonResponse);
-            JArray filters = (JArray)responseObj["filters"];
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return filters;
-        }
-    
-        // GET INPUT (SOURCE) SETTINGS
-        public static JObject SUObsGetInputSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName)
-        {
-            string logName = $"{productNumber}::SUObsGetInputSettings";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            string jsonResponse = CPH.ObsSendRaw("GetInputSettings", "{\"inputName\":\""+sourceName+"\"}", obsConnection);
-            JObject responseObj = JObject.Parse(jsonResponse);
-            JObject settings = (JObject)responseObj["inputSettings"];
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return settings;
-        }
-
         // SET INPUT (SOURCE) VOLUME
         public static void SUObsSetInputVolume(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, VolumeType volumeType, double volumeLevel)
         {
@@ -267,19 +354,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
-        // GET SCENE ITEM LIST
-        public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
-        {
-            string logName = $"{productNumber}::SUObsGetSceneItemList";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            string jsonResponse = CPH.ObsSendRaw("GetSceneItemList", $"{{\"sceneName\":\"{sceneName}\"}}", obsConnection);
-            JObject responseObj = JObject.Parse(jsonResponse);
-            JArray sceneItems = (JArray)responseObj["sceneItems"];
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return sceneItems;
-        }
-        
         // GET GROUP SCENE ITEM LIST
         public static JArray SUObsGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string groupName)
         {
@@ -631,86 +705,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
     
-        public static bool SUObsGetSceneItemEnabled(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
-        {
-            string logName = $"{productNumber}::SUObsGetSceneItemEnabled";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-                		
-            // Pull scene Item ID
-            CPH.SUWriteLog("Getting scene item id...", logName);
-            int id = CPH.SUObsGetSceneItemId(productNumber, obsConnection, parentSourceType, parentSource, childSource);
-
-            // Set scene item enabled/disabled
-            string visibilityState = CPH.ObsSendRaw("GetSceneItemEnabled", "{\"sceneName\":\""+parentSource+"\",\"sceneItemId\":"+id+"}", obsConnection);
-            // Parse the JSON string
-            var jsonObject = JObject.Parse(visibilityState);
-
-            // Extract the 'sceneItemEnabled' value as a boolean
-            bool sceneItemEnabled = jsonObject["sceneItemEnabled"].Value<bool>();
-            CPH.SUWriteLog($"Got scene item visiblity 'sourcename=[{childSource}]': parentSource=[{parentSource}], sceneItemId=[{id}], sceneItemEnabled=[{sceneItemEnabled.ToString().ToLower()}]", logName);
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return sceneItemEnabled;
-        }
-    
-        // Get Canvas Scale Factor
-        public static double SUObsGetCanvasScaleFactor(this IInlineInvokeProxy CPH, string productNumber, int obsConnection)
-        {
-            string logName = $"{productNumber}::SUObsGetCanvasScaleFactor";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Pull obs canvas width
-            CPH.SUWriteLog("Getting video settings...", logName);
-            JObject videoSettings = CPH.SUObsGetVideoSettings(productNumber, obsConnection);
-            double canvasWidth = (double)videoSettings["baseWidth"];
-            CPH.SUWriteLog($"Pulled base canvas width from obs: canvasWidth=[{canvasWidth}]", logName);
-
-            // Work out scale difference based on 1920x1080
-            double canvasScaleFactor = (canvasWidth / 1920);
-            CPH.SUWriteLog($"Worked out canvas scale factor: canvasScaleFactor=[{canvasScaleFactor}]", logName);
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return canvasScaleFactor;
-        }
-
-        // Get Current DSK Scene
-        public static string SUObsGetCurrentDSKScene(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string dskName)
-        {
-            string logName = $"{productNumber}::SUObsGetCurrentDSKScene";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Send the request and get the response
-            string responseJson = CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"get_downstream_keyer\",\"requestData\":{\"dsk_name\":\""+dskName+"\"}}", obsConnection);
-            
-            // Log the response (optional)
-            CPH.SUWriteLog($"Response: {responseJson}", logName);
-
-            // Parse the response to extract the "scene" value
-            string sceneName = "";
-            try
-            {
-                JObject jsonResponse = JObject.Parse(responseJson);
-                sceneName = jsonResponse["responseData"]?["scene"]?.ToString();
-
-                if (string.IsNullOrEmpty(sceneName))
-                {
-                    CPH.SUWriteLog("Scene name not found in response.", logName);
-                    CPH.SUWriteLog("METHOD FAILED", logName);
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                CPH.SUWriteLog($"Error parsing response: {ex.Message}", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return null;
-            }
-
-            CPH.SUWriteLog($"Extracted scene: {sceneName}", logName);
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return sceneName;
-        }
-
         // Set Current DSK Scene
         public static void SUObsSetCurrentDSKScene(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string dskName, string sceneName)
         {
@@ -740,24 +734,6 @@ namespace StreamUP {
             }        
             
             return bitrate;
-        }
-
-        // Get Source Show Transition
-        public static JObject SUObsGetShowTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
-        {
-            JObject json = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getShowTransition\",\"requestData\":{\"sceneName\":\""+sceneName+"\",\"sourceName\":\""+sourceName+"\"}}", obsConnection));
-            JObject transition = (JObject)json["responseData"];
-
-            return transition;
-        }
-
-        // Get Source Hide Transition
-        public static JObject SUObsGetHideTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
-        {
-            JObject json = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getHideTransition\",\"requestData\":{\"sceneName\":\""+sceneName+"\",\"sourceName\":\""+sourceName+"\"}}", obsConnection));
-            JObject transition = (JObject)json["responseData"];
-
-            return transition;
         }
 
         // Set Source Show Transition
@@ -804,22 +780,6 @@ namespace StreamUP {
 
             // Send the request
             CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
-        }
-
-        // Get currect selected source
-        public static string SUObsGetCurrentSource(this IInlineInvokeProxy CPH, int obsConnection) 
-        {
-            JObject response = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getCurrentSource\",\"requestData\":null}", obsConnection));
-            string sourceName = response["responseData"]["selectedSource"].ToString();
-            return sourceName;
-        }
-
-        // Get Obs recording output filepath
-        public static string SUObsGetOutputFilePath(this IInlineInvokeProxy CPH, int obsConnection) 
-        {
-            JObject response = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getOutputFilePath\",\"requestData\":null}", obsConnection));
-            string filePath = response["responseData"]["outputFilePath"].ToString();
-            return filePath;
         }
 
         // Screenshot current selected source
