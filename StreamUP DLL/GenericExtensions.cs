@@ -11,6 +11,7 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Drawing.Imaging;
+using static StreamUP.StreamUpLib;
 
 namespace StreamUP {
 

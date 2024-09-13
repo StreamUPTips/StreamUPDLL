@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
+using static StreamUP.StreamUpLib;
 
 namespace StreamUP {
     public static class ObsWebsocketExtensions {
@@ -53,7 +54,7 @@ namespace StreamUP {
         public static string SUObsGetCurrentSource(this IInlineInvokeProxy CPH, int obsConnection) 
         {
             StreamUpLib sup = new StreamUpLib(CPH);
-            if (!sup.GetObsCurrentSource(obsConnection, out string source))
+            if (!sup.GetObsSelectedSource(obsConnection, out string source))
             {
                 return null;
             }
@@ -87,6 +88,20 @@ namespace StreamUP {
             return filterArray;
         }
     
+
+        // GET SCENE ITEM NAMES
+        [Obsolete]
+        public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productNumber, int obsConnection,  OBSSceneType sceneType, string sceneName, List<string> sceneItemNames)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSceneItemsNamesList(sceneName, sceneType, obsConnection, out List<string> sceneItemsNamesList))
+            {
+                return;
+            }
+
+            sceneItemNames = sceneItemsNamesList;
+        }    
+
         // GET OUTPUT FILEPATH
         [Obsolete]
         public static string SUObsGetOutputFilePath(this IInlineInvokeProxy CPH, int obsConnection) 
@@ -118,14 +133,27 @@ namespace StreamUP {
         public static JArray SUObsGetSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName)
         {
             StreamUpLib sup = new StreamUpLib(CPH, productNumber);
-            if (!sup.GetObsSceneItemList(sceneName, obsConnection, out JArray sceneItemList))
+            if (!sup.GetObsSceneItemsArray(sceneName, OBSSceneType.Scene, obsConnection, out JArray sceneItemArray))
             {
                 return null;
             }
 
-            return sceneItemList;
+            return sceneItemArray;
         }
         
+        [Obsolete]
+        // GET GROUP SCENE ITEM LIST
+        public static JArray SUObsGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string groupName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSceneItemsArray(groupName, OBSSceneType.Group, obsConnection, out JArray sceneItemArray))
+            {
+                return null;
+            }
+
+            return sceneItemArray;
+        }
+
         // GET SOURCE SHOW TRANSITION
         [Obsolete]
         public static JObject SUObsGetShowTransition(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string sourceName)
@@ -354,67 +382,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
-        // GET GROUP SCENE ITEM LIST
-        public static JArray SUObsGetGroupSceneItemList(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string groupName)
-        {
-            string logName = $"{productNumber}::SUObsGetGroupSceneItemList";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            string jsonResponse = CPH.ObsSendRaw("GetGroupSceneItemList", $"{{\"sceneName\":\"{groupName}\"}}", obsConnection);
-            JObject responseObj = JObject.Parse(jsonResponse);
-            JArray sceneItems = (JArray)responseObj["sceneItems"];
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return sceneItems;
-        }
-
-        // GET SCENE ITEM NAMES
-        public static void SUObsGetSceneItemNames(this IInlineInvokeProxy CPH, string productNumber, int obsConnection,  OBSSceneType sceneType, string sceneName, List<string> sceneItemNames)
-        {
-            string logName = $"{productNumber}::SUObsGetSceneItemNames";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            JArray sceneItems = new JArray();
-            switch (sceneType)
-            {
-                case OBSSceneType.Scene:
-                    CPH.SUWriteLog("Getting scene item list...", logName);
-                    sceneItems = CPH.SUObsGetSceneItemList(productNumber, obsConnection, sceneName);
-                    CPH.SUWriteLog($"Created sceneItemList of sceneName [{sceneName}]", logName);
-                    break;
-                case OBSSceneType.Group:
-                    CPH.SUWriteLog("Getting group scene item list", logName);
-                    sceneItems = CPH.SUObsGetGroupSceneItemList(productNumber, obsConnection, sceneName);
-                    CPH.SUWriteLog($"Created sceneItemList of sceneName (group) [{sceneName}]", logName);
-                    break;
-                default:
-                    CPH.SUWriteLog($"You have chosen sceneType=[{sceneType}]. Please set either [0]=Scene, [1]=Group", logName);
-                    CPH.SUWriteLog("METHOD FAILED", logName);
-                    break;
-            }
-
-            CPH.SUWriteLog($"sceneItems=[{sceneItems.ToString()}]", logName);
-            foreach (JObject item in sceneItems)
-            {
-                bool? isGroup = (bool?)item["isGroup"];
-                string sourceName = (string)item["sourceName"];
-
-                // Check if isGroup has a value and is true
-                if (isGroup.HasValue && isGroup.Value)
-                {
-                    // If the item is a group, recursively fetch its scene items
-                    CPH.SUWriteLog($"Source is a group, getting sceneItemNames for that group: sourceName=[{sourceName}]", logName);
-                    CPH.SUObsGetSceneItemNames(productNumber, obsConnection, OBSSceneType.Group, sourceName, sceneItemNames);
-                }
-                else
-                {
-                    // If it's not a group or isGroup is null, add its source name to the list
-                    CPH.SUWriteLog($"Source is not a group, adding sourceName to sceneItemNames list: sourceName=[{sourceName}]", logName);
-                    sceneItemNames.Add(sourceName);
-                }
-            }
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-        }    
 
         // AUTOSIZE ADVANCED MASK
         public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, Dictionary<string, object> productSettings, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
@@ -826,15 +793,4 @@ namespace StreamUP {
         }
     }
 
-    public enum VolumeType
-    {
-        Db = 0,        // Decibels
-        Multiplier = 1 // Multiplicative factor
-    }
-
-    public enum OBSSceneType
-    {
-        Scene = 0,
-        Group = 1
-    }
 }
