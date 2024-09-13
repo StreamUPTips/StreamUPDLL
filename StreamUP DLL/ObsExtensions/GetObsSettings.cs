@@ -92,5 +92,41 @@ namespace StreamUP
             return true;
         }
 
+        //! NEEDS WORK
+        public bool GetObsCurrentBitrate(int obsConnection, out string bitrate) //! Requires StreamUP OBS plugin
+        {
+            LogInfo("Requesting Current OBS bitrate");
+
+            // Get current bitrate
+            string response = _CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getBitrate\",\"requestData\":{}}", obsConnection);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("No response from OBS");
+                bitrate = null;
+                return false;
+            }
+
+            // Parse as object
+            JObject responseObj = JObject.Parse(response);
+
+            // Check if responseData and outputFilePath exist
+            if (responseObj["responseData"] == null)
+            {
+                LogError("responseData not found in the response");
+                bitrate = null;
+                return false;
+            }
+            if (responseObj["responseData"]["kbits-per-sec"] == null)
+            {
+                LogError("kbits-per-sec not found in responseData");
+                bitrate = null;
+                return false;
+            }
+
+            bitrate = responseObj["responseData"]["kbits-per-sec"].ToString();
+            LogInfo("Successfully retrieved bitrate");
+            return true;
+        }
+
     }
 }

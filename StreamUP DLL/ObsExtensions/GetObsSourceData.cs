@@ -1,3 +1,4 @@
+using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace StreamUP
@@ -192,7 +193,6 @@ namespace StreamUP
             return true;
         }
 
-        // GET SHOW/HIDE TRANSITIONS
         public bool GetObsSourceShowTransition(string sceneName, string sourceName, int obsConnection, out JObject showTransition) //! Requires StreamUP OBS plugin
         {
             LogInfo($"Requesting show transition for source [{sourceName}] on scene [{sceneName}]");
@@ -244,6 +244,50 @@ namespace StreamUP
             LogInfo("Successfully retrieved hide transition");
             return true;
         }
+
+        public bool GetObsSourceTransform(string parentSource, OBSSceneType parentSourceType, string childSource, int obsConnection, out JObject sourceTransform)
+        {
+            LogInfo($"Requesting source transform of [{childSource}] on [{parentSourceType}] - [{parentSource}]");
+
+            if (!GetObsSceneItemId(parentSource, parentSourceType, childSource, obsConnection, out int sceneItemId))
+            {
+                LogError("Unable to retrieve sceneItemId");
+                sourceTransform = null;
+                return false;
+            }
+
+            // Get scene item transform
+            string response = _CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsConnection);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("No response from OBS");
+                sourceTransform = null;
+                return false;
+            }
+
+            // Parse as object
+            JObject responseObj = JObject.Parse(response);
+            if (responseObj["sceneItemTransform"] == null)
+            {
+                LogError("sceneItemTransform not found in the response");
+                sourceTransform = null;
+                return false;
+            }
+
+            // Ensure all numbers are integers
+            var keys = responseObj.Properties().Select(p => p.Name).ToList();
+            foreach (var key in keys) {
+                if (responseObj[key].Type == JTokenType.Float) {
+                    responseObj[key] = (int)responseObj[key];
+                }
+            }
+
+            sourceTransform = responseObj;
+            LogInfo("Successfully retrieved source transform");
+            return true;
+        }
+
+
 
     }
 }

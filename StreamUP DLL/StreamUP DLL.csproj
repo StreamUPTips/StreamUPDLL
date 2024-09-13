@@ -80,6 +80,7 @@
     <Compile Include="ObsExtensions\GetObsSceneData.cs" />
     <Compile Include="ObsExtensions\GetObsSourceData.cs" />
     <Compile Include="ObsExtensions\GetObsSettings.cs" />
+    <Compile Include="ObsExtensions\GetObsFilterData.cs" />
     <Compile Include="ObsExtensions\ObsEnums.cs" />
     <Compile Include="CoreExtensions\Logger.cs" />
     <Compile Include="CoreExtensions\Utilities.cs" />

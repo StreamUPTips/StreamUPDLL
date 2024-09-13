@@ -219,82 +219,65 @@ namespace StreamUP {
             return sourceState;
         }
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // PULL SCENE ITEM TRANSFORM
-        public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource) {
-            string logName = $"{productNumber}::SUObsGetSceneItemTransform";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            // Pull sceneItemId
-            CPH.SUWriteLog($"Pulling scene item ID for parentSource: [{parentSource}]", logName);
-            int sceneItemId = CPH.SUObsGetSceneItemId(productNumber, obsConnection, parentSourceType, parentSource, childSource);
-            if (sceneItemId == -1) {
-                // Log an error if the Scene Item ID is not found
-                CPH.SUWriteLog("Scene Item ID not found", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return null;
+        // GET MOVE FILTER DURATION
+        [Obsolete]
+        public static int SUObsGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsMoveFilterDuration(sourceName, filterName, obsConnection, out int moveDuration))
+            {
+                return -1;
             }
 
-            // Extract the transformation data of the source
-            CPH.SUWriteLog($"Sending request to get scene item transform for (sceneItemId: [{sceneItemId}]) on (parentSource: [{parentSource}])", logName);
-            string jsonResponse = CPH.ObsSendRaw("GetSceneItemTransform", "{\"sceneName\":\"" + parentSource + "\",\"sceneItemId\":" + sceneItemId + "}", obsConnection);
-
-            // Parse the JSON response
-            var obsResponse = JObject.Parse(jsonResponse);
-            // Check if the obsResponse data is not null
-            if (obsResponse == null) {
-                CPH.SUWriteLog($"No transform data found in jsonResponse", logName);
-                CPH.SUWriteLog("METHOD FAILED", logName);
-                return null;
-            }
-
-            // Return sceneItemTransform from obsResponse
-            JObject transform = obsResponse["sceneItemTransform"] as JObject;
-
-            // Ensure all numbers are integers
-            var keys = transform.Properties().Select(p => p.Name).ToList();
-            foreach (var key in keys) {
-                if (transform[key].Type == JTokenType.Float) {
-                    transform[key] = (int)transform[key];
-                }
-            }
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return transform;
+            return moveDuration;
         }
+    
+        // GET SCENE ITEM TRANSFORM
+        public static JObject SUObsGetSceneItemTransform(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string parentSource, string childSource)
+        {
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            if (!sup.GetObsSourceTransform(parentSource, parentSourceType, childSource, obsConnection, out JObject sourceTransform))
+            {
+                return null;
+            }
+
+            return sourceTransform;            
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // SET SOURCE FILTER SETTINGS
         public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, string filterSettings) 
@@ -382,7 +365,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
-
         // AUTOSIZE ADVANCED MASK
         public static void SUObsAutosizeAdvancedMask(this IInlineInvokeProxy CPH, string productNumber, Dictionary<string, object> productSettings, string sourceName, string filterName, double sourceHeight, double sourceWidth, double padHeight, double padWidth)
         {
@@ -422,19 +404,6 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
            
-        public static int SUObsGetMoveFilterDuration(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName)
-        {
-            string logName = $"{productNumber}::SUObsGetMoveFilterDuration";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            CPH.SUWriteLog("Getting source filter...", logName);
-            JObject filter = CPH.SUObsGetSourceFilter(productNumber, obsConnection, sourceName, filterName);
-            int duration = (int)filter["filterSettings"]["duration"];
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return duration;
-        }
-    
         // SPLIT TEXT ONTO MULTIPLE LINES FROM WIDTH
         public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
@@ -682,25 +651,6 @@ namespace StreamUP {
             CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"dsk_select_scene\",\"requestData\":{\"dsk_name\":\""+dskName+"\",\"scene\":\""+sceneName+"\"}}", obsConnection);
             
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-        }
-
-        // Get Bitrate
-        public static string SUObsGetBitrate(this IInlineInvokeProxy CPH, int obsConnection)
-        {
-            // Get Bitrate
-            JObject bitrateJson = JObject.Parse(CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"streamup\",\"requestType\":\"getBitrate\",\"requestData\":{}}", obsConnection));            
-            string bitrate;
-            JToken errorToken = bitrateJson.SelectToken("responseData.error");
-            if (errorToken != null)
-            {
-                bitrate = null;
-            }
-            else
-            {
-                bitrate = bitrateJson["responseData"]["kbits-per-sec"].ToString();
-            }        
-            
-            return bitrate;
         }
 
         // Set Source Show Transition
