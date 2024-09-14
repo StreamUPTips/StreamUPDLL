@@ -77,17 +77,17 @@
     <Compile Include="UIResources.cs" />
     <Compile Include="TerrierDartsExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ObsExtensions\GetObsSceneData.cs" />
-    <Compile Include="ObsExtensions\GetObsSourceData.cs" />
-    <Compile Include="ObsExtensions\GetObsSettings.cs" />
-    <Compile Include="ObsExtensions\GetObsFilterData.cs" />
-    <Compile Include="ObsExtensions\ObsEnums.cs" />
-    <Compile Include="ObsExtensions\ObsTools.cs" />
-    <Compile Include="ObsExtensions\SetObsSourceData.cs" />
-    <Compile Include="ObsExtensions\SetObsSceneData.cs" />
-    <Compile Include="CoreExtensions\Logger.cs" />
-    <Compile Include="CoreExtensions\Utilities.cs" />
-    <Compile Include="UIExtensions\UINotifications.cs" />
+    <Compile Include="Extensions\ObsExtensions\GetObsSceneData.cs" />
+    <Compile Include="Extensions\ObsExtensions\GetObsSourceData.cs" />
+    <Compile Include="Extensions\ObsExtensions\GetObsSettings.cs" />
+    <Compile Include="Extensions\ObsExtensions\GetObsFilterData.cs" />
+    <Compile Include="Extensions\ObsExtensions\ObsEnums.cs" />
+    <Compile Include="Extensions\ObsExtensions\ObsTools.cs" />
+    <Compile Include="Extensions\ObsExtensions\SetObsSourceData.cs" />
+    <Compile Include="Extensions\ObsExtensions\SetObsSceneData.cs" />
+    <Compile Include="Extensions\CoreExtensions\Logger.cs" />
+    <Compile Include="Extensions\CoreExtensions\Utilities.cs" />
+    <Compile Include="Extensions\UIExtensions\UINotifications.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
