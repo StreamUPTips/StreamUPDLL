@@ -83,6 +83,8 @@
     <Compile Include="ObsExtensions\GetObsFilterData.cs" />
     <Compile Include="ObsExtensions\ObsEnums.cs" />
     <Compile Include="ObsExtensions\ObsTools.cs" />
+    <Compile Include="ObsExtensions\SetObsSourceData.cs" />
+    <Compile Include="ObsExtensions\SetObsSceneData.cs" />
     <Compile Include="CoreExtensions\Logger.cs" />
     <Compile Include="CoreExtensions\Utilities.cs" />
     <Compile Include="UIExtensions\UINotifications.cs" />

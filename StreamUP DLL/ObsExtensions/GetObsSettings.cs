@@ -26,7 +26,6 @@ namespace StreamUP
         }
 
         public bool GetObsOutputFilePath(int obsConnection, out string filePath) //! Requires StreamUP OBS plugin
-
         {
             LogInfo($"Requesting OBS filepath");
 

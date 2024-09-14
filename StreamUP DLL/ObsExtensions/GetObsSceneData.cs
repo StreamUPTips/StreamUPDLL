@@ -88,7 +88,7 @@ namespace StreamUP
             return true;
         }
 
-        public bool GetObsCurrentDSKScene(string dskName, int obsConnection, out string sceneName)
+        public bool GetObsCurrentDSKScene(string dskName, int obsConnection, out string sceneName) //! Requires Downstream Keyer OBS plugin
         {
             LogInfo($"Requesting OBS current DSK scene on DSK [{dskName}]");
 

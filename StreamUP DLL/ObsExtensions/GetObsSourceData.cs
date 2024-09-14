@@ -48,7 +48,7 @@ namespace StreamUP
             LogInfo($"Requesting if source [{childSource}] on parent [{parentSourceType}] - [{parentSource}] is enabled");
 
             // Get scene item ID
-            if (!GetObsSceneItemId(parentSource, parentSourceType, childSource, obsConnection, out int sceneItemId))
+            if (!GetObsSceneItemId(parentSource, childSource, obsConnection, out int sceneItemId))
             {
                 LogError("Unable to retrieve sceneItemId");
                 sourceState = null;
@@ -78,53 +78,33 @@ namespace StreamUP
             return true;
         }
 
-        // #region GET SCENE ITEM ID
-        public bool GetObsSceneItemId(string parentSource, OBSSceneType parentSourceType, string childSource, int obsConnection, out int sceneItemId)
+        public bool GetObsSceneItemId(string sceneName, string sourceName, int obsConnection, out int sceneItemId)
         {
-            LogInfo($"Requesting scene item id for source [{childSource}] on parent [{parentSourceType}] - [{parentSource}]");
+            LogInfo($"Requesting scene item id for source [{sourceName}] on parent [{sceneName}]");
 
-            // Get the scene items based on the parent type (scene or group)
-            if (!GetObsSceneItemsArray(parentSource, parentSourceType, obsConnection, out JArray sceneItemsArray))
+            // Send the request to OBS
+            string response = _CPH.ObsSendRaw("GetSceneItemId", "{\"sceneName\":\"" + sceneName + "\",\"sourceName\":\"" + sourceName + "\",\"searchOffset\":0}", obsConnection);
+
+            if (string.IsNullOrEmpty(response) || response == "{}")
             {
-                LogError("Unable to retrieve scene item list");
+                LogError("No response from OBS");
                 sceneItemId = -1;
                 return false;
             }
 
-            // Search for sceneItemId
-            if (!FindObsSceneItemIdBySourceName(sceneItemsArray, childSource, out sceneItemId))
+            // Parse the JSON response
+            JObject responseObj = JObject.Parse(response);
+            if (responseObj["sceneItemId"] == null)
             {
-                LogError("Unable to find sceneItemId");
+                LogError("sceneItemId not found in the response");
                 sceneItemId = -1;
                 return false;
-            }
-
-            LogInfo($"Successfully retrieved source state");
+            }           
+            
+            sceneItemId = responseObj.Value<int>("sceneItemId");
+            LogInfo($"Successfully retrieved scene item ID: [{sceneItemId}]");
             return true;
         }
-
-        internal bool FindObsSceneItemIdBySourceName(JArray sceneItems, string sourceToFind, out int sceneItemId)
-        {
-            LogInfo($"Searching for sceneItemId of source [{sourceToFind}] in sceneItems");
-
-            foreach (var item in sceneItems)
-            {
-                string currentItemName = item["sourceName"]?.ToString();
-                if (currentItemName == sourceToFind)
-                {
-                    if (int.TryParse(item["sceneItemId"]?.ToString(), out sceneItemId))
-                    {
-                        LogInfo($"Found sceneItemId [{sceneItemId}] for source [{sourceToFind}]");
-                        return true;
-                    }
-                }
-            }
-
-            LogError($"SceneItemId for source [{sourceToFind}] not found in the sceneItems");
-            sceneItemId = -1;
-            return false;
-        }
-        // #endregion
 
         public bool GetObsSourceSettings(string sourceName, int obsConnection, out JObject sourceSettings)
         {
@@ -245,11 +225,11 @@ namespace StreamUP
             return true;
         }
 
-        public bool GetObsSourceTransform(string parentSource, OBSSceneType parentSourceType, string childSource, int obsConnection, out JObject sourceTransform)
+        public bool GetObsSourceTransform(string parentSource, string childSource, int obsConnection, out JObject sourceTransform)
         {
-            LogInfo($"Requesting source transform of [{childSource}] on [{parentSourceType}] - [{parentSource}]");
+            LogInfo($"Requesting source transform of [{childSource}] on scene/group [{parentSource}]");
 
-            if (!GetObsSceneItemId(parentSource, parentSourceType, childSource, obsConnection, out int sceneItemId))
+            if (!GetObsSceneItemId(parentSource, childSource, obsConnection, out int sceneItemId))
             {
                 LogError("Unable to retrieve sceneItemId");
                 sourceTransform = null;
@@ -286,8 +266,6 @@ namespace StreamUP
             LogInfo("Successfully retrieved source transform");
             return true;
         }
-
-
 
     }
 }
