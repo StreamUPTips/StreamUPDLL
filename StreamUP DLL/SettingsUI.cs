@@ -2258,7 +2258,7 @@ namespace StreamUP
             return settings;
 
         }
-        //OTHERS
+        //COLOURS
         public static List<Control> SUSBAddColour(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -2376,6 +2376,8 @@ namespace StreamUP
 
             return settings;
         }
+
+        //FILE and FOLDER
         public static List<Control> SUSBAddFile(this IInlineInvokeProxy CPH, string description, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -2422,6 +2424,7 @@ namespace StreamUP
 
             var input = new RoundedButton
             {
+                Name = "fileButtonIgnoreTDxyz",
                 Text = "🗁",
                 AutoSize = true,
                 //Margin = new Padding(10, 10, 0, 0),
@@ -2506,6 +2509,7 @@ namespace StreamUP
 
             var input = new RoundedButton
             {
+                Name = "fileButtonIgnoreTDxyz",
                 Text = "🗁",
                 AutoSize = true,
                 //Margin = new Padding(10, 10, 0, 0),
@@ -2544,6 +2548,8 @@ namespace StreamUP
 
             return settings;
         }
+
+        //OTHERS
         public static List<Control> SUSBAddFont(this IInlineInvokeProxy CPH, string description, string defaultName, string defaultSize, string defaultStyle, string saveName, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -2746,10 +2752,10 @@ namespace StreamUP
 
             return settings;
         }
-          public static List<Control> SUSBAddGroupsDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
+        public static List<Control> SUSBAddGroupsDrop(this IInlineInvokeProxy CPH, string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<string> groups = CPH.GetGroups();
-          
+
 
             string[] groupsArray = groups.ToArray();
             Array.Sort(groupsArray);
@@ -2759,6 +2765,7 @@ namespace StreamUP
 
             return settings;
         }
+
 
         private static Task<string> OpenFileDialogAsync()
         {
@@ -2880,8 +2887,11 @@ namespace StreamUP
                         CPH.SUSaveSetting(trackbar.Name, trackbar.Value);
                         break;
                     case Button button:
-                        CPH.SUSBSettingsLog($"Save Name: {button.Name}, Text: {button.Text}");
-                        CPH.SUSaveSetting(button.Name, button.Text);
+                        if (button.Name != "fileButtonIgnoreTDxyz")
+                        {
+                            CPH.SUSBSettingsLog($"Save Name: {button.Name}, Text: {button.Text}");
+                            CPH.SUSaveSetting(button.Name, button.Text);
+                        }
                         break;
                     case ComboBox comboBox:
                         CPH.SUSBSettingsLog($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
@@ -2984,35 +2994,35 @@ namespace StreamUP
         }
 
 
-    private static void InitializeDatabase(IInlineInvokeProxy CPH, out string filePath)
-    {
-        CPH.TryGetArg("saveFile", out string saveFile);
+        private static void InitializeDatabase(IInlineInvokeProxy CPH, out string filePath)
+        {
+            CPH.TryGetArg("saveFile", out string saveFile);
 
-        string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string dir = Path.Combine(programDirectory, "StreamUP", "Data");
-        Directory.CreateDirectory(dir);
-        filePath = Path.Combine(dir, $"{saveFile}_Product_Settings.json");
+            string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string dir = Path.Combine(programDirectory, "StreamUP", "Data");
+            Directory.CreateDirectory(dir);
+            filePath = Path.Combine(dir, $"{saveFile}_Product_Settings.json");
 
-        SimpleDatabase.Initialize(CPH, filePath);
-    }
+            SimpleDatabase.Initialize(CPH, filePath);
+        }
 
-    public static T SUGetSetting<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
-    {
-        InitializeDatabase(CPH, out string filePath);
-        return CPH.StreamUpInternalGet(settingName, defaultValue);
-    }
+        public static T SUGetSetting<T>(this IInlineInvokeProxy CPH, string settingName, T defaultValue)
+        {
+            InitializeDatabase(CPH, out string filePath);
+            return CPH.StreamUpInternalGet(settingName, defaultValue);
+        }
 
-    public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object newValue)
-    {
-        InitializeDatabase(CPH, out string filePath);
-        CPH.StreamUpInternalUpdate(settingName, newValue);
-    }
+        public static void SUSaveSetting(this IInlineInvokeProxy CPH, string settingName, object newValue)
+        {
+            InitializeDatabase(CPH, out string filePath);
+            CPH.StreamUpInternalUpdate(settingName, newValue);
+        }
 
-    public static void SUDeleteSetting(this IInlineInvokeProxy CPH, string settingName)
-    {
-        InitializeDatabase(CPH, out string filePath);
-        CPH.StreamUpInternalDelete(settingName);
-    }
+        public static void SUDeleteSetting(this IInlineInvokeProxy CPH, string settingName)
+        {
+            InitializeDatabase(CPH, out string filePath);
+            CPH.StreamUpInternalDelete(settingName);
+        }
     }
 
     #endregion
