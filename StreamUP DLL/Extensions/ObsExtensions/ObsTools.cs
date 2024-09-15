@@ -124,6 +124,7 @@ namespace StreamUP
             return true;
         }
 
+        //#region Split text based on width
         public bool SUObsSplitTextOnWidth(string sceneName, string sourceName, string inputText, int maxWidth, int maxHeight, int obsConnection, out string outputText)
         {
             _CPH.ObsSetGdiText(sceneName, sourceName, inputText, obsConnection);
@@ -301,7 +302,6 @@ namespace StreamUP
             return true;
         }
 
-        // Helper to check bounds
         private bool? DoesTextExceedBounds(string sceneName, string sourceName, string text, int maxWidth, int maxHeight, int obsConnection)
         {
             _CPH.ObsSetGdiText(sceneName, sourceName, text, obsConnection);
@@ -336,7 +336,6 @@ namespace StreamUP
             return currentWidth > maxWidth || currentHeight > maxHeight;
         }
 
-        // Helper to trim the message for fitting within bounds
         private void TrimMessageToFitBounds(ref StringBuilder message)
         {
             int lastSpaceIndex = message.ToString().LastIndexOf(' ', message.Length - 4); // -4 to ignore the '...'
@@ -345,6 +344,7 @@ namespace StreamUP
                 message.Remove(lastSpaceIndex, message.Length - lastSpaceIndex).Append("...");
             }
         }
-
+        //#endregion
+        
     }
 }

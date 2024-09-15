@@ -88,6 +88,10 @@
     <Compile Include="Extensions\CoreExtensions\Logger.cs" />
     <Compile Include="Extensions\CoreExtensions\Utilities.cs" />
     <Compile Include="Extensions\UIExtensions\UINotifications.cs" />
+    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandler.cs" />    
+    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotCoreEvents.cs" />    
+    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotTwitchEvents.cs" />    
+    <Compile Include="Extensions\TwitchExtensions\GetTwitchUserData.cs" />    
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

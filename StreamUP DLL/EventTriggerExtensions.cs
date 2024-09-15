@@ -535,6 +535,7 @@ namespace StreamUP {
             return userImage;
         }               
 
+        [Obsolete]
         public static string SUSBGetTwitchProfilePicture(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, string productNumber, TwitchProfilePictureUserType userType, Dictionary<string, object> productSettings, string testUser = "")
         {
             string logName = $"{productNumber}::SUSBGetTwitchProfilePicture";
@@ -743,48 +744,6 @@ namespace StreamUP {
             }
         }
 
-    }
-
-    public enum StreamingPlatform
-    {
-        All = 0,
-        Twitch = 1,
-        YouTube = 2
-    }
-
-    public enum TwitchProfilePictureUserType
-    {
-        userId = 0,   
-        recipientId = 1,
-        createdById = 2,
-        targetUserId = 3,
-        broadcastUserId = 4
-    }
-
-
-    // SB events trigger data
-    public class TriggerData 
-    {
-        public string AlertMessage { get; set; } = null;
-        public int Amount { get; set; } = 0;
-        public string AmountCurrency { get; set; } = null;
-        public double AmountCurrencyDouble { get; set; } = 0;
-        public bool Anonymous { get; set; } = false;
-        public int BanDuration { get; set; } = 0;
-        public string BanType { get; set; } = null;
-        public bool Donation { get; set; } = false;
-        public string EventSource { get; set; } = null;
-        public string EventType { get; set; } = null;
-        public string Message { get; set; } = null;
-        public int MonthsGifted { get; set; } = 0;
-        public int MonthsStreak { get; set; } = 0;
-        public int MonthsTotal { get; set; } = 0;
-        public string Receiver { get; set; } = null;
-        public string ReceiverImage { get; set; } = null;
-        public string Tier { get; set; } = null;
-        public int TotalAmount { get; set; } = 0;
-        public string User { get; set; } = null;
-        public string UserImage { get; set; } = null;
     }
 
 
