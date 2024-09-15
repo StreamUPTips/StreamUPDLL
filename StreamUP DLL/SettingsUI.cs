@@ -1716,7 +1716,7 @@ namespace StreamUP
                 Increment = (decimal)increments,
                 Minimum = int.MinValue,
                 Maximum = int.MaxValue,
-                Value = CPH.SUGetSetting<decimal>(saveName, (decimal)defaultValue),
+                Value = (decimal)CPH.SUGetSetting<double>(saveName, defaultValue),
                 //Padding = new Padding(10),
                 //Margin = new Padding(0, 10, 10, 0),
                 Dock = DockStyle.Fill,
@@ -2872,7 +2872,7 @@ namespace StreamUP
                         break;
                     case NumericUpDown numericUpDown:
                         CPH.SUSBSettingsLog($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
-                        CPH.SUSaveSetting(numericUpDown.Name, (double)numericUpDown.Value);
+                        CPH.SUSaveSetting(numericUpDown.Name, numericUpDown.Value.ToString());
                         break;
                     case TextBox textBox:
                         CPH.SUSBSettingsLog($"Save Name: {textBox.Name}, Text: {textBox.Text}");
