@@ -3,51 +3,62 @@ using Streamer.bot.Common.Events;
 
 namespace StreamUP
 {
+    public interface IEventHandler
+    {
+        TriggerData HandleEvent(IDictionary<string, object> sbArgs, StreamUpLib streamUpLib);
+    }
+
     public partial class StreamUpLib
     {
-        // StreamerBot Event Handler
-
-        public interface IEventHandler
+        public static readonly Dictionary<EventType, IEventHandler> EventHandlers = new()
         {
-            TriggerData HandleEvent(IDictionary<string, object> sbArgs);
-        }
-
-        private static readonly Dictionary<EventType, IEventHandler> EventHandlers = new Dictionary<EventType, IEventHandler>
-        {
+            // Twitch Events
             { EventType.TwitchChatMessage, new TwitchChatMessageHandler() },
-            // etc...
+
+            // YouTube Events
         };
 
-        public enum StreamingPlatform
+        public TriggerData ProcessEvent(IDictionary<string, object> sbArgs)
         {
-            All = 0,
-            Twitch = 1,
-            YouTube = 2
-        }
+            var eventType = _CPH.GetEventType();
 
-        public class TriggerData
-        {
-            public string AlertMessage { get; set; } = null;
-            public int Amount { get; set; } = -1;
-            public string AmountCurrency { get; set; } = null;
-            public double AmountCurrencyDouble { get; set; } = -1;
-            public bool Anonymous { get; set; } = false;
-            public int BanDuration { get; set; } = -1;
-            public string BanType { get; set; } = null;
-            public bool Donation { get; set; } = false;
-            public string EventSource { get; set; } = null;
-            public string EventType { get; set; } = null;
-            public string Message { get; set; } = null;
-            public int MonthsGifted { get; set; } = -1;
-            public int MonthsStreak { get; set; } = -1;
-            public int MonthsTotal { get; set; } = -1;
-            public string Receiver { get; set; } = null;
-            public string ReceiverImage { get; set; } = null;
-            public string Tier { get; set; } = null;
-            public int TotalAmount { get; set; } = -1;
-            public string User { get; set; } = null;
-            public string UserImage { get; set; } = null;
-        }
+            if (EventHandlers.TryGetValue(eventType, out IEventHandler handler))
+            {
+                return handler.HandleEvent(sbArgs, this);
+            }
 
+            return null;
+        }
+    }
+
+    public enum StreamingPlatform
+    {
+        All = 0,
+        Twitch = 1,
+        YouTube = 2
+    }
+
+    public class TriggerData
+    {
+        public string AlertMessage { get; set; } = null;
+        public int Amount { get; set; } = -1;
+        public string AmountCurrency { get; set; } = null;
+        public double AmountCurrencyDouble { get; set; } = -1;
+        public bool Anonymous { get; set; } = false;
+        public int BanDuration { get; set; } = -1;
+        public string BanType { get; set; } = null;
+        public bool Donation { get; set; } = false;
+        public string EventSource { get; set; } = null;
+        public string EventType { get; set; } = null;
+        public string Message { get; set; } = null;
+        public int MonthsGifted { get; set; } = -1;
+        public int MonthsStreak { get; set; } = -1;
+        public int MonthsTotal { get; set; } = -1;
+        public string Receiver { get; set; } = null;
+        public string ReceiverImage { get; set; } = null;
+        public string Tier { get; set; } = null;
+        public int TotalAmount { get; set; } = -1;
+        public string User { get; set; } = null;
+        public string UserImage { get; set; } = null;
     }
 }

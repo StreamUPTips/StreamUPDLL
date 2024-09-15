@@ -6,7 +6,7 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         // Get Twitch User Data
-        public string GetTwitchProfilePicture(IDictionary<string, object> sbArgs, string userType)
+        public string GetTwitchProfilePicture(IDictionary<string, object> sbArgs, TwitchUserType userType)
         {
             LogInfo($"Requesting Twitch profile picture for userType [{userType}]");
             string profilePictureUrl;
@@ -30,7 +30,7 @@ namespace StreamUP
             return profilePictureUrl;
         }
 
-        public enum TwitchProfilePictureUserType
+        public enum TwitchUserType
         {
             userId = 0,
             recipientId = 1,

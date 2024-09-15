@@ -66,9 +66,7 @@
     <Compile Include="_Obsolete\_ObsWebSocketExtensions.cs" />
     <Compile Include="ValidationExtensions.cs" />
     <Compile Include="UIExtensions.cs" />
-    <Compile Include="PollExtensions.cs" />
     <Compile Include="ProductSettingsUIExtensions.cs" />
-    <Compile Include="EventTriggerExtensions.cs" />
     <Compile Include="CurrencyExtensions.cs" />
     <Compile Include="SettingTriggers.cs" />
     <Compile Include="SettingsUI.cs" />
@@ -89,8 +87,7 @@
     <Compile Include="Extensions\CoreExtensions\Utilities.cs" />
     <Compile Include="Extensions\UIExtensions\UINotifications.cs" />
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandler.cs" />    
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotCoreEvents.cs" />    
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotTwitchEvents.cs" />    
+    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\TwitchChatMessageHandler.cs" />    
     <Compile Include="Extensions\TwitchExtensions\GetTwitchUserData.cs" />    
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

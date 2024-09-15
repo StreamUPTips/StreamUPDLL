@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace StreamUP
@@ -23,7 +24,14 @@ namespace StreamUP
             return true;
         }
     
-
+        public T GetValueOrDefault<T>(IDictionary<string, object> dict, string key, T defaultValue = default)
+        {
+            if (dict != null && dict.TryGetValue(key, out var value) && value is T typedValue)
+            {
+                return typedValue;
+            }
+            return defaultValue;
+        }
 
 
     }
