@@ -62,33 +62,15 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GenericExtensions.cs" />
-    <Compile Include="_Obsolete\_ObsWebSocketExtensions.cs" />
-    <Compile Include="ValidationExtensions.cs" />
-    <Compile Include="UIExtensions.cs" />
-    <Compile Include="ProductSettingsUIExtensions.cs" />
-    <Compile Include="CurrencyExtensions.cs" />
-    <Compile Include="SettingTriggers.cs" />
-    <Compile Include="SettingsUI.cs" />
-    <Compile Include="SettingsSaving.cs" />
-    <Compile Include="StreamUP.cs" />
-    <Compile Include="UIResources.cs" />
-    <Compile Include="TerrierDartsExtensions.cs" />
+    <Compile Include="*.cs" />
+    <Compile Include="_Obsolete\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\ObsExtensions\GetObsSceneData.cs" />
-    <Compile Include="Extensions\ObsExtensions\GetObsSourceData.cs" />
-    <Compile Include="Extensions\ObsExtensions\GetObsSettings.cs" />
-    <Compile Include="Extensions\ObsExtensions\GetObsFilterData.cs" />
-    <Compile Include="Extensions\ObsExtensions\ObsEnums.cs" />
-    <Compile Include="Extensions\ObsExtensions\ObsTools.cs" />
-    <Compile Include="Extensions\ObsExtensions\SetObsSourceData.cs" />
-    <Compile Include="Extensions\ObsExtensions\SetObsSceneData.cs" />
-    <Compile Include="Extensions\CoreExtensions\Logger.cs" />
-    <Compile Include="Extensions\CoreExtensions\Utilities.cs" />
-    <Compile Include="Extensions\UIExtensions\UINotifications.cs" />
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandler.cs" />    
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\TwitchChatMessageHandler.cs" />    
-    <Compile Include="Extensions\TwitchExtensions\GetTwitchUserData.cs" />    
+    <Compile Include="Extensions\*.cs" />
+    <Compile Include="Extensions\CoreExtensions\*.cs" />
+    <Compile Include="Extensions\EventTriggerExtensions\*.cs" />
+    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
+    <Compile Include="Extensions\ObsExtensions\*.cs" />
+    <Compile Include="Extensions\UIExtensions\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -245,6 +245,11 @@ namespace StreamUP {
                     string donorAvatarUrl = (!string.IsNullOrEmpty(donorAvatarUrlInput)) ? donorAvatarUrlInput : "https://static.donordrive.com/clients/try/img/avatar-constituent-default.gif";
                     triggerData.UserImage = donorAvatarUrl;
                     break;
+
+
+
+
+
                 // TWITCH
                 case EventType.TwitchAnnouncement:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
@@ -267,7 +272,7 @@ namespace StreamUP {
                     triggerData.Message = sbArgs["messageCheermotesStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
-                    break;
+                    break;        
                 case EventType.TwitchFirstWord:
                     triggerData.Message = sbArgs["messageStripped"].ToString();
                     triggerData.User = sbArgs["user"].ToString();
@@ -292,8 +297,7 @@ namespace StreamUP {
                         triggerData.User = sbArgs["user"].ToString();
                         triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, TwitchProfilePictureUserType.userId, productSettings);
                     }
-
-                    break;
+                    break; 
                 case EventType.TwitchGiftBomb:
                     triggerData.Amount = int.Parse(sbArgs["gifts"].ToString());
                     triggerData.Anonymous = bool.Parse(sbArgs["anonymous"].ToString());
@@ -384,6 +388,11 @@ namespace StreamUP {
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
+
+
+
+
+
                 // YOUTUBE
                 case EventType.YouTubeFirstWords:
                     triggerData.Message = sbArgs["message"].ToString();
@@ -773,6 +782,16 @@ namespace StreamUP {
             public string User { get; set; } = null;
             public string UserImage { get; set; } = null;
         }
+
+        public enum TwitchProfilePictureUserType
+        {
+            userId = 0,
+            recipientId = 1,
+            createdById = 2,
+            targetUserId = 3,
+            broadcastUserId = 4
+        }
+
 
     }
 

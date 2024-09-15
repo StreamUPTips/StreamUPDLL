@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 
 namespace StreamUP
 {
-    public class TwitchChatMessageHandler : IEventHandler
+    public class TwitchFirstWordHandler : IEventHandler
     {
         public TriggerData HandleEvent(IDictionary<string, object> sbArgs, StreamUpLib SUP)
         {
