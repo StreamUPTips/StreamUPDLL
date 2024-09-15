@@ -2775,8 +2775,8 @@ namespace StreamUP
             {
                 using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
-                    openFileDialog.InitialDirectory = "c:\\";
-                    openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    openFileDialog.InitialDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    openFileDialog.Filter = "All files (*.*)|*.*";
                     openFileDialog.FilterIndex = 1;
                     openFileDialog.RestoreDirectory = true;
 
