@@ -388,11 +388,6 @@ namespace StreamUP {
                     triggerData.User = sbArgs["user"].ToString();
                     triggerData.UserImage = CPH.SUSBGetTwitchProfilePicture(sbArgs, productInfo.ProductNumber, 0, productSettings);
                     break;
-
-
-
-
-
                 // YOUTUBE
                 case EventType.YouTubeFirstWords:
                     triggerData.Message = sbArgs["message"].ToString();

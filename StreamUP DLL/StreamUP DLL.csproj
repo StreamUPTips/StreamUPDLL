@@ -71,6 +71,8 @@
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
     <Compile Include="Extensions\ObsExtensions\*.cs" />
     <Compile Include="Extensions\UIExtensions\*.cs" />
+    <Compile Include="Extensions\TwitchExtensions\*.cs" />
+    <Compile Include="Extensions\YouTubeExtensions\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
