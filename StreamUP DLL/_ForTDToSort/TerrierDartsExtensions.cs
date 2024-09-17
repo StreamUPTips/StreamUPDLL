@@ -11,6 +11,7 @@ using Streamer.bot.Plugin.Interface.Model;
 using System.Globalization;
 using Streamer.bot.Plugin.Interface.Enums;
 using System.CodeDom;
+using System.Data.Common;
 
 namespace StreamUP
 {
@@ -36,38 +37,38 @@ namespace StreamUP
         {
 
 
-           if (inGroup && !allowAdding)
-        {
-            CPH.TimedVipError(1, "User can not add anymore time.");
-            return false;
-        }
+            if (inGroup && !allowAdding)
+            {
+                CPH.TimedVipError(1, "User can not add anymore time.");
+                return false;
+            }
 
-        if (mod && !allowMods)
-        {
-            CPH.TimedVipError(2, "User is a Moderator and Moderators are not allowed to redeem.");
-            return false;
-        }
+            if (mod && !allowMods)
+            {
+                CPH.TimedVipError(2, "User is a Moderator and Moderators are not allowed to redeem.");
+                return false;
+            }
 
-        if (!inGroup && vip && !allowVIPs)
-        {
-            CPH.TimedVipError(3, "User is already a Vip Permanently and VIPs are not allowed to redeem.");
-            return false;
-        }
+            if (!inGroup && vip && !allowVIPs)
+            {
+                CPH.TimedVipError(3, "User is already a Vip Permanently and VIPs are not allowed to redeem.");
+                return false;
+            }
 
-        int vips = CPH.CurrentVipCount();
-        if (vips >= maxVips)
-        {
-            CPH.TimedVipError(4, "You already have the max number of Allowed Users in the Group.");
-            return false;
-        }
+            int vips = CPH.CurrentVipCount();
+            if (vips >= maxVips)
+            {
+                CPH.TimedVipError(4, "You already have the max number of Allowed Users in the Group.");
+                return false;
+            }
 
-        if (usePoints && (cost > points))
-        {
-            CPH.TimedVipError(5, "You can not afford to redeem this.");
-            return false;
-        }
+            if (usePoints && (cost > points))
+            {
+                CPH.TimedVipError(5, "You can not afford to redeem this.");
+                return false;
+            }
 
-        return true;
+            return true;
         }
         public static int TimedVipDaysLeft(this IInlineInvokeProxy CPH, DateTime expireDate)
         {
@@ -88,23 +89,11 @@ namespace StreamUP
         }
 
 
-    
+
     }
 
     public static class TerrierDartsHelperMethods
     {
-        
-        public static void SUSBSendPlatformMessage(this IInlineInvokeProxy CPH, string platform, string message, bool botAccount)
-        {
-            if (platform == "twitch")
-            {
-                CPH.SendMessage(message, botAccount);
-            }
-            if (platform == "youtube")
-            {
-                CPH.SendYouTubeMessage(message, botAccount);
-            }
-        }
 
 
         public static string SURawInputWithInputsRemoved(this IInlineInvokeProxy CPH, int inputsToRemove)
@@ -116,30 +105,30 @@ namespace StreamUP
             {
                 combinedInputs.Append(" ").Append(moreInput);
             }
-           return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+            return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
         }
 
         public static string SURawInputWithInputsRemovedEncoded(this IInlineInvokeProxy CPH, int inputsToRemove)
         {
-             StringBuilder combinedInputs = new StringBuilder();
+            StringBuilder combinedInputs = new StringBuilder();
             for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
 
 
             {
                 combinedInputs.Append(" ").Append(moreInput);
             }
-           return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+            return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
         }
         public static string SURawInputWithInputsRemovedMAC(this IInlineInvokeProxy CPH, int inputsToRemove)
         {
             StringBuilder combinedInputs = new StringBuilder();
 
             for (int i = inputsToRemove; CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
-            {   
+            {
                 string textToAppend = "";
                 if (moreInput.StartsWith("!"))
                 {
-                        textToAppend = moreInput;
+                    textToAppend = moreInput;
                 }
                 else
                 {
@@ -153,73 +142,44 @@ namespace StreamUP
             return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
         }
 
-        public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false)
+        //! Im fairly sure these arent been used in any public products but ive left them for now
+       [Obsolete]
+        public static bool SUSBRefund(this IInlineInvokeProxy CPH, bool refund = false, string productName = "General")
         {
-            CPH.TryGetArg("rewardId", out string reward);
-            CPH.TryGetArg("redemptionId", out string redemption);
-            if (reward == null || redemption == null)
-            {
-                return true;
-            }
-            if (refund)
-            {
 
-                CPH.TwitchRedemptionCancel(reward, redemption);
-            }
-
+            StreamUpLib SUP = new StreamUpLib(CPH, productName);
+            SUP.Refund(refund, productName);
             return true;
         }
 
-        public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false)
+        [Obsolete]
+        public static bool SUSBFulfill(this IInlineInvokeProxy CPH, bool fulfill = false, string productName = "General")
         {
 
 
-            CPH.TryGetArg("rewardId", out string reward);
-            CPH.TryGetArg("redemptionId", out string redemption);
-            if (reward == null || redemption == null)
-            {
-                return true;
-            }
-            if (fulfill)
-            {
-
-                CPH.TwitchRedemptionFulfill(reward, redemption);
-            }
-
+            StreamUpLib SUP = new StreamUpLib(CPH, productName);
+            SUP.Refund(fulfill, productName);
             return true;
         }
-
-        public static string SUpwnyyReplacement(this IInlineInvokeProxy CPH, string message)
-    {
-        Regex regex = new Regex("%(.*?)(?::(.*?))?%");
-        // Use Regex.Replace with a MatchEvaluator to replace each match
-        string result = regex.Replace(message, match =>
+        [Obsolete]
+        public static string SUpwnyyReplacement(this IInlineInvokeProxy CPH, string message, string productName = "General")
         {
-            // Extract the word inside the % symbols
-            string word = match.Groups[1].Value;
-            string format = match.Groups[2].Value;
-
-            // Attempt to get the argument for this word
-            if (CPH.TryGetArg(word, out object arg))
+            StreamUpLib SUP = new StreamUpLib(CPH, productName);
+            var result = SUP.ArgumentReplacement(message, productName);
+            return result;
+        }
+        [Obsolete]
+        public static void SUSBSendPlatformMessage(this IInlineInvokeProxy CPH, string platform, string message, bool botAccount)
+        {
+            if (platform == "twitch")
             {
-                if (arg is IFormattable formattable)
-                {
-                    // Use the specified format if provided, otherwise use the default format
-                    return formattable.ToString(format, CultureInfo.CurrentCulture);
-                }
-                else
-                {
-                    // Return the argument value without formatting
-                    return arg.ToString();
-                }
+                CPH.SendMessage(message, botAccount);
             }
-            else
+            if (platform == "youtube")
             {
-                return match.Value; // Return the original %word% if no argument is found
+                CPH.SendYouTubeMessage(message, botAccount);
             }
-        });
-        return result;
-    }
+        }
 
 
     }
