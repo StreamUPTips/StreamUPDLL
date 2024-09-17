@@ -12,7 +12,15 @@ namespace StreamUP
     {
         public static readonly Dictionary<EventType, IEventHandler> EventHandlers = new()
         {
-            // Twitch Events
+            { EventType.CommandTriggered, new CommandTriggeredHandler() },
+            { EventType.DonorDriveDonation, new DonorDriveDonationHandler() },
+            { EventType.FourthwallDonation, new FourthwallDonationHandler() },
+            { EventType.KofiDonation, new KofiDonationHandler() },
+            { EventType.StreamElementsTip, new StreamElementsTipHandler() },
+            { EventType.StreamlabsDonation, new StreamlabsDonationHandler() },
+            { EventType.Test, new TestHandler() },
+            { EventType.TipeeeStreamDonation, new TipeeeStreamDonationHandler() },
+
             { EventType.TwitchAnnouncement, new TwitchAnnouncementHandler() },
             { EventType.TwitchBotWhisper, new TwitchBotWhisperHandler() },
             { EventType.TwitchChatMessage, new TwitchChatMessageHandler() },
@@ -31,7 +39,6 @@ namespace StreamUP
             { EventType.TwitchWatchStreak, new TwitchWatchStreakHandler() },
             { EventType.TwitchWhisper, new TwitchWhisperHandler() },
 
-            // YouTube Events
             { EventType.YouTubeFirstWords, new YouTubeFirstWordsHandler() },
             { EventType.YouTubeGiftMembershipReceived, new YouTubeGiftMembershipReceivedHandler() },
             { EventType.YouTubeMemberMileStone, new YouTubeMemberMileStoneHandler() },
@@ -70,6 +77,7 @@ namespace StreamUP
         public int Amount { get; set; } = -1;
         public string AmountCurrency { get; set; } = null;
         public double AmountCurrencyDouble { get; set; } = -1;
+        public decimal AmountCurrencyDecimal { get; set; } = -1;
         public bool Anonymous { get; set; } = false;
         public int BanDuration { get; set; } = -1;
         public string BanType { get; set; } = null;
@@ -86,6 +94,5 @@ namespace StreamUP
         public int TotalAmount { get; set; } = -1;
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
-        public decimal AmountCurrencyDecimal { get; internal set; }
     }
 }

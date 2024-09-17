@@ -9,13 +9,122 @@ using System.Diagnostics;
 using System.Text;
 using Streamer.bot.Plugin.Interface.Model;
 using System.Globalization;
-using Streamer.bot.Plugin.Interface.Enums;
 
 namespace StreamUP {
 
     public static class EventTriggerExtensions 
     {
+        //! Rework this
+        private static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
+        {
+            string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVarsTriggerData";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            string triggerType = CPH.GetEventType().ToString();
+            if (triggerData.Donation)
+            {
+                triggerType = "Donation";
+            }
+            
+            string eventTypeKey = triggerType + "AlertMessage";
+            if (productSettings.TryGetValue(eventTypeKey, out object value))
+            {
+                string customMessageValue = value.ToString();
+                CPH.SUWriteLog($"Custom message value found: [{customMessageValue}]");
+
+                StringBuilder builder = new StringBuilder(customMessageValue);
+                builder.Replace("%user%", triggerData.User)
+                .Replace("%message%", triggerData.Message)
+                .Replace("%tier%", triggerData.Tier)
+                .Replace("%amount%", triggerData.Amount.ToString())
+                .Replace("%amountCurrency%", triggerData.AmountCurrency)
+                .Replace("%banType%", triggerData.BanType)
+                .Replace("%duration%", triggerData.BanDuration.ToString())
+                .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
+                .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
+                .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
+                .Replace("%reason%", triggerData.BanType)
+                .Replace("%receiver%", triggerData.Receiver)
+                .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
+
+                triggerData.AlertMessage = builder.ToString();
+                
+            }
+            else
+            {
+                CPH.SUWriteLog("No custom message configuration found for event type: " + eventTypeKey);
+            }
+
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+        }
+        
+        //! Work with TD for this
+        public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount, StreamingPlatform streamingPlatform = StreamingPlatform.All)
+        {
+            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.Twitch)
+            {
+                CPH.SendMessage(message, botAccount);
+            }
+
+            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.YouTube)
+            {
+                CPH.SendYouTubeMessage(message, botAccount);
+            }
+            //CPH.SendTrovoMessage(message, botAccount);
+        }
+        
+        //! Do we need this?
+        // Queue system
+        public static bool SUSBSaveTriggerQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
+        {
+            string logName = "EventTriggerExtensions-SUSBSaveTriggerQueueToGlobalVar";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Serialize the queue to a JSON string
+            var array = myQueue.ToArray();
+            string jsonString = JsonConvert.SerializeObject(array);
+
+            // Set the global variable
+            CPH.SetGlobalVar(varName, jsonString, persisted);
+            CPH.SUWriteLog("Method Complete", logName);
+
+            return true;
+        }
+        public static Queue<TriggerData> SUSBGetTriggerQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
+        {
+            // Load log string
+            string logName = "EventTriggerExtensions-SUSBGetTriggerQueueFromGlobalVar";
+            CPH.SUWriteLog("Method Started", logName);
+
+            // Retrieve the JSON string from the global variable
+            string jsonString = CPH.GetGlobalVar<string>(varName, persisted);
+
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                CPH.SUWriteLog("JSON string is null or empty, returning a new empty Queue<TriggerData>.", logName);
+                return new Queue<TriggerData>();
+            }
+
+            // Try to convert the JSON string back to a List<TriggerData>, then to a Queue
+            try
+            {
+                var list = JsonConvert.DeserializeObject<List<TriggerData>>(jsonString);
+                Queue<TriggerData> myQueue = new Queue<TriggerData>(list);
+
+                CPH.SUWriteLog("Successfully deserialised and converted to Queue<TriggerData>.", logName);
+                return myQueue;
+            }
+            catch (JsonException e)
+            {
+                CPH.SUWriteLog($"Failed to deserialise JSON: {e.Message}", logName);
+                // Handle error (e.g., by returning an empty queue or re-throwing the exception)
+                return new Queue<TriggerData>(); // Return an empty queue as a fallback
+            }
+        }
+
+
         // Process SB events
+        [Obsolete]
         public static TriggerData SUSBProcessEvent(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs, ProductInfo productInfo, Dictionary<string, object> productSettings, string settingsGlobalName = "ProductSettings") 
         {
             string logName = $"{productInfo.ProductNumber}::SUSBProcessEvent";
@@ -79,6 +188,8 @@ namespace StreamUP {
                 // CORE
                 case EventType.CommandTriggered:
                     triggerData.Message = sbArgs["rawInput"].ToString();
+
+
                     string command = sbArgs["command"].ToString();
                     if (triggerData.Message.StartsWith(command))
                     {
@@ -485,49 +596,7 @@ namespace StreamUP {
             return triggerData;
         }
         
-        private static void ReplaceAlertMessageVarsTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings)
-        {
-            string logName = $"{productInfo.ProductNumber}::ReplaceAlertMessageVarsTriggerData";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
-
-            string triggerType = CPH.GetEventType().ToString();
-            if (triggerData.Donation)
-            {
-                triggerType = "Donation";
-            }
-            
-            string eventTypeKey = triggerType + "AlertMessage";
-            if (productSettings.TryGetValue(eventTypeKey, out object value))
-            {
-                string customMessageValue = value.ToString();
-                CPH.SUWriteLog($"Custom message value found: [{customMessageValue}]");
-
-                StringBuilder builder = new StringBuilder(customMessageValue);
-                builder.Replace("%user%", triggerData.User)
-                .Replace("%message%", triggerData.Message)
-                .Replace("%tier%", triggerData.Tier)
-                .Replace("%amount%", triggerData.Amount.ToString())
-                .Replace("%amountCurrency%", triggerData.AmountCurrency)
-                .Replace("%banType%", triggerData.BanType)
-                .Replace("%duration%", triggerData.BanDuration.ToString())
-                .Replace("%monthsGifted%", triggerData.MonthsGifted.ToString())
-                .Replace("%monthsStreak%", triggerData.MonthsStreak.ToString())
-                .Replace("%monthsTotal%", triggerData.MonthsTotal.ToString())
-                .Replace("%reason%", triggerData.BanType)
-                .Replace("%receiver%", triggerData.Receiver)
-                .Replace("%totalAmount%", triggerData.TotalAmount.ToString());
-
-                triggerData.AlertMessage = builder.ToString();
-                
-            }
-            else
-            {
-                CPH.SUWriteLog("No custom message configuration found for event type: " + eventTypeKey);
-            }
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-        }
-
+        [Obsolete]
         private static string SUSBGetDonationUserImage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string triggerType, string defaultDonationImageUrl)
         {
             string logName = $"{productInfo.ProductNumber}::SUSBGetDonationUserImage";
@@ -586,7 +655,8 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return image;
         }
-            
+        
+        [Obsolete]
         public static string SUSBCheckYouTubeProfileImageArgs(this IInlineInvokeProxy CPH, string productNumber)
         {
             string logName = $"{productNumber}::SUSBCheckYouTubeProfileImageArgs";
@@ -605,6 +675,7 @@ namespace StreamUP {
             return profileImage;
         }
 
+        [Obsolete]
         public static string SUSBReplaceMessageVarsFromTriggerData(this IInlineInvokeProxy CPH, TriggerData triggerData, ProductInfo productInfo, Dictionary<string, object> productSettings, string inputMessage)
         {
             string logName = $"{productInfo.ProductNumber}::SUSBReplaceMessageVarsFromTriggerData";
@@ -634,22 +705,7 @@ namespace StreamUP {
             return outputMessage;
         }
 
-        public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount, StreamingPlatform streamingPlatform = StreamingPlatform.All)
-        {
-            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.Twitch)
-            {
-                CPH.SendMessage(message, botAccount);
-            }
-
-            if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.YouTube)
-            {
-                CPH.SendYouTubeMessage(message, botAccount);
-            }
-            //CPH.SendTrovoMessage(message, botAccount);
-        }
-        
-
-
+        [Obsolete]
         public static T SUSBTryGetArgOrDefault<T>(this IInlineInvokeProxy CPH, string key, T defaultValue = default)
         {
             if (CPH.TryGetArg(key, out object value))
@@ -697,56 +753,7 @@ namespace StreamUP {
             }
         }
 
-
-
-
-        // Queue system
-        public static bool SUSBSaveTriggerQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
-        {
-            string logName = "EventTriggerExtensions-SUSBSaveTriggerQueueToGlobalVar";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Serialize the queue to a JSON string
-            var array = myQueue.ToArray();
-            string jsonString = JsonConvert.SerializeObject(array);
-
-            // Set the global variable
-            CPH.SetGlobalVar(varName, jsonString, persisted);
-            CPH.SUWriteLog("Method Complete", logName);
-
-            return true;
-        }
-        public static Queue<TriggerData> SUSBGetTriggerQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
-        {
-            // Load log string
-            string logName = "EventTriggerExtensions-SUSBGetTriggerQueueFromGlobalVar";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Retrieve the JSON string from the global variable
-            string jsonString = CPH.GetGlobalVar<string>(varName, persisted);
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                CPH.SUWriteLog("JSON string is null or empty, returning a new empty Queue<TriggerData>.", logName);
-                return new Queue<TriggerData>();
-            }
-
-            // Try to convert the JSON string back to a List<TriggerData>, then to a Queue
-            try
-            {
-                var list = JsonConvert.DeserializeObject<List<TriggerData>>(jsonString);
-                Queue<TriggerData> myQueue = new Queue<TriggerData>(list);
-
-                CPH.SUWriteLog("Successfully deserialised and converted to Queue<TriggerData>.", logName);
-                return myQueue;
-            }
-            catch (JsonException e)
-            {
-                CPH.SUWriteLog($"Failed to deserialise JSON: {e.Message}", logName);
-                // Handle error (e.g., by returning an empty queue or re-throwing the exception)
-                return new Queue<TriggerData>(); // Return an empty queue as a fallback
-            }
-        }
+        [Obsolete]
         public enum StreamingPlatform
         {
             All = 0,
@@ -754,6 +761,7 @@ namespace StreamUP {
             YouTube = 2
         }
 
+        [Obsolete]
         public class TriggerData
         {
             public string AlertMessage { get; set; } = null;
@@ -778,6 +786,7 @@ namespace StreamUP {
             public string UserImage { get; set; } = null;
         }
 
+        [Obsolete]
         public enum TwitchProfilePictureUserType
         {
             userId = 0,

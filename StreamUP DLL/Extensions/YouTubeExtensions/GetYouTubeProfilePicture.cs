@@ -16,7 +16,7 @@ namespace StreamUP
                 if (!_CPH.TryGetArg("profileImageUrl", out profilePictureUrl))
                 {
                     LogError("Unable to pull 'userProfileUrl' or 'profileImageUrl'. Setting image to StreamUP logo");
-                    profilePictureUrl = "https://streamup.tips/assets/StreamUp-3color-midnightcyanpink-button.png";
+                    profilePictureUrl = "https://avatars.githubusercontent.com/u/86125158?v=4";
                 }
             }
 

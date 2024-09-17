@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 using static StreamUP.StreamUpLib;
