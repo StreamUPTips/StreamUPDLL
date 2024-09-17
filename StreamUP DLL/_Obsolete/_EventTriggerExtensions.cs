@@ -74,56 +74,6 @@ namespace StreamUP {
             //CPH.SendTrovoMessage(message, botAccount);
         }
         
-        //! Do we need this?
-        // Queue system
-        public static bool SUSBSaveTriggerQueueToGlobalVar(this IInlineInvokeProxy CPH, Queue<TriggerData> myQueue, string varName, bool persisted)
-        {
-            string logName = "EventTriggerExtensions-SUSBSaveTriggerQueueToGlobalVar";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Serialize the queue to a JSON string
-            var array = myQueue.ToArray();
-            string jsonString = JsonConvert.SerializeObject(array);
-
-            // Set the global variable
-            CPH.SetGlobalVar(varName, jsonString, persisted);
-            CPH.SUWriteLog("Method Complete", logName);
-
-            return true;
-        }
-        public static Queue<TriggerData> SUSBGetTriggerQueueFromGlobalVar(this IInlineInvokeProxy CPH, string varName, bool persisted)
-        {
-            // Load log string
-            string logName = "EventTriggerExtensions-SUSBGetTriggerQueueFromGlobalVar";
-            CPH.SUWriteLog("Method Started", logName);
-
-            // Retrieve the JSON string from the global variable
-            string jsonString = CPH.GetGlobalVar<string>(varName, persisted);
-
-            if (string.IsNullOrEmpty(jsonString))
-            {
-                CPH.SUWriteLog("JSON string is null or empty, returning a new empty Queue<TriggerData>.", logName);
-                return new Queue<TriggerData>();
-            }
-
-            // Try to convert the JSON string back to a List<TriggerData>, then to a Queue
-            try
-            {
-                var list = JsonConvert.DeserializeObject<List<TriggerData>>(jsonString);
-                Queue<TriggerData> myQueue = new Queue<TriggerData>(list);
-
-                CPH.SUWriteLog("Successfully deserialised and converted to Queue<TriggerData>.", logName);
-                return myQueue;
-            }
-            catch (JsonException e)
-            {
-                CPH.SUWriteLog($"Failed to deserialise JSON: {e.Message}", logName);
-                // Handle error (e.g., by returning an empty queue or re-throwing the exception)
-                return new Queue<TriggerData>(); // Return an empty queue as a fallback
-            }
-        }
-
-
 
 
         // Process SB events
