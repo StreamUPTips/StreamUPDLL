@@ -13,9 +13,35 @@ namespace StreamUP
         public static readonly Dictionary<EventType, IEventHandler> EventHandlers = new()
         {
             // Twitch Events
+            { EventType.TwitchAnnouncement, new TwitchAnnouncementHandler() },
+            { EventType.TwitchBotWhisper, new TwitchBotWhisperHandler() },
             { EventType.TwitchChatMessage, new TwitchChatMessageHandler() },
+            { EventType.TwitchCheer, new TwitchCheerHandler() },
+            { EventType.TwitchFirstWord, new TwitchFirstWordHandler() },
+            { EventType.TwitchFollow, new TwitchFollowHandler() },
+            { EventType.TwitchGiftBomb, new TwitchGiftBombHandler() },
+            { EventType.TwitchGiftSub, new TwitchGiftSubHandler() },
+            { EventType.TwitchRaid, new TwitchRaidHandler() },
+            { EventType.TwitchReSub, new TwitchReSubHandler() },
+            { EventType.TwitchRewardRedemption, new TwitchRewardRedemptionHandler() },
+            { EventType.TwitchShoutoutCreated, new TwitchShoutoutCreatedHandler() },
+            { EventType.TwitchSub, new TwitchSubHandler() },
+            { EventType.TwitchUserBanned, new TwitchUserBannedHandler() },
+            { EventType.TwitchUserTimedOut, new TwitchUserTimedOutHandler() },
+            { EventType.TwitchWatchStreak, new TwitchWatchStreakHandler() },
+            { EventType.TwitchWhisper, new TwitchWhisperHandler() },
 
             // YouTube Events
+            { EventType.YouTubeFirstWords, new YouTubeFirstWordsHandler() },
+            { EventType.YouTubeGiftMembershipReceived, new YouTubeGiftMembershipReceivedHandler() },
+            { EventType.YouTubeMemberMileStone, new YouTubeMemberMileStoneHandler() },
+            { EventType.YouTubeMembershipGift, new YouTubeMembershipGiftHandler() },
+            { EventType.YouTubeMessage, new YouTubeMessageHandler() },
+            { EventType.YouTubeNewSponsor, new YouTubeNewSponsorHandler() },
+            { EventType.YouTubeNewSubscriber, new YouTubeNewSubscriberHandler() },
+            { EventType.YouTubeSuperChat, new YouTubeSuperChatHandler() },
+            { EventType.YouTubeSuperSticker, new YouTubeSuperStickerHandler() },
+            { EventType.YouTubeUserBanned, new YouTubeUserBannedHandler() }
         };
 
         public TriggerData ProcessEvent(IDictionary<string, object> sbArgs)
@@ -60,5 +86,6 @@ namespace StreamUP
         public int TotalAmount { get; set; } = -1;
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
+        public decimal AmountCurrencyDecimal { get; internal set; }
     }
 }
