@@ -368,8 +368,6 @@ namespace StreamUP {
             return settingsIndex;
         }
 
-
-
         public static void SUPollUpdate(this IInlineInvokeProxy CPH, Dictionary<string, object> args, string productNumber = "sup043")
         {
             if (!CPH.GetGlobalVar<bool>($"{productNumber}_PollActive", false))

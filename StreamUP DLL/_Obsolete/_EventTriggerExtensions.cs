@@ -21,7 +21,7 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD STARTED!", logName);
 
             string triggerType = CPH.GetEventType().ToString();
-            if (triggerData.Donation)
+            if ((bool)triggerData.Donation)
             {
                 triggerType = "Donation";
             }
@@ -59,6 +59,7 @@ namespace StreamUP {
         }
         
         //! Work with TD for this
+        [Obsolete]
         public static void SUSBSendMessage(this IInlineInvokeProxy CPH, ProductInfo productInfo, string message, bool botAccount, StreamingPlatform streamingPlatform = StreamingPlatform.All)
         {
             if (streamingPlatform == StreamingPlatform.All || streamingPlatform == StreamingPlatform.Twitch)
@@ -761,31 +762,6 @@ namespace StreamUP {
             All = 0,
             Twitch = 1,
             YouTube = 2
-        }
-
-        [Obsolete]
-        public class TriggerData
-        {
-            public string AlertMessage { get; set; } = null;
-            public int Amount { get; set; } = -1;
-            public string AmountCurrency { get; set; } = null;
-            public double AmountCurrencyDouble { get; set; } = -1;
-            public bool Anonymous { get; set; } = false;
-            public int BanDuration { get; set; } = -1;
-            public string BanType { get; set; } = null;
-            public bool Donation { get; set; } = false;
-            public string EventSource { get; set; } = null;
-            public string EventType { get; set; } = null;
-            public string Message { get; set; } = null;
-            public int MonthsGifted { get; set; } = -1;
-            public int MonthsStreak { get; set; } = -1;
-            public int MonthsTotal { get; set; } = -1;
-            public string Receiver { get; set; } = null;
-            public string ReceiverImage { get; set; } = null;
-            public string Tier { get; set; } = null;
-            public int TotalAmount { get; set; } = -1;
-            public string User { get; set; } = null;
-            public string UserImage { get; set; } = null;
         }
 
         [Obsolete]

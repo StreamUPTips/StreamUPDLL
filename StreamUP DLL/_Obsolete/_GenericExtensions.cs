@@ -12,11 +12,13 @@ using Newtonsoft.Json;
 using System.Drawing;
 using System.Drawing.Imaging;
 using static StreamUP.StreamUpLib;
+using System.Data.Common;
 
 namespace StreamUP {
 
     public static class GenericExtensions {
 
+        [Obsolete]
         public static bool SUInitialiseGeneralProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productNumber}::SUInitialiseGeneralProduct";
@@ -53,6 +55,7 @@ namespace StreamUP {
             return true;
         }
 
+        [Obsolete]
         public static bool SUInitialiseObsProduct(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL", string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productNumber}::SUInitialiseObsProduct";
@@ -129,6 +132,7 @@ namespace StreamUP {
             sup.LogInfo(logMessage);
         }
    
+        [Obsolete]
         public static bool SULoadProductInfo(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SULoadProductInfo";
@@ -157,6 +161,7 @@ namespace StreamUP {
             return true;
         }
 
+        [Obsolete]
         public static string SULoadProductSettings(this IInlineInvokeProxy CPH, ProductInfo productInfo)
         {
             string logName = $"{productInfo.ProductNumber}::SULoadProductInfo";
@@ -180,6 +185,7 @@ namespace StreamUP {
             return productSettings;
         }
 
+        [Obsolete]
         public static bool SULoadSettingsMenu(this IInlineInvokeProxy CPH, Dictionary<string, object> sbArgs, ProductInfo productInfo, List<StreamUpSetting> supSettingsList, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string settingsGlobalName = "ProductSettings")
         {
             string logName = $"{productInfo.ProductNumber}::SULoadSettingsMenu";
@@ -358,98 +364,42 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return region != null ? region.CurrencySymbol : currencyCode;
         }      
-
+        
+        [Obsolete]
         public static long SUGetContrastingColour(this IInlineInvokeProxy CPH, long inputColour, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SUGetContrastingColour";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
 
-            long a = (inputColour >> 24) & 0xFF;
-            long r = (inputColour >> 16) & 0xFF; 
-            long g = (inputColour >> 8) & 0xFF;  
-            long b = inputColour & 0xFF;         
+            sup.GetContrastingColourLong(inputColour, out long contrastingColourLong);
 
-            // Convert RGB to YIQ:
-            double y = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-            
-            if (y >= 0.5)
-            {
-                CPH.SUWriteLog("Returning black as contrasting colour", logName);
-                return 4278190080L;
-            }
-            else
-            {
-                CPH.SUWriteLog("Returning white as contrasting colour", logName);
-                return 4294967295L;
-            }
+            return contrastingColourLong;
         }
 
+        [Obsolete]
         public static string SUGetRandomColour(this IInlineInvokeProxy CPH, string productNumber = "DLL")
         {
-            Random random = new Random();            
-            int red = random.Next(256);
-            int green = random.Next(256);
-            int blue = random.Next(256);
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
 
-            // Convert RGB values to a hexadecimal string
-            string hexColor = $"#{red:X2}{green:X2}{blue:X2}";
+            sup.GetRandomColourHex(out string hexColour);
 
-            return hexColor;
+            return hexColour;
         }
 
+        [Obsolete]
         public static void SUTrimPng(this IInlineInvokeProxy CPH, string filePath)
         {
-            Image trimmedImage = TrimImage(filePath);
-            trimmedImage.Save(filePath, ImageFormat.Png);
-            trimmedImage.Dispose();
-        }
+            StreamUpLib sup = new StreamUpLib(CPH);
 
-        private static Image TrimImage(string imagePath)
-        {
-            Bitmap originalImage = new Bitmap(imagePath);
-            Rectangle cropRect = GetImageBounds(originalImage);
-            Bitmap trimmedImage = CropImage(originalImage, cropRect);
-            originalImage.Dispose();
-            return trimmedImage;
-        }    
-
-        private static Rectangle GetImageBounds(Bitmap img)
-        {
-            int x1 = img.Width, x2 = 0, y1 = img.Height, y2 = 0;
-            for (int x = 0; x < img.Width; x++)
-            {
-                for (int y = 0; y < img.Height; y++)
-                {
-                    Color pixel = img.GetPixel(x, y);
-                    if (pixel.A != 0)
-                    {
-                        if (x < x1)
-                            x1 = x;
-                        if (x > x2)
-                            x2 = x;
-                        if (y < y1)
-                            y1 = y;
-                        if (y > y2)
-                            y2 = y;
-                    }
-                }
-            }
-
-            if (x1 > x2 || y1 > y2) 
-                return new Rectangle(0, 0, img.Width, img.Height);
-            return new Rectangle(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
-        }
-
-        private static Bitmap CropImage(Bitmap img, Rectangle cropArea)
-        {
-            return img.Clone(cropArea, img.PixelFormat);
+            sup.TrimImagePng(filePath);
         }
    
+        [Obsolete]
         public static T SUGetPropertyValue<T>(this IInlineInvokeProxy CPH, object obj, string propertyName)
         {
             return (T)obj.GetType().GetProperty(propertyName).GetValue(obj);
         }
 
+        [Obsolete]
         public static void SUSetPropertyValue<T>(this IInlineInvokeProxy CPH, object obj, string propertyName, T value)
         {
             obj.GetType().GetProperty(propertyName).SetValue(obj, value);

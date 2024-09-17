@@ -38,6 +38,7 @@ namespace StreamUP
     // - StreamUpSettingType.Link 
     //
     // Name = The variable name, Description = The UI label, Type = See above, Default = The default value as a string.
+    [Obsolete]
     public static class ProductSettingsUIExtensions
     {
         public static bool? savePressed = false;
@@ -51,6 +52,7 @@ namespace StreamUP
         private static Color boolTrueColor = Color.SeaGreen;
         private static Color boolFalseColor =  Color.IndianRed;
 
+        [Obsolete]
         public static bool? SUExecuteSettingsMenu(this IInlineInvokeProxy CPH, ProductInfo productInfo, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, string settingsGlobalName = "ProductSettings")
         {
             // Create loading window
@@ -179,6 +181,7 @@ namespace StreamUP
             return savePressed;
         }
 
+        [Obsolete]
         private static void AddSettingToTable(this IInlineInvokeProxy CPH, TableLayoutPanel table, StreamUpSetting setting, List<string> actions, Dictionary<string, object> settings, ref int rowIndex)
         {
             switch (setting.Type)
@@ -244,7 +247,7 @@ namespace StreamUP
             rowIndex++;
         }
 
-
+        [Obsolete]
         private static List<string> GetSBActions(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs)
         {
             ClientWebSocket ws = new ClientWebSocket();
@@ -308,6 +311,7 @@ namespace StreamUP
             return sbActions;
         }
 
+        [Obsolete]
         private static void AddActionSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, List<string> withActions, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -352,6 +356,7 @@ namespace StreamUP
             toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddRewardSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var twitchRewards = CPH.TwitchGetRewards();
@@ -413,6 +418,7 @@ namespace StreamUP
             toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddDropdownSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -463,6 +469,7 @@ namespace StreamUP
             toTable.Controls.Add(dropdown, 1, atIndex);
         }
 
+        [Obsolete]
         private static void SetComboBoxWidth(ComboBox cb, int minWidth = 120, int maxWidth = 245)
         {
             int calculatedWidth = 0;
@@ -484,6 +491,7 @@ namespace StreamUP
             };
         }
 
+        [Obsolete]
         private static void AddSecretSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -518,12 +526,14 @@ namespace StreamUP
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddSpacerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             toTable.Controls.Add(new Label(), 0, atIndex);
             toTable.Controls.Add(new Label(), 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddRulerSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             Label rulerLabel = new Label();
@@ -537,6 +547,7 @@ namespace StreamUP
             toTable.SetColumnSpan(rulerLabel, 3);
         }
 
+        [Obsolete]
         private static void AddStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -568,6 +579,7 @@ namespace StreamUP
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddMultiStringSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label
@@ -605,7 +617,7 @@ namespace StreamUP
             toTable.Controls.Add(textbox, 1, atIndex);
         }
 
-
+        [Obsolete]
         private static void AddColorSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -670,7 +682,7 @@ namespace StreamUP
             toTable.Controls.Add(button, 1, atIndex);
         }
 
-
+        [Obsolete]
         private static void AddBoolSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -702,6 +714,7 @@ namespace StreamUP
             toTable.Controls.Add(checkbox, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddIntSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -736,6 +749,7 @@ namespace StreamUP
             toTable.Controls.Add(input, 1, atIndex);
         }
 
+        [Obsolete]
         private static void AddTrackbarSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label
@@ -807,6 +821,7 @@ namespace StreamUP
 
         }
 
+        [Obsolete]
         private static void AddLabelSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -820,6 +835,7 @@ namespace StreamUP
             toTable.SetColumnSpan(label, 2);
         }
 
+        [Obsolete]
         private static void AddLinkSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new LinkLabel();
@@ -834,6 +850,7 @@ namespace StreamUP
             toTable.SetColumnSpan(label, 2);
         }
 
+        [Obsolete]
         private static void AddHeadingSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -848,6 +865,7 @@ namespace StreamUP
             toTable.SetColumnSpan(label, 2);
         }
 
+        [Obsolete]
         private static void AddDoubleSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
             var label = new Label();
@@ -885,6 +903,7 @@ namespace StreamUP
             toTable.Controls.Add(input, 1, atIndex);
         }
 
+        [Obsolete]
         public static void AddFileSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
 
@@ -954,6 +973,7 @@ namespace StreamUP
 
         }
 
+        [Obsolete]
         public static void AddFolderSetting(this IInlineInvokeProxy CPH, TableLayoutPanel toTable, StreamUpSetting withSetting, int atIndex, Dictionary<string, object> settings)
         {
 
@@ -1024,6 +1044,7 @@ namespace StreamUP
         }
 
 
+        [Obsolete]
         private static Task<string> OpenFileDialogAsync()
         {
             var tcs = new TaskCompletionSource<string>();
@@ -1055,6 +1076,7 @@ namespace StreamUP
             return tcs.Task;
         }
 
+        [Obsolete]
         private static Task<string> OpenFolderDialogAsync()
         {
             var tcs = new TaskCompletionSource<string>();
@@ -1081,6 +1103,7 @@ namespace StreamUP
             return tcs.Task;
         }
 
+        [Obsolete]
         private static void AddButtonControls(this IInlineInvokeProxy CPH, Panel buttonPanel, Form withParent, int atIndex, List<StreamUpSetting> streamUpSettings, IDictionary<string, object> sbArgs, ProductInfo productInfo, string settingsGlobalName, TabControl tabControl)
         {
             var resetButton = new Button
@@ -1251,6 +1274,7 @@ namespace StreamUP
         }
     }
     
+    [Obsolete]
     public class StreamUpSetting
     {
         public string Name { get; set; }
@@ -1271,6 +1295,7 @@ namespace StreamUP
         public int Max { get; set; }
     }
 
+    [Obsolete]
     public enum StreamUpSettingType
     {
         Action,
@@ -1295,7 +1320,7 @@ namespace StreamUP
 
     }
 
-
+    [Obsolete]
     public static class ProductSettingsBuilder
     {
         public static List<StreamUpSetting> SUSettingsCreateAction(this IInlineInvokeProxy CPH, string name, string description, string tabName = "General", bool addSpacer = false)
