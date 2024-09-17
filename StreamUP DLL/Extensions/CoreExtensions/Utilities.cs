@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace StreamUP
 {
@@ -52,6 +54,66 @@ namespace StreamUP
             return defaultValue;
         }
 
+        public bool GetProductObsVersion(string sceneName, string sourceName, int obsConnection, out string productVersion)
+        {
+            LogInfo($"Getting product verison number for scene [{sceneName}]");
+
+            // Check scene exists
+            if (!GetObsSceneExists(sceneName, obsConnection))
+            {
+                LogError($"Scene [{sceneName}] doesn't exist in OBS");
+                productVersion = null;
+                return false;
+            }
+
+            // Get settings for source
+            if (!GetObsSourceSettings(sourceName, obsConnection, out JObject sourceSettings))
+            {
+                LogError($"Unable to pull source settings for source [{sourceName}]");
+                productVersion = null;
+                return false;
+            }
+
+            // Check sourceSettings contains product_version
+            string versionNumber = sourceSettings["product_version"].ToString();
+            if (string.IsNullOrEmpty(versionNumber))
+            {
+                LogError("No product_version setting found");
+                productVersion = null;
+                return false;
+            }
+
+            productVersion = versionNumber;
+            LogInfo($"Successfully retrieved product [{sceneName}] version number [{sourceName}] - [{versionNumber}]");
+            return true;
+        }
+
+        public bool SetProductObsVersion(string sceneName, string versionNumber, int obsConnection)
+        {
+            LogInfo($"Setting product OBS version [{versionNumber}] to scene [{sceneName}]");
+
+            // Create a JObject for product_version
+            JObject productVersionJson = new JObject
+            {
+                { "product_version", versionNumber }
+            };
+
+            // Get sceneItem list
+            if (GetObsSceneItemsNamesList(sceneName, OBSSceneType.Scene, obsConnection, out List<string> sceneItemsNamesList))
+            {
+                LogError("Unable to retrieve sceneItemsNameList");
+                return false;
+            }
+
+            // Set the version number on each source in that scene
+            foreach (string currentItemName in sceneItemsNamesList)
+            {
+                SetObsSourceSettings(currentItemName, productVersionJson, obsConnection);
+            }
+
+            LogInfo($"Successfully set product OBS version");
+            return true;
+        }
 
     }
 }

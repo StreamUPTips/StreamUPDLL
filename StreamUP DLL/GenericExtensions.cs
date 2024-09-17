@@ -122,7 +122,8 @@ namespace StreamUP {
         public static string SUGetStreamerBotFolder(this IInlineInvokeProxy CPH) {
             return AppDomain.CurrentDomain.BaseDirectory;
         }
-        //MARK AS OBSOLETE
+        
+        [Obsolete]
         public static void SUWriteLog(this IInlineInvokeProxy CPH, string logMessage, string productName = "General") {
             StreamUpLib sup = new StreamUpLib(CPH, productName);
             sup.LogInfo(logMessage);
@@ -220,56 +221,59 @@ namespace StreamUP {
             return true;
         }
 
+        [Obsolete]
         public static bool SUSetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string versionNumber, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SUSetProductObsVersion";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
 
-            string inputSettings = $"\"product_version\": \"{versionNumber}\"";
-            CPH.SUWriteLog($"Loaded version settings to set: inputSettings=[{inputSettings}]", logName);
-
-            // Create sceneItem list
-            List<string> sceneItemNames = new List<string>();
-            CPH.SUObsGetSceneItemNames(productNumber, obsConnection, 0, sceneName, sceneItemNames);
-            CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
-
-            // Set the version number on each source in that scene
-            foreach (string currentItemName in sceneItemNames)
+            if (!sup.SetProductObsVersion(sceneName, versionNumber, obsConnection))
             {
-                CPH.SUObsSetInputSettings(productNumber, obsConnection, currentItemName, inputSettings);
+                sup.LogError("Unable to set product version number");
             }
 
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
     
+        [Obsolete]
         public static bool SUGetProductObsVersion(this IInlineInvokeProxy CPH, int obsConnection, string sceneName, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SUGetProductObsVersion";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            sup.LogInfo($"Getting product version number for [{sceneName}]");
 
             // Create sceneItem list
-            List<string> sceneItemNames = new List<string>();
-            CPH.SUObsGetSceneItemNames(productNumber, obsConnection, OBSSceneType.Scene, sceneName, sceneItemNames);
-            CPH.SUWriteLog($"Retrieved scene item list on scene [{sceneName}]: sceneItemNames=[{sceneItemNames.ToString()}]", logName);
-
-            if (sceneItemNames.Count > 0)
+            if (!sup.GetObsSceneItemsNamesList(sceneName, OBSSceneType.Scene, obsConnection, out List<string> sceneItemsNamesList))
             {
-                string firstItemName = sceneItemNames[0];
-                JObject inputSettings = CPH.SUObsGetInputSettings(productNumber, obsConnection, firstItemName);
+                sup.LogError("Unable to retrieve sceneItemsNameList");
+                return false;
+            }
+
+            if (sceneItemsNamesList.Count > 0)
+            {
+                string firstItemName = sceneItemsNamesList[0];
+                if (!sup.GetObsSourceSettings(firstItemName, obsConnection, out JObject inputSettings))
+                {
+                    sup.LogError($"Unable to retrieve source settings for [{firstItemName}]");
+                    return false;
+                }
+
                 string versionNumber = inputSettings["product_version"].ToString();
-                CPH.SUWriteLog($"Version for item '{firstItemName}': {versionNumber}", logName);
-                CPH.SUUIShowInformationOKMessage($"{sceneName} is currently product_version: {versionNumber}");
+                if (string.IsNullOrEmpty(versionNumber))
+                {
+                    sup.LogError($"No versionNumber found on source [{firstItemName}]");
+                    return false;
+                }
+
+                sup.LogInfo($"Successfully retrieved product version number for [{versionNumber}]");
+                return true;
             }
             else
             {
-                CPH.SUWriteLog("No items found in the scene.", logName);
+                sup.LogError($"No sources found on scene [{sceneName}]");
+                return false;
             }
-
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return true;
         }
 
+        [Obsolete]
         public static string SUConvertCurrency(this IInlineInvokeProxy CPH, decimal amount, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUConvertCurrency";
@@ -301,6 +305,7 @@ namespace StreamUP {
             return formattedAmount;
         }
 
+        [Obsolete]
         public static decimal SUGetExchangeRate(this IInlineInvokeProxy CPH, string fromCurrency, string toCurrency, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUGetExchangeRate";
@@ -340,6 +345,7 @@ namespace StreamUP {
             return exchangeRate;
         }
 
+        [Obsolete]
         public static string SUGetCurrencySymbol(this IInlineInvokeProxy CPH, string currencyCode, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUGetCurrencySymbol";

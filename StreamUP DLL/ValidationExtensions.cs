@@ -11,9 +11,11 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
 
-namespace StreamUP {
+namespace StreamUP
+{
 
-    public static class ValidationExtensions {
+    public static class ValidationExtensions
+    {
         public static bool SUValSBUpdateChecker(this IInlineInvokeProxy CPH, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUValSBUpdateChecker";
@@ -25,7 +27,7 @@ namespace StreamUP {
                 CPH.SUWriteLog("Update checker has already been prompted this launch.", logName);
                 CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
                 return true;
-            } 
+            }
 
             // Check if Update checker action exists
             if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
@@ -34,22 +36,23 @@ namespace StreamUP {
                 string error2 = "You can download it from the StreamUP website.";
                 string error3 = "Would you like to open the link now?";
                 CPH.SUWriteLog(error1, logName);
-                DialogResult errorOutput = CPH.SUUIShowWarningYesNoMessage($"{error1}\n{error2}\n\n{error3}");           
-                
-                if (errorOutput == DialogResult.Yes) {
+                DialogResult errorOutput = CPH.SUUIShowWarningYesNoMessage($"{error1}\n{error2}\n\n{error3}");
+
+                if (errorOutput == DialogResult.Yes)
+                {
                     Process.Start("https://streamup.tips/product/update-checker");
-                }      
+                }
                 CPH.SetGlobalVar("sup000_UpdateCheckerPrompted", true, false);
-            }  
+            }
             else
             {
                 CPH.SUWriteLog("StreamUP update checker for Streamer.Bot is installed.", logName);
-            } 
+            }
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-        
-        public static ProductInfo SUValProductInfoLoaded(this IInlineInvokeProxy CPH,string actionName, string productNumber = "DLL")
+
+        public static ProductInfo SUValProductInfoLoaded(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUValProductInfoLoaded";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -99,7 +102,7 @@ namespace StreamUP {
                     CPH.SUWriteLog($"User selected 'No'.", logName);
                 }
                 CPH.SUWriteLog("METHOD FAILED", logName);
-                return false;   
+                return false;
             }
             else
             {
@@ -119,18 +122,18 @@ namespace StreamUP {
             CPH.SUWriteLog($"Pulled library version. currentVersion=[{currentVersion}], minimumRequiredVersion=[{minimumRequiredVersion}]", logName);
 
             if (currentVersion < minimumRequiredVersion)
-            {       
+            {
                 CPH.SUWriteLog("StreamUP.dll file is not the required version. Prompting the user to download the latest.", logName);
                 CPH.SUUIShowErrorOKMessage("You do not have the required version of 'StreamUP.dll' installed.\nPlease download it via the 'StreamUP_Library_Updater.exe' that was bundled in with this product.\n\nYou should have placed it in the root of your Streamer.Bot folder.");
                 CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
 
-            CPH.SUWriteLog("The current version of the StreamUP.dll file is okay.", logName);          
+            CPH.SUWriteLog("The current version of the StreamUP.dll file is okay.", logName);
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-    
+
         public static bool SUValObsIsConnected(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValObsIsConnected";
@@ -182,7 +185,7 @@ namespace StreamUP {
             if (checkPlugins.Trim() == "{}")
             {
                 CPH.SUWriteLog("Cannot check OBS plugins. The StreamUP OBS plugin may not be installed or is out of date.", logName);
-                DialogResult response = CPH.SUUIShowWarningYesNoMessage("Cannot check OBS plugins. The StreamUP OBS plugin may not be installed or is out of date.\n\nWould you like to go to the download page now?");       
+                DialogResult response = CPH.SUUIShowWarningYesNoMessage("Cannot check OBS plugins. The StreamUP OBS plugin may not be installed or is out of date.\n\nWould you like to go to the download page now?");
                 if (response == DialogResult.Yes)
                 {
                     CPH.SUWriteLog("User selected 'Yes'. Opening StreamUP website in web browser.", logName);
@@ -205,9 +208,9 @@ namespace StreamUP {
             bool isSuccess = checkPluginsObj["responseData"]?["success"]?.Value<bool>() ?? false;
             if (!isSuccess)
             {
-                CPH.SUWriteLog($"OBS has plugins that are required that are out of date.", logName);   
+                CPH.SUWriteLog($"OBS has plugins that are required that are out of date.", logName);
 
-                var (response, askAgain) = CPH.SUUIShowObsPluginsUpdateMessage();      
+                var (response, askAgain) = CPH.SUUIShowObsPluginsUpdateMessage();
 
                 if (response == DialogResult.Yes)
                 {
@@ -252,7 +255,7 @@ namespace StreamUP {
             return true;
         }
 
-        public static bool SUValProductObsVersion(this IInlineInvokeProxy CPH,  ProductInfo productInfo, int obsConnection)
+        public static bool SUValProductObsVersion(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValProductObsVersion";
             CPH.SUWriteLog("METHOD STARTED!", logName);
@@ -268,7 +271,7 @@ namespace StreamUP {
             {
                 foundVersion = versionToken.ToString();
                 CPH.SUWriteLog($"Found product version: {foundVersion}", logName);
-            }          
+            }
 
             if (foundVersion == null)
             {
@@ -292,7 +295,7 @@ namespace StreamUP {
                 string error3 = $"Then install the latest .StreamUP version for '{productInfo.ProductName}' into OBS.";
                 CPH.SUWriteLog($"ERROR: {error1}", logName);
                 CPH.SUUIShowErrorOKMessage($"{error1}\n\n{error2}\n{error3}");
-                
+
                 CPH.SUWriteLog("METHOD FAILED", logName);
                 return false;
             }
@@ -301,55 +304,26 @@ namespace StreamUP {
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-    
-    public static bool SUValFontInstalled(this IInlineInvokeProxy CPH, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string productNumber = "DLL")
-    {
-        string logName = $"{productNumber}::SUValFontInstalled";
-        CPH.SUWriteLog("METHOD STARTED!", logName);
 
-        bool allFontsInstalled = true;
-
-        foreach (var font in requiredFonts)
+        public static bool SUValFontInstalled(this IInlineInvokeProxy CPH, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string productNumber = "DLL")
         {
-            string fontName = font.fontName;
-            string fontFile = font.fontFile;
-            string fontUrl = font.fontUrl;
+            string logName = $"{productNumber}::SUValFontInstalled";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            // Get the list of installed font families
-            FontFamily[] installedFonts = FontFamily.Families;
+            bool allFontsInstalled = true;
 
-            if (!installedFonts.Any(ff => ff.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
+            foreach (var font in requiredFonts)
             {
-                CPH.SUWriteLog($"WARNING: Unable to locate '{fontName}' in the font family list.", logName);
-                allFontsInstalled = false;
-                CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
-                DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
-                if (result == DialogResult.Yes)
+                string fontName = font.fontName;
+                string fontFile = font.fontFile;
+                string fontUrl = font.fontUrl;
+
+                // Get the list of installed font families
+                FontFamily[] installedFonts = FontFamily.Families;
+
+                if (!installedFonts.Any(ff => ff.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Process.Start(fontUrl);
-                }
-                continue; // Skip further checks and move to the next font in the list
-            }
-
-            // Check for specific font file extension type
-            string fontFileName = Path.GetFileNameWithoutExtension(fontFile);
-            string searchPattern = $"{fontFileName}.*";
-
-            // Check default font folder
-            string directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-            CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
-            List<string> baseDirMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
-
-            if (!CheckIfFontMatches(CPH, baseDirMatchingFontFiles, fontFile, productNumber))
-            {
-                // Check APPDATA font folder
-                string appdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                directoryPath = Path.Combine(appdataFolder, "Microsoft", "Windows", "Fonts");
-                CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
-
-                List<string> appdataMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
-                if (!CheckIfFontMatches(CPH, appdataMatchingFontFiles, fontFile, productNumber))
-                {
+                    CPH.SUWriteLog($"WARNING: Unable to locate '{fontName}' in the font family list.", logName);
                     allFontsInstalled = false;
                     CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
                     DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
@@ -357,58 +331,87 @@ namespace StreamUP {
                     {
                         Process.Start(fontUrl);
                     }
+                    continue; // Skip further checks and move to the next font in the list
                 }
+
+                // Check for specific font file extension type
+                string fontFileName = Path.GetFileNameWithoutExtension(fontFile);
+                string searchPattern = $"{fontFileName}.*";
+
+                // Check default font folder
+                string directoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+                CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+                List<string> baseDirMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+
+                if (!CheckIfFontMatches(CPH, baseDirMatchingFontFiles, fontFile, productNumber))
+                {
+                    // Check APPDATA font folder
+                    string appdataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    directoryPath = Path.Combine(appdataFolder, "Microsoft", "Windows", "Fonts");
+                    CPH.SUWriteLog($"Searching for '{fontFile}' in: [{directoryPath}]", logName);
+
+                    List<string> appdataMatchingFontFiles = GetAllMatchingFontFiles(CPH, directoryPath, searchPattern, productNumber);
+                    if (!CheckIfFontMatches(CPH, appdataMatchingFontFiles, fontFile, productNumber))
+                    {
+                        allFontsInstalled = false;
+                        CPH.SUWriteLog($"WARNING: The font '{fontFile}' is not installed. The product may not function properly.", logName);
+                        DialogResult result = CPH.SUUIShowWarningYesNoMessage($"The font '{fontFile}' is not installed. The product may not function properly.\n\nWould you like to go to the fonts download page now? Once installed make sure to restart OBS.");
+                        if (result == DialogResult.Yes)
+                        {
+                            Process.Start(fontUrl);
+                        }
+                    }
+                }
+            }
+
+            if (allFontsInstalled)
+            {
+                CPH.SUWriteLog("All required fonts are installed.", logName);
+                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
+                return true;
+            }
+            else
+            {
+                CPH.SUWriteLog("One or more required fonts are not installed.", logName);
+                CPH.SUWriteLog("METHOD FAILED", logName);
+                return false;
             }
         }
 
-        if (allFontsInstalled)
+        private static List<string> GetAllMatchingFontFiles(this IInlineInvokeProxy CPH, string directoryPath, string searchPattern, string productNumber)
         {
-            CPH.SUWriteLog("All required fonts are installed.", logName);
+            string logName = $"{productNumber}::GetAllMatchingFontFiles";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            string[] filePaths = Directory.GetFiles(directoryPath, searchPattern);
+            List<string> fileNames = new List<string>();
+            foreach (var filePath in filePaths)
+            {
+                string fileName = Path.GetFileName(filePath);
+                fileNames.Add(fileName);
+                CPH.SUWriteLog($"Added '{fileName}' to list", logName);
+            }
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-            return true;
+            return fileNames;
         }
-        else
+
+        private static bool CheckIfFontMatches(this IInlineInvokeProxy CPH, List<string> fontFiles, string fontName, string productNumber)
         {
-            CPH.SUWriteLog("One or more required fonts are not installed.", logName);
-            CPH.SUWriteLog("METHOD FAILED", logName);
+            string logName = $"{productNumber}::CheckIfFontMatches";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
+
+            foreach (var file in fontFiles)
+            {
+                if (file.Equals(fontName, StringComparison.OrdinalIgnoreCase))
+                {
+                    CPH.SUWriteLog($"Font match found: {file}", logName);
+                    return true;
+                }
+            }
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return false;
         }
     }
-
-    private static List<string> GetAllMatchingFontFiles(this IInlineInvokeProxy CPH, string directoryPath, string searchPattern, string productNumber)
-    {
-        string logName = $"{productNumber}::GetAllMatchingFontFiles";
-        CPH.SUWriteLog("METHOD STARTED!", logName);
-
-        string[] filePaths = Directory.GetFiles(directoryPath, searchPattern);
-        List<string> fileNames = new List<string>();
-        foreach (var filePath in filePaths)
-        {
-            string fileName = Path.GetFileName(filePath);
-            fileNames.Add(fileName);
-            CPH.SUWriteLog($"Added '{fileName}' to list", logName);
-        }
-        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-        return fileNames;
-    }
-
-    private static bool CheckIfFontMatches(this IInlineInvokeProxy CPH, List<string> fontFiles, string fontName, string productNumber)
-    {
-        string logName = $"{productNumber}::CheckIfFontMatches";
-        CPH.SUWriteLog("METHOD STARTED!", logName);
-
-        foreach (var file in fontFiles)
-        {
-            if (file.Equals(fontName, StringComparison.OrdinalIgnoreCase))
-            {
-                CPH.SUWriteLog($"Font match found: {file}", logName);
-                return true;
-            }
-        }
-        CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-        return false;
-    }    
-}
 
 
     [Serializable]
@@ -421,6 +424,6 @@ namespace StreamUP {
         public string SettingsAction { get; set; } = string.Empty;
         public string SourceNameVersionCheck { get; set; } = string.Empty;
         public Version SourceNameVersionNumber { get; set; }
-        public Version ProductVersionNumber {get; set;} = new Version (0,0,0);
+        public Version ProductVersionNumber { get; set; } = new Version(0, 0, 0);
     }
 }

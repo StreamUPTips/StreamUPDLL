@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP
 {
@@ -122,5 +124,48 @@ namespace StreamUP
             return true;
         }
 
+        public bool GetObsSceneList(int obsConnection, out JObject sceneList)
+        {
+            LogInfo($"Requesting scene list from OBS");
+
+            string response = _CPH.ObsSendRaw("GetSceneList", "{}", 0);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("Unable to retrieve sceneList");
+                sceneList = null;
+                return false;
+            }
+
+            sceneList = JObject.Parse(response);
+            LogInfo($"Successfully retrieved scene list from OBS");
+            return true;
+        }
+
+        public bool GetObsSceneExists(string sceneName, int obsConnection)
+        {
+            LogInfo($"Checking if scene [{sceneName}] exists in OBS");
+
+            // Get the scene list from OBS
+            if (!GetObsSceneList(obsConnection, out JObject sceneList))
+            {
+                LogError("Failed to retrieve the scene list from OBS.");
+                return false;
+            }
+
+            // Check if the scene list contains the input scene name
+            JArray scenes = (JArray)sceneList["scenes"];
+            foreach (var scene in scenes)
+            {
+                string sceneNameInList = scene["sceneName"]?.ToString();
+                if (sceneNameInList != null && sceneNameInList.Equals(sceneName))
+                {
+                    LogInfo($"Scene [{sceneName}] exists in OBS.");
+                    return true;
+                }
+            }
+
+            LogInfo($"Scene [{sceneName}] does not exist in OBS.");
+            return false;
+        }
     }
 }

@@ -62,6 +62,31 @@ namespace StreamUP
 
             return null;
         }
+
+        public void LogTriggerData(TriggerData triggerData, bool skipNullOrEmpty)
+        {
+        // Use reflection to log all properties of TriggerData, skipping null, -1, and 0 values
+        foreach (var property in triggerData.GetType().GetProperties())
+        {
+            var value = property.GetValue(triggerData, null);
+
+            if (skipNullOrEmpty)
+            {
+                // Skip properties that are null
+                if (value == null)
+                {
+                    continue;
+                }
+
+                // Check for numeric types and skip if value is -1 or 0
+                if ((value is decimal decValue && (decValue == -1)) || (value is double doubleValue && (doubleValue == -1)) || (value is int intValue && (intValue == -1)) || (value is long longValue && (longValue == -1)))
+                {
+                    continue;
+                }
+            }
+            LogInfo($"{property.Name}: {value}");
+        }
+        }
     }
 
     public enum StreamingPlatform
@@ -78,10 +103,10 @@ namespace StreamUP
         public string AmountCurrency { get; set; } = null;
         public double AmountCurrencyDouble { get; set; } = -1;
         public decimal AmountCurrencyDecimal { get; set; } = -1;
-        public bool Anonymous { get; set; } = false;
+        public bool? Anonymous { get; set; } = null;
         public int BanDuration { get; set; } = -1;
         public string BanType { get; set; } = null;
-        public bool Donation { get; set; } = false;
+        public bool? Donation { get; set; } = null;
         public string EventSource { get; set; } = null;
         public string EventType { get; set; } = null;
         public string Message { get; set; } = null;
