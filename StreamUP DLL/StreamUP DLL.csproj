@@ -71,6 +71,7 @@
     <Compile Include="Extensions\EventTriggerExtensions\*.cs" />
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
     <Compile Include="Extensions\ObsExtensions\*.cs" />
+    <Compile Include="Extensions\SettingsExtensions\*.cs" />
     <Compile Include="Extensions\UIExtensions\*.cs" />
     <Compile Include="Extensions\TwitchExtensions\*.cs" />
     <Compile Include="Extensions\YouTubeExtensions\*.cs" />

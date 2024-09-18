@@ -1,54 +1,51 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Streamer.bot.Plugin.Interface;
+
 
 namespace StreamUP
 {
-    public static class SimpleDatabase
+    public partial class StreamUpLib
     {
-        private static string _filePath;
-        private static string _saveName;
-        private static Dictionary<string, object> _data = new Dictionary<string, object>();
+        public string _filePath;
+        public string _saveName;
+        public Dictionary<string, object> _data = new Dictionary<string, object>();
 
         // Static method to initialize the database
-        public static void Initialize(IInlineInvokeProxy CPH, string filePath)
+        public void Initialize(string filePath)
         {
             _filePath = filePath;
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
-            _data = CPH.StreamUpInternalLoad(_saveName);
+            _data = StreamUpInternalLoad(_saveName);
         }
 
-        private static Dictionary<string, object> StreamUpInternalLoad(this IInlineInvokeProxy CPH, string saveFile)
+        public Dictionary<string, object> StreamUpInternalLoad(string saveFile)
         {
-            CPH.LogInfo($"string({saveFile})2:" + CPH.GetGlobalVar<string>(saveFile, true));
-
             // Initialize the dictionary safely
-            Dictionary<string, object> json = CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
 
-            CPH.LogInfo($"Loaded JSON: {json}");
+           //GetStreamerBotGlobalVar<Dictionary<string, object>>(saveFile, true, out Dictionary<string, object> json);
+            Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
+            string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
+            LogInfo($"Loaded JSON: {jsonString}");
             return json;
         }
 
 
-        private static void StreamUpInternalSave(this IInlineInvokeProxy CPH)
+        public void StreamUpInternalSave()
         {
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
             var json = JsonConvert.SerializeObject(_data);
-            CPH.SetGlobalVar(_saveName, json, true);
-
-
+            _CPH.SetGlobalVar(_saveName, json, true);
             //string jsonString = JsonConvert.SerializeObject(_data, Formatting.Indented);
             var cleanedDict = DeserializeDictionary(json);
-string jsonString = ConvertDictionaryToJsonString(cleanedDict);
+            string jsonString = ConvertDictionaryToJsonString(cleanedDict);
             File.WriteAllText(_filePath, jsonString, Encoding.UTF8);
         }
 
-        public static void StreamUpInternalUpdate(this IInlineInvokeProxy CPH, string key, object newValue)
+        public void StreamUpInternalUpdate(string key, object newValue)
         {
             // Convert JArray to a serializable List<string> before storing
             if (newValue is JArray jArray)
@@ -77,17 +74,17 @@ string jsonString = ConvertDictionaryToJsonString(cleanedDict);
             }
 
             // Save the updated _data dictionary
-            CPH.StreamUpInternalSave();
+            StreamUpInternalSave();
         }
-        public static T StreamUpInternalGet<T>(this IInlineInvokeProxy CPH, string key, T defaultValue)
+        public T StreamUpInternalGet<T>(string key, T defaultValue)
         {
-            CPH.LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
+            LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
 
             if (_data.TryGetValue(key, out var jsonValue))
             {
                 try
                 {
-                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(decimal))
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }
@@ -106,39 +103,39 @@ string jsonString = ConvertDictionaryToJsonString(cleanedDict);
                     }
                     else
                     {
-                        CPH.LogInfo($"Unsupported type: {typeof(T)}. Returning default value.");
+                        LogInfo($"Unsupported type: {typeof(T)}. Returning default value.");
                         return defaultValue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    CPH.LogError($"Error during conversion or deserialization: {ex.Message}");
+                    LogError($"Error during conversion or deserialization: {ex.Message}");
                     return defaultValue;
                 }
             }
             else
             {
-                CPH.LogInfo($"Key '{key}' not found. Returning default value.");
+                LogInfo($"Key '{key}' not found. Returning default value.");
                 return defaultValue;
             }
         }
 
 
-        public static void StreamUpInternalDelete(this IInlineInvokeProxy CPH, string key)
+        public void StreamUpInternalDelete(string key)
         {
             if (_data.Remove(key))
             {
-                CPH.StreamUpInternalSave();
+                StreamUpInternalSave();
             }
         }
 
-        public static IEnumerable<string> StreamUpInternalGetAllKeys(this IInlineInvokeProxy CPH)
+        public IEnumerable<string> StreamUpInternalGetAllKeys()
         {
             return _data.Keys;
         }
 
 
-        public static Dictionary<string, object> DeserializeDictionary(string jsonString)
+        public Dictionary<string, object> DeserializeDictionary(string jsonString)
         {
             // Deserialize the outer dictionary
             var outerDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonString);
@@ -162,13 +159,13 @@ string jsonString = ConvertDictionaryToJsonString(cleanedDict);
         }
 
         // Helper function to check if a string is JSON
-        private static bool IsJson(string value)
+        private bool IsJson(string value)
         {
             // Basic check for JSON format
             return value.StartsWith("{") || value.StartsWith("[");
         }
 
-        public static string ConvertDictionaryToJsonString(Dictionary<string, object> dictionary)
+        public string ConvertDictionaryToJsonString(Dictionary<string, object> dictionary)
         {
             return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
         }

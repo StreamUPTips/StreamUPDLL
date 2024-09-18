@@ -1,0 +1,10 @@
+using System.Collections.Generic;
+using Streamer.bot.Plugin.Interface.Model;
+
+namespace StreamUP
+{
+    public partial class StreamUpLib
+    {
+
+    }
+}
