@@ -73,6 +73,8 @@
     <Compile Include="Extensions\ObsExtensions\*.cs" />
     <Compile Include="Extensions\SettingsExtensions\*.cs" />
     <Compile Include="Extensions\UIExtensions\*.cs" />
+    <Compile Include="Extensions\ProductExtensions\*.cs" />
+    <Compile Include="Extensions\ProductExtensions\CurrencyExtensions\*.cs" />
     <Compile Include="Extensions\TwitchExtensions\*.cs" />
     <Compile Include="Extensions\YouTubeExtensions\*.cs" />
   </ItemGroup>

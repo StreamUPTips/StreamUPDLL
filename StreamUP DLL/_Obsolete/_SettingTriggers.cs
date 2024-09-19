@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Streamer.bot.Plugin.Interface;
@@ -5,25 +6,10 @@ using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP
 {
-    public class CustomTrigger
-    {
-        public string Name { get; set; }
-        public string Code { get; set; }
-
-        public string[] TriggerCategory { get; set; }
-
-        public CustomTrigger(string name, string code, string[] triggerCategory)
-        {
-            Name = name;
-            Code = code;
-            TriggerCategory = triggerCategory;
-        }
-
-    }
-
+    
     public static class SetTriggers //Give your Class a Name
     {
-
+        [Obsolete]
         public static void SetCustomTriggers(this IInlineInvokeProxy CPH, List<CustomTrigger> customTriggers)
         {
             foreach (var customTrigger in customTriggers)
@@ -33,6 +19,7 @@ namespace StreamUP
             }
         }
 
+        [Obsolete]
         public static void SetGenericCurrencyTriggers(this IInlineInvokeProxy CPH)
         {
             string[] categories = { "Currency" };
@@ -45,7 +32,8 @@ namespace StreamUP
 
 
         }
-        
+
+        [Obsolete]
         public static void SetTriggersForSlots(this IInlineInvokeProxy CPH)
         {
             string[] categories = { "Currency", "Slots" };
@@ -62,6 +50,7 @@ namespace StreamUP
 
         }
 
+        [Obsolete]
         public static void SetTriggersForRaffle(this IInlineInvokeProxy CPH)
         {
             string[] categories = { "Currency", "Raffle" };
@@ -77,6 +66,7 @@ namespace StreamUP
 
         }
 
+        [Obsolete]
         public static void SetTriggersForGamble(this IInlineInvokeProxy CPH)
         {
             string[] categories = { "Currency", "Gamble" };
@@ -97,7 +87,8 @@ namespace StreamUP
 
         }
 
-          public static void SetTriggersForTimedVIP(this IInlineInvokeProxy CPH)
+        [Obsolete]
+        public static void SetTriggersForTimedVIP(this IInlineInvokeProxy CPH)
         {
             string [] categories = {"Timed VIP"};
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
