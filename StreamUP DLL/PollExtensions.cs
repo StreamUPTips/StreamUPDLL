@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using Streamer.bot.Common.Events;
 using Streamer.bot.Plugin.Interface;
+using static StreamUP.StreamUpLib;
 using Timer = System.Timers.Timer;
 
 namespace StreamUP {
@@ -974,5 +975,9 @@ namespace StreamUP {
         public bool BotAccount { get; set; }
         public bool ResultsOutputUI { get; set; }
     }
+
+    
+    
+
 
 }

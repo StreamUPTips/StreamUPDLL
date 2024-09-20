@@ -5,11 +5,11 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Streamer.bot.Plugin.Interface;
+using static StreamUP.StreamUpLib;
 
 namespace StreamUP
 {
@@ -88,6 +88,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValLibraryVersion(this IInlineInvokeProxy CPH, Version minimumRequiredVersion, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUValLibraryVersion";
@@ -109,6 +110,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValObsIsConnected(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValObsIsConnected";
@@ -151,6 +153,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValObsPlugins(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValObsPlugins";
@@ -207,6 +210,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValStreamUPSceneExists(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValStreamUPSceneExists";
@@ -230,6 +234,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValProductObsVersion(this IInlineInvokeProxy CPH, ProductInfo productInfo, int obsConnection)
         {
             string logName = $"{productInfo.ProductNumber}::SUValProductObsVersion";
@@ -280,6 +285,7 @@ namespace StreamUP
             return true;
         }
 
+        [Obsolete]
         public static bool SUValFontInstalled(this IInlineInvokeProxy CPH, List<(string fontName, string fontFile, string fontUrl)> requiredFonts, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUValFontInstalled";
@@ -353,6 +359,7 @@ namespace StreamUP
             }
         }
 
+        [Obsolete]
         private static List<string> GetAllMatchingFontFiles(this IInlineInvokeProxy CPH, string directoryPath, string searchPattern, string productNumber)
         {
             string logName = $"{productNumber}::GetAllMatchingFontFiles";
@@ -370,6 +377,7 @@ namespace StreamUP
             return fileNames;
         }
 
+        [Obsolete]
         private static bool CheckIfFontMatches(this IInlineInvokeProxy CPH, List<string> fontFiles, string fontName, string productNumber)
         {
             string logName = $"{productNumber}::CheckIfFontMatches";
@@ -386,19 +394,9 @@ namespace StreamUP
             CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return false;
         }
+    
+    
     }
 
 
-    [Serializable]
-    public class ProductInfo
-    {
-        public string ProductName { get; set; } = string.Empty;
-        public string ProductNumber { get; set; } = string.Empty;
-        public Version RequiredLibraryVersion { get; set; } = new Version(0, 0, 0, 0);
-        public string SceneName { get; set; } = string.Empty;
-        public string SettingsAction { get; set; } = string.Empty;
-        public string SourceNameVersionCheck { get; set; } = string.Empty;
-        public Version SourceNameVersionNumber { get; set; }
-        public Version ProductVersionNumber { get; set; } = new Version(0, 0, 0);
-    }
 }

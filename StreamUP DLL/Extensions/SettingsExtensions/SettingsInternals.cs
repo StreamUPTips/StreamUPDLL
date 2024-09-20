@@ -712,7 +712,7 @@ namespace StreamUP
             string programDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
-            filePath = Path.Combine(dir, $"{saveFile}_Product_Settings.json");
+            filePath = Path.Combine(dir, $"{saveFile}_ProductSettings.json");
 
             Initialize(filePath);
         }

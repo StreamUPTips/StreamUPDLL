@@ -1,3 +1,10 @@
 {
-    "dotnet.preferCSharpExtension": true
+    "dotnet.preferCSharpExtension": true,
+    "cSpell.words": [
+        "initialisation",
+        "Initialise",
+        "Initialised",
+        "initialising",
+        "Newtonsoft"
+    ]
 }

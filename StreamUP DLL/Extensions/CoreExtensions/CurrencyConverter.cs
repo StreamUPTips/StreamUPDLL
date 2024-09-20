@@ -100,7 +100,8 @@ namespace StreamUP
         {
             LogInfo("Getting local currency code from Streamer.Bot globals");
 
-            if (!GetStreamerBotGlobalVar("sup000_LocalCurrency", true, out localCurrencyCode))
+            localCurrencyCode = _CPH.GetGlobalVar<string>("sup000_LocalCurrency", true);
+            if (string.IsNullOrEmpty(localCurrencyCode))
             {
                 LogError("Local currency variable not found.");
                 localCurrencyCode = null;

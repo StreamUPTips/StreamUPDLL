@@ -9,10 +9,6 @@ using System.Text.RegularExpressions;
 
 namespace StreamUP
 {
-
- 
-
-
     public static class Currency
     {
         //Add Points by Id

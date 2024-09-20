@@ -3,7 +3,7 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         // UI Notifications
-        public bool ShowToastNotification(NotificationType type, string title, string message, string attribution = null)
+        public bool ShowToastNotification(NotificationType type, string title, string message, string attribution = "StreamUP")
         {
             // Determine the appropriate icon based on the notification type
             string icon = GetIconForNotificationType(type);

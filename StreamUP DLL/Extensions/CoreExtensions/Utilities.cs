@@ -13,24 +13,6 @@ namespace StreamUP
             return AppDomain.CurrentDomain.BaseDirectory;
         }
 
-        public bool GetStreamerBotGlobalVar<T>(string varName, bool persisted, out T globalVar)
-        {
-            LogInfo($"Getting Streamer.Bot global variable");
-
-            // Get global var
-            globalVar = _CPH.GetGlobalVar<T>(varName, persisted);
-
-            // Check if the global variable is null or the default value for its type
-            if (EqualityComparer<T>.Default.Equals(globalVar, default(T)))
-            {
-                LogError($"Global variable '{varName}' is null or empty.");
-                return false;
-            }
-
-            LogInfo($"Successfully retrieved Streamer.Bot global variable");
-            return true;
-        }
-
         public bool RemoveUrlFromString(string inputText, string replacementText, out string outputText)
         {
             LogInfo($"Replacing Url from [{inputText}] with [{replacementText}]");
