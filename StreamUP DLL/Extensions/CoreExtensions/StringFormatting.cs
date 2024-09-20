@@ -1,13 +1,14 @@
 using System;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        
-        
+
+
         public string ArgumentReplacement(string message, string productName = "General")
         {
             Regex regex = new Regex("%(.*?)(?::(.*?))?%");
@@ -45,6 +46,28 @@ namespace StreamUP
 
         }
 
+        public string RawWithInputsRemoved(int inputsToRemove, bool decoded = false)
+        {
+            StringBuilder combinedInputs = new StringBuilder();
+            if (decoded)
+            {
 
+                for (int i = inputsToRemove; _CPH.TryGetArg("inputUrlEncoded" + i, out string moreInput); i++)
+                {
+                    string textToAppend = Uri.UnescapeDataString(moreInput); ;
+                    combinedInputs.Append(" ").Append(textToAppend);
+                }
+            }
+            else
+            {
+                for (int i = inputsToRemove; _CPH.TryGetArg("input" + i, out string moreInput); i++)
+                {
+                    combinedInputs.Append(" ").Append(moreInput);
+                }
+
+            }
+            return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
+
+        }
     }
 }
