@@ -13,11 +13,11 @@ namespace StreamUP
         public List<UserVariableValue<long>> GetAllPointUsers(string varName = "points")
         {
 
-            List<UserVariableValue<long>> userScores =
-            [
-                .. _CPH.GetTwitchUsersVar<long>(varName, true),
-                .. _CPH.GetYouTubeUsersVar<long>(varName, true),
-            ];
+            List<UserVariableValue<long>> userScores = new List<UserVariableValue<long>>();
+            
+            userScores.AddRange(_CPH.GetTwitchUsersVar<long>(varName, true));
+            userScores.AddRange(_CPH.GetYouTubeUsersVar<long>(varName, true));
+            
             return userScores;
         }
 
