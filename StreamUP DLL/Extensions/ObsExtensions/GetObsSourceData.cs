@@ -262,7 +262,7 @@ namespace StreamUP
                 }
             }
 
-            sourceTransform = responseObj;
+            sourceTransform = (JObject)responseObj["sceneItemTransform"];
             LogInfo("Successfully retrieved source transform");
             return true;
         }

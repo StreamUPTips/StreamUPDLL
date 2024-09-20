@@ -27,7 +27,7 @@ namespace StreamUP
                 return false;
             }
 
-            LogInfo($"Sucessfully retrieved Streamer.Bot global variable");
+            LogInfo($"Successfully retrieved Streamer.Bot global variable");
             return true;
         }
 
@@ -55,7 +55,7 @@ namespace StreamUP
 
         public bool GetProductObsVersion(string sceneName, string sourceName, int obsConnection, out string productVersion)
         {
-            LogInfo($"Getting product verison number for scene [{sceneName}]");
+            LogInfo($"Getting product version number for scene [{sceneName}]");
 
             // Check scene exists
             if (!GetObsSceneExists(sceneName, obsConnection))

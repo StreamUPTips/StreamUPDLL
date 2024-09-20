@@ -16,42 +16,16 @@ namespace StreamUP
 
     public static class ValidationExtensions
     {
+        [Obsolete]
         public static bool SUValSBUpdateChecker(this IInlineInvokeProxy CPH, string productNumber = "DLL")
         {
-            string logName = $"{productNumber}::SUValSBUpdateChecker";
-            CPH.SUWriteLog("METHOD STARTED!", logName);
+            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            sup.TryGetSBProductUpdateChecker();
 
-            // Check if user has already been prompted for the update checker this launch
-            if (CPH.GetGlobalVar<bool>("sup000_UpdateCheckerPrompted", false))
-            {
-                CPH.SUWriteLog("Update checker has already been prompted this launch.", logName);
-                CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
-                return true;
-            }
-
-            // Check if Update checker action exists
-            if (!CPH.ActionExists("StreamUP Tools • Update Checker"))
-            {
-                string error1 = "The StreamUP Update Checker for Streamer.Bot is not installed";
-                string error2 = "You can download it from the StreamUP website.";
-                string error3 = "Would you like to open the link now?";
-                CPH.SUWriteLog(error1, logName);
-                DialogResult errorOutput = CPH.SUUIShowWarningYesNoMessage($"{error1}\n{error2}\n\n{error3}");
-
-                if (errorOutput == DialogResult.Yes)
-                {
-                    Process.Start("https://streamup.tips/product/update-checker");
-                }
-                CPH.SetGlobalVar("sup000_UpdateCheckerPrompted", true, false);
-            }
-            else
-            {
-                CPH.SUWriteLog("StreamUP update checker for Streamer.Bot is installed.", logName);
-            }
-            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
             return true;
         }
-
+        
+        [Obsolete]
         public static ProductInfo SUValProductInfoLoaded(this IInlineInvokeProxy CPH, string actionName, string productNumber = "DLL")
         {
             string logName = $"{productNumber}::SUValProductInfoLoaded";
@@ -81,6 +55,7 @@ namespace StreamUP
             return productInfo;
         }
 
+        [Obsolete]
         public static bool SUValProductSettingsLoaded(this IInlineInvokeProxy CPH, ProductInfo productInfo)
         {
             string logName = $"{productInfo.ProductNumber}::SUValProductSettingsLoaded";

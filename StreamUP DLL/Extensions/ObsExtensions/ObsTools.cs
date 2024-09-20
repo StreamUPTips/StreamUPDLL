@@ -125,226 +125,172 @@ namespace StreamUP
         }
 
         //#region Split text based on width
-        public bool SUObsSplitTextOnWidth(string sceneName, string sourceName, string inputText, int maxWidth, int maxHeight, int obsConnection, out string outputText)
+        public string ObsSplitTextOnWidth(string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
-            _CPH.ObsSetGdiText(sceneName, sourceName, inputText, obsConnection);
+            // Check current text width by setting initial text
+            _CPH.ObsSetGdiText(sceneName, sourceName, rawText, obsConnection);
             _CPH.Wait(20); // Allow OBS to update
-            //!Do we need to add a delay!?
 
-            // Get initial text dimensions
             if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out JObject textTransform))
             {
-                LogError("Unable to get source transform");
-                outputText = null;
-                return false;
-            }
-
-            // Check if width exists
-            if (textTransform["width"] == null)
-            {
-                LogError("width not found in the response");
-                outputText = null;
-                return false;
+                LogError("Unable to retrieve source transform");
+                return null;
             }
 
             int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
 
-            if (textWidth <= maxWidth)
+            string newMessage = "";
+
+            // If text is too wide, split into lines
+            if (textWidth > maxWidth)
             {
-                outputText = inputText;
-                return true;
+                List<string> lines = ObsSplitTextIntoLines(productNumber, obsConnection, maxWidth, rawText, parentSourceType, sceneName, sourceName);
+                string previousMessage = ""; // Store the message from the previous iteration
+
+                int currentHeight;
+                foreach (var line in lines)
+                {
+                    // Build the test message by adding the new line
+                    string testMessage = newMessage == "" ? line : newMessage + "\n" + line;
+                    _CPH.ObsSetGdiText(sceneName, sourceName, testMessage, obsConnection);
+                    _CPH.Wait(20); // Allow OBS to update
+
+                    // Fetch and parse the new height
+                    if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out textTransform))
+                    {
+                        LogError("Unable to retrieve source transform");
+                        return null;
+                    }
+
+                    currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
+
+                    if (currentHeight > maxHeight)
+                    {
+                        // If the height exceeds the max height, use the previous message and append '...'
+                        newMessage = previousMessage == "" ? "..." : previousMessage + "...";
+                        break; // Exit the loop as we've reached the limit
+                    }
+                    else
+                    {
+                        // If the height is within bounds, update newMessage and keep this as previousMessage
+                        newMessage = testMessage;
+                        previousMessage = newMessage; // Update previousMessage to this newMessage for next iteration
+                    }
+                }
+
+                if (newMessage.EndsWith("..."))
+                {
+                    bool fitsWithinBounds = false;
+                    while (!fitsWithinBounds)
+                    {
+                        _CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+                        _CPH.Wait(20); // Allow OBS to update
+
+                        // Fetch and parse the current dimensions
+                        if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out textTransform))
+                        {
+                            LogError("Unable to retrieve source transform");
+                            return null;
+                        }
+
+                        currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
+                        int currentWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+
+                        if (currentHeight > maxHeight || currentWidth > maxWidth)
+                        {
+                            // Remove the last word along with '...' then add '...' back
+                            int lastSpaceIndex = newMessage.LastIndexOf(' ', newMessage.Length - 4); // -4 to ignore the '...'
+
+                            if (lastSpaceIndex > 0) // Ensure there is a space to find, indicating another word exists
+                            {
+                                // Update newMessage by removing the last word
+                                newMessage = newMessage.Substring(0, lastSpaceIndex) + "...";
+                            }
+                            else
+                            {
+                                // No more spaces found, which means no more words left to remove
+                                fitsWithinBounds = true; // Exit the loop as we can't reduce the text further
+                            }
+                        }
+                        else
+                        {
+                            // Text fits within the height and width, exit the loop
+                            fitsWithinBounds = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // If the text is within the width limit, use the original text
+                newMessage = rawText;
             }
 
-            // Split text into lines if needed
-            if (!ObsSplitTextIntoLines(sceneName, sourceName, inputText, maxWidth, obsConnection, out List<string> textLines))
+
+            // Set final text in OBS and log final dimensions
+            _CPH.ObsSetGdiText(sceneName, sourceName, newMessage, obsConnection);
+            _CPH.Wait(20); // Allow OBS to update for the last time
+
+            if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out textTransform))
             {
-                LogError("Unable to split text into separate lines");
-                outputText = null;
-                return false;
+                LogError("Unable to retrieve source transform");
+                return null;
             }
 
-            // Initialise message vars
-            var newMessage = new StringBuilder();
-            string previousMessage = "";
+            int finalWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
+            int finalHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
 
-            // Add each line to check if it exceeds height
-            foreach (var line in textLines)
+            if (finalWidth > maxWidth || finalHeight > maxHeight)
             {
-                // Test by appending new lines
-                string testMessage = newMessage.Length == 0 ? line : $"{newMessage}\n{line}";
-                _CPH.ObsSetGdiText(sceneName, sourceName, testMessage, obsConnection);
-                _CPH.Wait(20);
-                //!Do we need to add a delay!?
 
-                // Get the height of the updated text
-                if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out textTransform))
-                {
-                    outputText = null;
-                    LogError("Unable to get source transform");
-                    return false;
-                }
-
-                // Check if height exists
-                if (textTransform["height"] == null)
-                {
-                    LogError("height not found in the response");
-                    outputText = null;
-                    return false;
-                }
-
-                int currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
-
-                if (currentHeight > maxHeight)
-                {
-                    // Exceeded height, add ellipsis
-                    newMessage.Clear().Append(previousMessage).Append("...");
-                    break;
-                }
-
-                previousMessage = newMessage.ToString();
-                newMessage.Append(line);
+                return null;
             }
 
-            // Final adjustment to ensure it fits within the width and height
-            while (newMessage.ToString().EndsWith("..."))
-            {
-                // Call DoesTextExceedBounds and handle the null case
-                bool? exceedsBounds = DoesTextExceedBounds(sceneName, sourceName, newMessage.ToString(), maxWidth, maxHeight, obsConnection);
-
-                if (exceedsBounds == null)
-                {
-                    // Error case, break the loop or handle accordingly
-                    LogError("Error while checking bounds. Exiting loop.");
-                    break;
-                }
-                else if (exceedsBounds == true)
-                {
-                    // Trim the message to fit the bounds
-                    TrimMessageToFitBounds(ref newMessage);
-                }
-                else
-                {
-                    // Message fits within bounds, exit the loop
-                    break;
-                }
-            }
-
-            // Set final text source
-            _CPH.ObsSetGdiText(sceneName, sourceName, newMessage.ToString(), obsConnection);
-            _CPH.Wait(20);
-            //!Do we need to add a delay!?
-
-            outputText = newMessage.ToString();
-            LogInfo("Text split into lines successfully");
-            return true;
+            return newMessage;
         }
 
-        private bool ObsSplitTextIntoLines(string sceneName, string sourceName, string message, int maxWidth, int obsConnection, out List<string> textLines)
+        private List<string> ObsSplitTextIntoLines(string productNumber, int obsConnection, int maxWidth, string message, OBSSceneType parentSourceType, string sceneName, string sourceName)
         {
-            // Initialise vars
-            textLines = new List<string>();
-            var currentLine = new StringBuilder();
+            List<string> lines = new List<string>();
             string[] words = message.Split(' ');
+            string currentLine = "";
 
-            // Check length after each word is added and split the string into lines
             foreach (string word in words)
             {
-                // Build the test line by adding the new word
                 string testLine = (currentLine.Length > 0 ? currentLine + " " : "") + word;
-
-                // Set text in OBS and measure the width
                 _CPH.ObsSetGdiText(sceneName, sourceName, testLine, obsConnection);
                 _CPH.Wait(20); // Allow OBS to update
-                //!Do we need to add a delay!?
 
-                // Get the width of the updated text
                 if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out JObject textTransform))
                 {
-                    textLines = null;
-                    LogError("Unable to get source transform");
-                    return false;
+                    LogError("Unable to retrieve source transform");
+                    return null;
                 }
 
-                // Check if width exists
-                if (textTransform["width"] == null)
-                {
-                    LogError("width not found in the response");
-                    textLines = null;
-                    return false;
-                }
-
-                // Load text width as var
                 int textWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
 
                 if (textWidth <= maxWidth)
                 {
-                    // If the width is within bounds, keep adding words to the current line
-                    currentLine.Clear().Append(testLine);
+                    currentLine = testLine;
                 }
                 else
                 {
-                    // Add the current line to the list of lines and start a new line with the current word
-                    if (!string.IsNullOrEmpty(currentLine.ToString()))
+                    if (!string.IsNullOrEmpty(currentLine))
                     {
-                        textLines.Add(currentLine.ToString());
+                        lines.Add(currentLine); // Add the current line to the list of lines
                     }
-                    currentLine.Clear().Append(word);
+                    currentLine = word; // Start a new line with the current word
                 }
             }
 
-            // Add the last remaining line
-            if (!string.IsNullOrEmpty(currentLine.ToString()))
+            if (!string.IsNullOrEmpty(currentLine))
             {
-                textLines.Add(currentLine.ToString());
+                lines.Add(currentLine); // Add the remaining line to the list
             }
 
-            LogInfo("Text lines split successfully");
-            return true;
-        }
-
-        private bool? DoesTextExceedBounds(string sceneName, string sourceName, string text, int maxWidth, int maxHeight, int obsConnection)
-        {
-            _CPH.ObsSetGdiText(sceneName, sourceName, text, obsConnection);
-            _CPH.Wait(20);
-            //!Do we need to add a delay!?
-
-            // Get the height of the updated text
-            if (!GetObsSourceTransform(sceneName, sourceName, obsConnection, out JObject textTransform))
-            {
-                LogError("Unable to get source transform");
-                return null;
-            }
-
-            // Check if width exists
-            if (textTransform["width"] == null)
-            {
-                LogError("width not found in the response");
-                return null;
-            }
-
-            // Check if height exists
-            if (textTransform["height"] == null)
-            {
-                LogError("height not found in the response");
-                return null;
-            }
-
-            // Set current width and height
-            int currentWidth = (int)Math.Round(decimal.Parse(textTransform["width"].ToString()));
-            int currentHeight = (int)Math.Round(decimal.Parse(textTransform["height"].ToString()));
-
-            return currentWidth > maxWidth || currentHeight > maxHeight;
-        }
-
-        private void TrimMessageToFitBounds(ref StringBuilder message)
-        {
-            int lastSpaceIndex = message.ToString().LastIndexOf(' ', message.Length - 4); // -4 to ignore the '...'
-            if (lastSpaceIndex > 0)
-            {
-                message.Remove(lastSpaceIndex, message.Length - lastSpaceIndex).Append("...");
-            }
-        }
+            return lines;
+        }        
         //#endregion
-        
+
     }
 }

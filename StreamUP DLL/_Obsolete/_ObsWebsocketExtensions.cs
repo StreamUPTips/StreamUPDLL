@@ -310,7 +310,7 @@ namespace StreamUP
                     return;
                 }
             }
-            
+
             if (!sup.SetObsSourceShowTransition(sceneName, sourceName, transitionType, transitionDuration, transitionSettingsObj, obsConnection))
             {
                 sup.LogError("Unable to set show transition");
@@ -341,7 +341,7 @@ namespace StreamUP
                     return;
                 }
             }
-            
+
             if (!sup.SetObsSourceHideTransition(sceneName, sourceName, transitionType, transitionDuration, transitionSettingsObj, obsConnection))
             {
                 sup.LogError("Unable to set hide transition");
@@ -382,63 +382,46 @@ namespace StreamUP
         [Obsolete]
         public static void SUObsSetSourceFilterSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sourceName, string filterName, string filterSettings)
         {
-            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            string logName = $"{productNumber}::SUObsSetSourceFilterSettings";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            JObject filterSettingsObj;
-            if (string.IsNullOrWhiteSpace(filterSettings))
+            // Set source filter settings
+            CPH.ObsSendRaw("SetSourceFilterSettings", $$"""
             {
-                filterSettingsObj = new JObject();
+                "sourceName": "{{sourceName}}",
+                "filterName": "{{filterName}}",
+                "filterSettings": {{{filterSettings}}},
+                "overlay": true
             }
-            else
-            {
-                try
-                {
-                    filterSettingsObj = JObject.Parse(filterSettings);
-                }
-                catch (Exception ex)
-                {
-                    sup.LogError($"Failed to parse filterSettings: {ex.Message}");
-                    return;
-                }
-            }
+            """, obsConnection);
 
-            if (!sup.SetObsSourceFilterSettings(sourceName, filterName, filterSettingsObj, obsConnection))
-            {
-                sup.LogError("Unable to set source filter settings");
-            }
+            // Log setting change
+            CPH.Wait(50);
+            CPH.SUWriteLog($"Set source filter settings: sourceName=[{sourceName}], filterName=[{filterName}], filterSettings=[{filterSettings}]", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
 
         // SET INPUT (SOURCE) SETTINGS
         [Obsolete]
         public static void SUObsSetInputSettings(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string inputName, string inputSettings)
         {
-            StreamUpLib sup = new StreamUpLib(CPH, productNumber);
+            string logName = $"{productNumber}::SUObsSetInputSettings";
+            CPH.SUWriteLog("METHOD STARTED!", logName);
 
-            // Ensure inputSettings is a valid JSON object
-            JObject inputSettingsObj;
-            if (string.IsNullOrWhiteSpace(inputSettings))
+            // Set source (input) settings
+            CPH.ObsSendRaw("SetInputSettings", $$"""
             {
-                inputSettingsObj = new JObject();
+                "inputName": "{{inputName}}",
+                "inputSettings": {{{inputSettings}}},
+                "overlay": true
             }
-            else
-            {
-                try
-                {
-                    inputSettingsObj = JObject.Parse(inputSettings);
-                }
-                catch (Exception ex)
-                {
-                    sup.LogError($"Failed to parse inputSettings: {ex.Message}");
-                    return;
-                }
-            }
+            """, obsConnection);
 
-            if (!sup.SetObsSourceSettings(inputName, inputSettingsObj, obsConnection))
-            {
-                sup.LogError("Unable to set source filter settings");
-            }
+            // Log setting change
+            CPH.Wait(50);
+            CPH.SUWriteLog($"Set source (input) settings: inputName=[{inputName}], inputSettings=[{inputSettings}]", logName);
+            CPH.SUWriteLog("METHOD COMPLETED SUCCESSFULLY!", logName);
         }
-
         // SET SCENE TRANSITION FOR SCENE
         [Obsolete]
         public static void SUObsSetSceneSceneTransitionOverride(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, string sceneName, string transitionName, int transitionDuration)
@@ -553,7 +536,7 @@ namespace StreamUP
                 sup.LogError("Unable to remove Url from string");
                 return null;
             }
-        
+
             return outputText;
         }
 
@@ -562,12 +545,9 @@ namespace StreamUP
         public static string SUObsSplitTextOnWidth(this IInlineInvokeProxy CPH, string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
             StreamUpLib sup = new StreamUpLib(CPH, productNumber);
-            if (!sup.SUObsSplitTextOnWidth(sceneName, sourceName, rawText, maxWidth, maxHeight, obsConnection, out string outputText))
-            {
-                sup.LogError("Unable to split text on width");
-                return null;
-            }
-        
+            string outputText = sup.ObsSplitTextOnWidth(productNumber, obsConnection, parentSourceType, sceneName, sourceName, rawText, maxWidth, maxHeight);
+
+
             return outputText;
         }
     }

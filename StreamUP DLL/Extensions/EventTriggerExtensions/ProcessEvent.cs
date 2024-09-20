@@ -103,10 +103,10 @@ namespace StreamUP
         public string AmountCurrency { get; set; } = null;
         public double AmountCurrencyDouble { get; set; } = -1;
         public decimal AmountCurrencyDecimal { get; set; } = -1;
-        public bool? Anonymous { get; set; } = null;
+        public bool Anonymous { get; set; } = false;
         public int BanDuration { get; set; } = -1;
         public string BanType { get; set; } = null;
-        public bool? Donation { get; set; } = null;
+        public bool Donation { get; set; } = false;
         public string EventSource { get; set; } = null;
         public string EventType { get; set; } = null;
         public string Message { get; set; } = null;
