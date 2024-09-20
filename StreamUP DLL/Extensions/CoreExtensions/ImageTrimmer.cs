@@ -1,4 +1,3 @@
-using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -14,7 +13,7 @@ namespace StreamUP
             trimmedImage.Save(filePath, ImageFormat.Png);
             trimmedImage.Dispose();
 
-            LogInfo($"Sucessfully trimmed png");
+            LogInfo($"Successfully trimmed png");
             return true;
         }
 

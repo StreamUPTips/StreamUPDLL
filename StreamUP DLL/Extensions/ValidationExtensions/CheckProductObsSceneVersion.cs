@@ -57,7 +57,6 @@ namespace StreamUP
             return true;
         }
 
-
         // Check product version
         private bool CheckObsProductSceneVersion(ProductInfo productInfo, int obsConnection)
         {

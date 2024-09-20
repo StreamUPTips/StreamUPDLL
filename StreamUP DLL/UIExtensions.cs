@@ -9,6 +9,7 @@ namespace StreamUP {
 
     public static class UIExtensions {
 
+        [Obsolete]
         public static DialogResult SUUIShowErrorOKMessage(this IInlineInvokeProxy CPH, string message)
         {
             DialogResult result = MessageBox.Show(
@@ -20,6 +21,7 @@ namespace StreamUP {
             return result;
         }  
 
+        [Obsolete]
         public static DialogResult SUUIShowWarningYesNoMessage(this IInlineInvokeProxy CPH, string message)
         {
             DialogResult result = MessageBox.Show(
@@ -31,6 +33,7 @@ namespace StreamUP {
             return result;
         }
 
+        [Obsolete]
         public static DialogResult SUUIShowInformationOKMessage(this IInlineInvokeProxy CPH, string message)
         {
             DialogResult result = MessageBox.Show(
@@ -42,6 +45,7 @@ namespace StreamUP {
             return result;
         }
 
+        [Obsolete]
         public static void SUUIShowToastNotification(this IInlineInvokeProxy CPH, string title, string message)
         {
             CPH.ShowToastNotification(title, message);
@@ -123,6 +127,7 @@ namespace StreamUP {
             thread.Start();
         }
 
+        [Obsolete]
         public static (DialogResult, bool) SUUIShowObsPluginsUpdateMessage(this IInlineInvokeProxy CPH)
         {
             using (var form = new Form()
@@ -192,6 +197,7 @@ namespace StreamUP {
             }
         }
     
+        [Obsolete]
         public static string SUUIShowSaveScreenshotDialog(this IInlineInvokeProxy CPH, string sourceName, string dateTime)
         {
             string defaultFileName = $"{sourceName}_{dateTime}";
@@ -208,6 +214,7 @@ namespace StreamUP {
             }
         }
 
+        [Obsolete]
         public static string SUUIShowInputBox(this IInlineInvokeProxy CPH, string message, string caption, string defaultValue)
         {
             using (Form form = new Form())

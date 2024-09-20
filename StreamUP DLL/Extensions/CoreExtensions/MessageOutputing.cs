@@ -1,9 +1,3 @@
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Windows.Forms.VisualStyles;
-using Streamer.bot.Plugin.Interface;
 using Streamer.bot.Plugin.Interface.Enums;
 
 namespace StreamUP
