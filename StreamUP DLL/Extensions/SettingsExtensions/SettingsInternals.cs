@@ -702,6 +702,8 @@ namespace StreamUP
             // Implement reset logic here
             MessageBox.Show("Settings have been reset.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
             form.Close();
+
+            //? Reopen can be added here if we really desire it, I wasnt too fussed about it when i built it so i dint bother
         }
 
 
