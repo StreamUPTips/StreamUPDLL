@@ -10,7 +10,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public bool GetInstalledFonts(List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
+        public bool CheckInstalledFonts(List<(string fontName, string fontFile, string fontUrl)> requiredFonts)
         {
             bool allFontsInstalled = true;
 
