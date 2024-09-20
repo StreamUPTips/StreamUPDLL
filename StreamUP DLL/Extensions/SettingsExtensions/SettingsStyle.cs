@@ -37,6 +37,11 @@ namespace StreamUP
         private readonly Font buttonFileFont = new Font("Segoe UI Emoji", 15.0F, FontStyle.Bold);
         private readonly Font tabFont = new Font("Segoe UI Emoji", 11.0F, FontStyle.Bold);
         private readonly Font productInfoFont = new Font("Monospace", 8.0F, FontStyle.Bold);
+
+        private readonly int column1Percent = 60;
+        private readonly int column2Percent = 40;
+        private readonly int column3Percent = 30;
+        private readonly int column4Percent = 10;
         //private SplashScreen splashScreen;
 
 

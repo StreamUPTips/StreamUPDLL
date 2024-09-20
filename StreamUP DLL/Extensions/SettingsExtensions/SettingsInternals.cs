@@ -38,6 +38,7 @@ namespace StreamUP
         public Form CreateMainForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
 
+            InitializeDatabase(out string filePath);
             // Dictionary to hold controls for each tab
             Dictionary<string, List<Control>> tabControls = new Dictionary<string, List<Control>>();
 
@@ -718,19 +719,28 @@ namespace StreamUP
 
         public T GetSetting<T>(string settingName, T defaultValue)
         {
-            //InitializeDatabase(out string filePath);
+            if(!_initialized)
+            {
+            InitializeDatabase(out string filePath);
+            }
             return StreamUpInternalGet(settingName, defaultValue);
         }
 
         public void SaveSetting(string settingName, object newValue)
         {
-            //InitializeDatabase(out string filePath);
+             if(!_initialized)
+            {
+            InitializeDatabase(out string filePath);
+            }
             StreamUpInternalUpdate(settingName, newValue);
         }
 
         public void DeleteSetting(string settingName)
         {
-            //InitializeDatabase(out string filePath);
+            if(!_initialized)
+            {
+            InitializeDatabase(out string filePath);
+            }
             StreamUpInternalDelete(settingName);
         }
 

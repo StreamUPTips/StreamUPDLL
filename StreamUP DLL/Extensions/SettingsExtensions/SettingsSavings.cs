@@ -14,12 +14,15 @@ namespace StreamUP
         public string _saveName;
         public Dictionary<string, object> _data = new Dictionary<string, object>();
 
+        public bool _initialized = false;
+
         // Static method to initialize the database
         public void Initialize(string filePath)
         {
             _filePath = filePath;
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
             _data = StreamUpInternalLoad(_saveName);
+            _initialized = true;
         }
 
         public Dictionary<string, object> StreamUpInternalLoad(string saveFile)
@@ -27,6 +30,7 @@ namespace StreamUP
             // Initialize the dictionary safely
 
            //GetStreamerBotGlobalVar<Dictionary<string, object>>(saveFile, true, out Dictionary<string, object> json);
+          
             Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
             string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
             LogInfo($"Loaded JSON: {jsonString}");

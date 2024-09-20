@@ -168,7 +168,7 @@ namespace StreamUP
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
                 ColumnCount = 2,
-                //AutoSize = true,
+                AutoSize = true,
                 Dock = DockStyle.Fill,
                 Padding = new Padding(10),
                 Margin = new Padding(0),
@@ -177,8 +177,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
 
             var label = new Label
@@ -237,8 +237,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -295,8 +295,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -354,8 +354,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -438,8 +438,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -496,8 +496,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -554,8 +554,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -639,8 +639,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -695,8 +695,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -752,9 +752,9 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column3Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column4Percent));
 
             var label = new Label
             {
@@ -825,8 +825,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -911,8 +911,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -982,8 +982,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -1055,8 +1055,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -1128,8 +1128,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -1199,8 +1199,8 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
@@ -1272,9 +1272,9 @@ namespace StreamUP
 
             };
 
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column3Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column4Percent));
 
             var label = new Label
             {
@@ -1388,9 +1388,9 @@ namespace StreamUP
                 Tag = tabName
             };
 
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column3Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column4Percent));
 
             var label = new Label
             {
@@ -1472,9 +1472,9 @@ namespace StreamUP
                 Tag = tabName
             };
 
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column3Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column4Percent));
 
             var label = new Label
             {
@@ -1557,9 +1557,9 @@ namespace StreamUP
 
             };
 
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column3Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column4Percent));
 
 
 
@@ -1663,13 +1663,14 @@ namespace StreamUP
             };
 
             // Define column styles for better control over sizing
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
 
             var label = new Label
             {
                 Text = description,
-                AutoSize = true,
+                Dock = DockStyle.Fill,
+                //AutoSize = true,
                 //Margin = new Padding(10),
                 Font = labelFont,
                 ForeColor = forecolour1,
@@ -1683,7 +1684,7 @@ namespace StreamUP
                 //Margin = new Padding(0, 10, 0, 0),
                 Size = new System.Drawing.Size(280, 30),
                 Font = buttonFont,
-                AutoSize = true,
+                //AutoSize = true,
                 ForeColor = forecolour1,
                 BackColor = backColour2,
                 TextAlign = ContentAlignment.MiddleCenter,
