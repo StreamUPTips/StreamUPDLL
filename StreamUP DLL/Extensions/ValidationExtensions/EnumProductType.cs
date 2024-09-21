@@ -1,12 +1,9 @@
 namespace StreamUP
 {
-    public partial class StreamUpLib
+    public enum ProductType
     {
-        public enum ProductType
-        {
-            Obs,
-            StreamerBot
-        }
-
+        Obs,
+        StreamerBot
     }
+
 }

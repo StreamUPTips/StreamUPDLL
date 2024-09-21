@@ -75,6 +75,7 @@ namespace StreamUP
                 string errorMessage = $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.";
                 string actionMessage = "Make sure OBS is connected via Websocket 5.0.0+ in the 'Stream Apps' tab in StreamerBot.";
                 MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
 
             GetObsCanvasSize(obsConnection, out int baseWidth, out int baseHeight);

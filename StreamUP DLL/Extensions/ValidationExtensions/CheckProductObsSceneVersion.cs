@@ -93,8 +93,7 @@ namespace StreamUP
                 $"No version number found for '{productInfo.ProductName}' in OBS.";
 
                 string actionMessage =
-                @$"This may indicate the scene is not up-to-date, or another OBS plugin such as 'Source Defaults' could be causing a conflict.
-                Please check your OBS setup or reinstall the latest .StreamUP version for '{productInfo.ProductName}'.";
+                $"This may indicate the scene is not up-to-date, or another OBS plugin such as 'Source Defaults' could be causing a conflict.\nPlease check your OBS setup or reinstall the latest .StreamUP version for '{productInfo.ProductName}'.";
 
                 LogError(warningMessage);
                 MessageBox.Show($"{warningMessage}\n\n{actionMessage}", "StreamUP Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);

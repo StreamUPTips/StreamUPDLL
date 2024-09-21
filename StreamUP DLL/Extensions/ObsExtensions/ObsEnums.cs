@@ -1,7 +1,5 @@
 namespace StreamUP
 {
-    public partial class StreamUpLib
-    {
         // OBS Enums
         public enum VolumeType
         {
@@ -13,6 +11,6 @@ namespace StreamUP
         {
             Scene = 0,
             Group = 1
-        }
+        
     }
 }
