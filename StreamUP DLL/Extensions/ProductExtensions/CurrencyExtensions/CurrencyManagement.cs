@@ -13,10 +13,11 @@ namespace StreamUP
         public List<UserVariableValue<long>> GetAllPointUsers(string varName = "points")
         {
 
-            List<UserVariableValue<long>> userScores = new List<UserVariableValue<long>>();
-            
-            userScores.AddRange(_CPH.GetTwitchUsersVar<long>(varName, true));
-            userScores.AddRange(_CPH.GetYouTubeUsersVar<long>(varName, true));
+            List<UserVariableValue<long>> userScores =
+            [
+                .. _CPH.GetTwitchUsersVar<long>(varName, true),
+                .. _CPH.GetYouTubeUsersVar<long>(varName, true),
+            ];
             
             return userScores;
         }
@@ -123,6 +124,13 @@ namespace StreamUP
 
         }
 
-
+        public bool DefaultPointHandler(string userId, Platform platform, long points, out long newPoints, string varName = "points")
+        {
+            
+            SetUserPointsById(userId,platform,points,varName);
+            LogDebug($"User - {userId} fell below mark of points, rounding back up to {points}");
+            newPoints = points;
+            return true;
+        }
     }
 }
