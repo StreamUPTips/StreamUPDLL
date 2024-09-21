@@ -1,8 +1,6 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Streamer.bot.Plugin.Interface.Enums;
 using Streamer.bot.Plugin.Interface.Model;
 
@@ -12,13 +10,11 @@ namespace StreamUP
     {
         public List<UserVariableValue<long>> GetAllPointUsers(string varName = "points")
         {
+            List<UserVariableValue<long>> userScores = new List<UserVariableValue<long>>();
 
-            List<UserVariableValue<long>> userScores =
-            [
-                .. _CPH.GetTwitchUsersVar<long>(varName, true),
-                .. _CPH.GetYouTubeUsersVar<long>(varName, true),
-            ];
-            
+            userScores.AddRange(_CPH.GetTwitchUsersVar<long>(varName, true));
+            userScores.AddRange(_CPH.GetYouTubeUsersVar<long>(varName, true));
+
             return userScores;
         }
 
