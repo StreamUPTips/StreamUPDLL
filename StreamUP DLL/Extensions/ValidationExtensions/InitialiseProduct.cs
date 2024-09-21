@@ -85,6 +85,8 @@ namespace StreamUP
                 LogError("Users canvas scale is not 16:9");
             }
 
+            SetScaleFactor(baseWidth, productSettings, productInfo.ProductNumber);
+
             bool ignorePluginsOutOfDate = _CPH.GetGlobalVar<bool>("sup000_IgnoreObsPluginsOutOfDate", false);
             if (!ignorePluginsOutOfDate)
             {
