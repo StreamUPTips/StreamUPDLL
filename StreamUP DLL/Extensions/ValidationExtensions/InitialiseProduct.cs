@@ -22,6 +22,7 @@ namespace StreamUP
                 return false;
             }
             
+            // Verify user has correct Library version
             if (!CheckStreamUpLibraryVersion(productInfo.RequiredLibraryVersion))
             {
                 LogError("StreamUP library version is out of date");

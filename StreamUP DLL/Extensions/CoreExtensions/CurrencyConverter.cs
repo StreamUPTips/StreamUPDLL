@@ -31,7 +31,7 @@ namespace StreamUP
 
             // Convert the amount
             convertedAmount = inputAmount / exchangeRate;
-            LogInfo($"Sucessfully retrieved converted amount");
+            LogInfo($"Successfully retrieved converted amount");
             return true;
         }
 
