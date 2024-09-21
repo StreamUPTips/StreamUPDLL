@@ -2,8 +2,6 @@ using System;
 
 namespace StreamUP
 {
-    public partial class StreamUpLib
-    {
         [Serializable]
         public class ProductInfo
         {
@@ -16,5 +14,5 @@ namespace StreamUP
             public Version SourceNameVersionNumber { get; set; }
             public Version ProductVersionNumber { get; set; } = new Version(0, 0, 0);
         }
-    }
+    
 }

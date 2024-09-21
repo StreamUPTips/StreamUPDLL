@@ -18,7 +18,7 @@ namespace StreamUP
             // Decide contrasting color based on luminance
             contrastingColourLong = luminance >= 0.5 ? 4278190080L : 4294967295L; // Black or White
 
-            LogInfo($"Sucessfully retrieved contrasting colour");
+            LogInfo($"Successfully retrieved contrasting colour");
             return true;
         }
 

@@ -18,9 +18,7 @@ namespace StreamUP
             {
                 string errorMessage = "The StreamUP Update Checker for Streamer.Bot is not installed";
 
-                string actionMessage = 
-                @"You can download it from the StreamUP website.
-                Would you like to open the link now?";
+                string actionMessage = "You can download it from the StreamUP website.\nWould you like to open the link now?";
 
                 LogError(errorMessage);
 
