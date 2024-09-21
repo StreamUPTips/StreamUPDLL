@@ -22,23 +22,31 @@ namespace StreamUP
         }
         public Form BuildForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
-            Image background = GetRandomImageIcon();
-            CustomSplashScreen splashScreen = new CustomSplashScreen(background);
-            splashScreen.Show();
+            // Reset progress
+            UIResources.streamUpSettingsProgress = 0;
 
-            Thread.Sleep(3000);
+            // Launch the progress bar window
+            _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");
 
-            splashScreen.Close();
-
+            // Create the main form
             Form form = CreateMainForm(title, layout, productInfo, imageFilePath);
 
-            return form;
+            // Close the progress bar
+            UIResources.closeLoadingWindow = true;
 
+            return form;
         }
+        
         public Form CreateMainForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
+            // Reset progress
+            UIResources.streamUpSettingsProgress = 0;
+
+            // Launch the progress bar window
+            _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");
 
             InitializeDatabase(out string filePath);
+            
             // Dictionary to hold controls for each tab
             Dictionary<string, List<Control>> tabControls = new Dictionary<string, List<Control>>();
 
@@ -63,12 +71,8 @@ namespace StreamUP
                 InactiveText = forecolour2,
                 InactiveBackground = backColour3,
                 TabBarBackColor = backColour3,
-
-
             };
 
-
-            // Create a form
             var form = new Form
             {
                 Text = title,
@@ -77,17 +81,17 @@ namespace StreamUP
                 FormBorderStyle = FormBorderStyle.Sizable,
                 Icon = GetIconOrDefault(imageFilePath),
                 BackColor = backColour1,
-
             };
+
+            // Initialise the progress
+            UIResources.streamUpSettingsCount = layout.Count; 
 
             // Create and add tab pages
             foreach (var tab in tabControls)
             {
                 TabPage tabPage = new TabPage(tab.Key)
                 {
-
                     BackColor = backColour1,
-
                 };
 
                 TableLayoutPanel tableLayout = new TableLayoutPanel
@@ -96,10 +100,8 @@ namespace StreamUP
                     AutoSize = true,
                     Dock = DockStyle.Top | DockStyle.Fill,
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    AutoScroll = true
+                    AutoScroll = true,
                 };
-
-
 
                 int modValue = 0;
                 foreach (Control control in tab.Value)
@@ -108,31 +110,30 @@ namespace StreamUP
                     tableLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                     tableLayout.Controls.Add(control, 0, rowIndex);
                     tableLayout.SetColumnSpan(control, 2);
+
                     if (control.Name == "thisisjustaline")
                     {
                         modValue = modValue == 0 ? 1 : 0;
                     }
                     control.BackColor = (rowIndex % 2) == modValue ? backColour1 : backColour3;
+
+                    // Increment progress as each control is added
+                    UIResources.streamUpSettingsProgress++;
                 }
-
-
-
 
                 tabPage.Controls.Add(tableLayout);
                 tabControl.TabPages.Add(tabPage);
             }
 
-            //Create "About" tab page
+            // Create "About" tab page
             TabPage aboutTabPage = new TabPage("About")
             {
                 BackColor = backColour1
             };
-
-            // Add your specific controls to the About tab
             aboutTabPage.Controls.Add(CreateAboutPanel(productInfo));
-
             tabControl.TabPages.Add(aboutTabPage);
 
+            // Add buttons to the button panel
             buttonPanel = new FlowLayoutPanel
             {
                 FlowDirection = FlowDirection.RightToLeft,
@@ -140,9 +141,10 @@ namespace StreamUP
                 Padding = new Padding(5),
                 AutoSize = true,
                 ForeColor = forecolour1,
-
                 Font = new Font("Segoe UI Emoji", 10.0F, FontStyle.Regular)
             };
+
+            // Save and Reset buttons
             saveButton = new RoundedButton
             {
                 Text = "💾 Save",
@@ -155,7 +157,6 @@ namespace StreamUP
                 CornerRadius = 8,
                 Cursor = Cursors.Hand,
             };
-
             saveButton.Click += (sender, e) => SaveButton_Click(sender, e, layout);
 
             resetButton = new RoundedButton
@@ -173,19 +174,14 @@ namespace StreamUP
             resetButton.Click += (sender, e) => ResetButton_Click(sender, e, layout, form);
 
             saveButton.FlatAppearance.BorderSize = 0;
-
             toolTip.SetToolTip(saveButton, "Save the Data");
             resetButton.FlatAppearance.BorderSize = 0;
-
             toolTip.SetToolTip(resetButton, "Reset the Data to Defaults");
-
-
 
             buttonPanel.Controls.Add(saveButton);
             buttonPanel.Controls.Add(resetButton);
 
-
-
+            // Status bar
             var statusBar = new StatusStrip
             {
                 BackColor = Color.DimGray,
@@ -202,12 +198,10 @@ namespace StreamUP
             form.Controls.Add(tabControl);
             form.Controls.Add(buttonPanel);
             form.Controls.Add(statusBar);
-            //form.ShowDialog();
-
-
 
             return form;
         }
+
         private Panel CreateAboutPanel(ProductInfo productInfo)
         {
             Panel aboutPanel = new Panel
