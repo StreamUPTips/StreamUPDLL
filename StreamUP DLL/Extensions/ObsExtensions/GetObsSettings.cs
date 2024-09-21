@@ -25,6 +25,38 @@ namespace StreamUP
             return true;
         }
 
+        public bool GetObsCanvasSize(int obsConnection, out int baseWidth, out int baseHeight)
+        {
+            LogInfo("Getting OBS canvas size");
+            baseWidth = 0;
+            baseHeight = 0;
+
+            // Get OBS video settings
+            if (!GetObsVideoSettings(obsConnection, out JObject videoSettings))
+            {
+                LogError("Unable to retrieve OBS video settings");
+                return false;
+            }
+
+            // Check baseWidth and baseHeight exist
+            if (videoSettings["baseWidth"] == null)
+            {
+                LogError("baseWidth not found in the response");
+                return false;
+            }
+            if (videoSettings["baseHeight"] == null)
+            {
+                LogError("baseHeight not found in the response");
+                return false;
+            }
+
+            baseWidth = int.Parse((string)videoSettings["baseWidth"]);
+            baseHeight = int.Parse((string)videoSettings["baseHeight"]);
+
+            LogInfo($"Canvas size retrieved successfully. baseHeight [{baseHeight}], baseWidth [{baseWidth}]");
+            return true;
+        }
+
         public bool GetObsOutputFilePath(int obsConnection, out string filePath) //! Requires StreamUP OBS plugin
         {
             LogInfo($"Requesting OBS filepath");

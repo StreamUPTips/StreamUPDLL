@@ -76,6 +76,13 @@ namespace StreamUP
                 MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
+            GetObsCanvasSize(obsConnection, out int baseWidth, out int baseHeight);
+
+            if (!CheckCanvasResolution(baseWidth, baseHeight))
+            {
+                LogError("Users canvas scale is not 16:9");
+            }
+
             bool ignorePluginsOutOfDate = _CPH.GetGlobalVar<bool>("sup000_IgnoreObsPluginsOutOfDate", false);
             if (!ignorePluginsOutOfDate)
             {
