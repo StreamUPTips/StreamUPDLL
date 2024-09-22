@@ -49,7 +49,6 @@ namespace StreamUP
             // Mark product as initialised
             SetProductInitialised(productNumber, true);
             LogInfo($"Product [{productInfo.ProductName}] initialised successfully.");
-            ShowToastNotification(NotificationType.Success, "Product Settings Applied Successfully", $"Settings for '{productInfo.ProductName}' have been set successfully");
             return true;
         }
 

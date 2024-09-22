@@ -69,9 +69,9 @@ namespace StreamUP
             return true;
         }
 
-        public bool SetProductObsVersion(string sceneName, string versionNumber, int obsConnection)
+        public bool SetProductObsVersion(string sourceName, string versionNumber, int obsConnection)
         {
-            LogInfo($"Setting product OBS version [{versionNumber}] to scene [{sceneName}]");
+            LogInfo($"Setting product OBS version [{versionNumber}] to source [{sourceName}]");
 
             // Create a JObject for product_version
             JObject productVersionJson = new JObject
@@ -79,18 +79,8 @@ namespace StreamUP
                 { "product_version", versionNumber }
             };
 
-            // Get sceneItem list
-            if (GetObsSceneItemsNamesList(sceneName, OBSSceneType.Scene, obsConnection, out List<string> sceneItemsNamesList))
-            {
-                LogError("Unable to retrieve sceneItemsNameList");
-                return false;
-            }
-
-            // Set the version number on each source in that scene
-            foreach (string currentItemName in sceneItemsNamesList)
-            {
-                SetObsSourceSettings(currentItemName, productVersionJson, obsConnection);
-            }
+            SetObsSourceSettings(sourceName, productVersionJson, obsConnection);
+            
 
             LogInfo($"Successfully set product OBS version");
             return true;

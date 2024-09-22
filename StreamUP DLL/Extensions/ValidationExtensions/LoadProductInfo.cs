@@ -29,7 +29,7 @@ namespace StreamUP
 
             // Convert productInfo string into ProductInfo class
             productInfo = JsonConvert.DeserializeObject<ProductInfo>(productInfoJson);
-            LogInfo("Retrived productInfo successfully");
+            LogInfo("Retrieved productInfo successfully");
             return true;
         }
 
@@ -41,9 +41,23 @@ namespace StreamUP
                 return string.Empty;
             }
 
-            string formattedActionName = actionName.Replace("•", "-").Trim();
+            // Find the position of the first occurrence of '•' or '-'
+            int delimiterPosition = actionName.IndexOfAny(new char[] { '•', '-' });
 
-            return formattedActionName;
+            string productName;
+
+            if (delimiterPosition > -1)
+            {
+                // Extract everything before the delimiter
+                productName = actionName.Substring(0, delimiterPosition).Trim();
+            }
+            else
+            {
+                // If no delimiter is found, use the full action name
+                productName = actionName.Trim();
+            }
+
+            return productName;
         }
 
     }
