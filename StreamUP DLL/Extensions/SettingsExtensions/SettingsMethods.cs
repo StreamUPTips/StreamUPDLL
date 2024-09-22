@@ -51,6 +51,28 @@ namespace StreamUP
             return settings;
         }
 
+        public List<Control> AddInfo(string labelText, string tabName = "General")
+        {
+            List<Control> settings = new List<Control>();
+
+            var label = new Label
+            {
+                Name = "thisisjustaline",
+                Text = labelText,
+                AutoSize = true,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Font = labelFont,
+                ForeColor = forecolour1,
+                Tag = tabName
+
+            };
+
+            settings.Add(label);
+            return settings;
+        }
+
         public List<Control> AddLink(string labelText, string url, string tabName = "General")
         {
             List<Control> settings = new List<Control>();
@@ -1711,6 +1733,75 @@ namespace StreamUP
 
 
         }
+
+         public List<Control> AddRunMethod(string description, string buttonText, string executeCode, string methodName, string tabName = "General")
+        {
+
+
+            List<Control> settings = new List<Control>();
+
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 2,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
+
+            var label = new Label
+            {
+                Text = description,
+                Dock = DockStyle.Fill,
+                //AutoSize = true,
+                //Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+            };
+
+
+
+            var input = new RoundedButton
+            {
+                Text = $"{buttonText}",
+                //Margin = new Padding(0, 10, 0, 0),
+                Size = new System.Drawing.Size(280, 30),
+                Font = buttonFont,
+                //AutoSize = true,
+                ForeColor = forecolour1,
+                BackColor = backColour2,
+                TextAlign = ContentAlignment.MiddleCenter,
+                FlatStyle = FlatStyle.Flat,
+                CornerRadius = 8,
+                Cursor = Cursors.Hand,
+            };
+            input.FlatAppearance.BorderSize = 0;
+            input.FlatAppearance.MouseOverBackColor = backColour2; // Hover color
+            input.FlatAppearance.MouseDownBackColor = backColour1; // Click color
+            input.Click += (sender, e) =>
+            {
+                _CPH.ExecuteMethod(executeCode,methodName);
+            };
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 1, 0);
+            toolTip.SetToolTip(input, "Run the Action");
+            // Add the table layout to the list of controls
+            settings.Add(settingsTable);
+            return settings;
+
+
+
+        }
+
         public List<Control> AddActionDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<ActionData> actions = _CPH.GetActions();
