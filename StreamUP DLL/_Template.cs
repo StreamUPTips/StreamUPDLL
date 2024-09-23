@@ -14,7 +14,6 @@ using System.Drawing.Imaging;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Streamer.bot.Plugin.Interface.Model;
-using LiteDB.Engine;
 using System.CodeDom;
 using System.Data.Common;
 

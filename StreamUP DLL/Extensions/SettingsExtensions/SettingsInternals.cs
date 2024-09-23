@@ -40,7 +40,7 @@ namespace StreamUP
         public Form CreateMainForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
             // Reset progress
-            UIResources.streamUpSettingsProgress = 0;
+            UIResources.streamUpSettingsProgress = -1;
 
             // Launch the progress bar window
             _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");

@@ -48,10 +48,7 @@
     <Reference Include="Streamer.bot.Common">
       <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
     </Reference>
-      <Reference Include="LiteDB">
-   
-    <HintPath>..\StreamUP DLL\dlls\LiteDB.dll</HintPath>
-</Reference>
+  
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
