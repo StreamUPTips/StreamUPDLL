@@ -8,15 +8,16 @@ namespace StreamUP
         public void SendMessageToAll(string message, bool bot = true)
         {
 
-            _CPH.SendMessage(message,bot);
+            _CPH.SendMessage(message,bot, true);
             _CPH.SendYouTubeMessage(message,bot);
+          
         }
 
         public void SendMessageToPlatform(string message, Platform platform, bool bot = true , string broadcastId = null )
         {
                 if(platform == Platform.Twitch)
                 {
-                     _CPH.SendMessage(message,bot);
+                     _CPH.SendMessage(message,bot, true);
            
                 }
                 if(platform == Platform.YouTube)
