@@ -30,10 +30,10 @@ namespace StreamUP
             // Launch the progress bar window
             _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");
 
-            // Perform the form build steps
+            // Create the main form
             Form form = CreateMainForm(title, layout, productInfo, imageFilePath);
 
-            // Mark the settings window as ready to close
+            // Close the progress bar
             UIResources.closeLoadingWindow = true;
 
             return form;

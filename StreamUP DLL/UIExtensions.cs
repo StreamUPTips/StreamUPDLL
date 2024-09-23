@@ -53,78 +53,9 @@ namespace StreamUP {
 
         public static void SUUIShowSettingsLoadingMessage(this IInlineInvokeProxy CPH, string title)
         {
-            Thread thread = new Thread(() =>
-            {
-                Form messageForm = new Form();
-                messageForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-                messageForm.StartPosition = FormStartPosition.CenterScreen;
-                messageForm.MaximizeBox = false;
-                messageForm.MinimizeBox = false;
-                messageForm.Text = title;
+            StreamUpLib sup = new StreamUpLib(CPH);
 
-                byte[] iconBytes = Convert.FromBase64String(UIResources.supIconString);
-                using (var msIcon = new MemoryStream(iconBytes))
-                {
-                    messageForm.Icon = new Icon(msIcon);
-                }
-
-                byte[] imageBytes = Convert.FromBase64String(UIResources.supSettingsLoadingBGString);
-
-                int formWidth = 0;
-                int formHeight = 0;
-
-                using (var msImage = new MemoryStream(imageBytes))
-                {
-                    Image image = Image.FromStream(msImage);
-
-                    // Create a PictureBox to display the image
-                    var description = new PictureBox();
-                    description.Image = image;
-                    description.SizeMode = PictureBoxSizeMode.AutoSize;
-                    description.Dock = DockStyle.Top;
-                    formWidth += image.Width;
-                    formHeight += image.Height;
-                    
-                    // Add the PictureBox to the form
-                    messageForm.Controls.Add(description);
-                }
-
-                ProgressBar progressBar = new ProgressBar
-                {
-                    Dock = DockStyle.Bottom,
-                    Style = ProgressBarStyle.Continuous,
-                    Minimum = 0,
-                    Maximum = UIResources.streamUpSettingsCount,
-                    Value = 0
-                };
-                messageForm.Controls.Add(progressBar);
-                formHeight += progressBar.Height;
-
-                // Set the form's size to match the image size
-                messageForm.ClientSize = new Size(formWidth, formHeight);
-
-                // Attach a timer to check the condition
-                System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-                timer.Interval = 200;
-                timer.Tick += (sender, args) =>
-                {
-                    progressBar.Value = UIResources.streamUpSettingsProgress;
-                    if (UIResources.closeLoadingWindow)
-                    {
-                        messageForm.Close();
-                        timer.Stop();
-                    }
-                };
-                timer.Start();
-
-                messageForm.FormClosing += (sender, args) => Application.ExitThread();
-
-                Application.Run(messageForm);
-            });
-
-            thread.IsBackground = true;
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
+            sup.ShowSettingsSplashScreen(title);
         }
 
         [Obsolete]
