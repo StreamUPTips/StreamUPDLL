@@ -20,18 +20,20 @@ namespace StreamUP
         {
             _CPH.RunAction(actionName, runImmediately);
         }
+
         public Form BuildForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
-            // Reset progress
+            // Reset global state before launching
             UIResources.streamUpSettingsProgress = 0;
+            UIResources.closeLoadingWindow = false;
 
             // Launch the progress bar window
             _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");
 
-            // Create the main form
+            // Perform the form build steps
             Form form = CreateMainForm(title, layout, productInfo, imageFilePath);
 
-            // Close the progress bar
+            // Mark the settings window as ready to close
             UIResources.closeLoadingWindow = true;
 
             return form;
@@ -39,16 +41,14 @@ namespace StreamUP
         
         public Form CreateMainForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
-            // Reset progress
-            UIResources.streamUpSettingsProgress = -1;
-
-            // Launch the progress bar window
-            _CPH.SUUIShowSettingsLoadingMessage("Loading Settings...");
+            // Initialise the progress
+            UIResources.streamUpSettingsCount = layout.Count + 7; 
 
             InitializeDatabase(out string filePath);
-            
+            UIResources.streamUpSettingsProgress++;
+
             // Dictionary to hold controls for each tab
-            Dictionary<string, List<Control>> tabControls = new Dictionary<string, List<Control>>();
+            Dictionary<string, List<Control>> tabControls = new();
 
             // Separate controls based on their associated tab name
             foreach (Control control in layout)
@@ -61,6 +61,7 @@ namespace StreamUP
                 }
                 tabControls[tabName].Add(control);
             }
+            UIResources.streamUpSettingsProgress++;
 
             tabControl = new BorderlessTabControl()
             {
@@ -82,9 +83,6 @@ namespace StreamUP
                 Icon = GetIconOrDefault(imageFilePath),
                 BackColor = backColour1,
             };
-
-            // Initialise the progress
-            UIResources.streamUpSettingsCount = layout.Count; 
 
             // Create and add tab pages
             foreach (var tab in tabControls)
@@ -132,6 +130,8 @@ namespace StreamUP
             };
             aboutTabPage.Controls.Add(CreateAboutPanel(productInfo));
             tabControl.TabPages.Add(aboutTabPage);
+            UIResources.streamUpSettingsProgress++;
+
 
             // Add buttons to the button panel
             buttonPanel = new FlowLayoutPanel
@@ -180,6 +180,7 @@ namespace StreamUP
 
             buttonPanel.Controls.Add(saveButton);
             buttonPanel.Controls.Add(resetButton);
+            UIResources.streamUpSettingsProgress++;
 
             // Status bar
             var statusBar = new StatusStrip
@@ -198,6 +199,7 @@ namespace StreamUP
             form.Controls.Add(tabControl);
             form.Controls.Add(buttonPanel);
             form.Controls.Add(statusBar);
+            UIResources.streamUpSettingsProgress++;
 
             return form;
         }
@@ -294,11 +296,11 @@ namespace StreamUP
             Label lblProductName = CreateInfoLabel("Product Name:", productInfo.ProductName);
             Label lblProductVersionNumber = CreateInfoLabel("Product Version:", productInfo.ProductVersionNumber.ToString());
             Label lblProductNumber = CreateInfoLabel("Product Number:", productInfo.ProductNumber);
-            Label lblRequiredLibraryVersion = CreateInfoLabel("Required Library Version:", productInfo.RequiredLibraryVersion.ToString());
-            Label lblSceneName = CreateInfoLabel("Scene Name:", productInfo.SceneName);
-            Label lblSettingsAction = CreateInfoLabel("Settings Action:", productInfo.SettingsAction);
-            Label lblSourceNameVersionCheck = CreateInfoLabel("Source Name Version Check:", productInfo.SourceNameVersionCheck);
-            Label lblSourceNameVersionNumber = CreateInfoLabel("Source Name Version Number:", productInfo.SourceNameVersionNumber.ToString());
+            // Label lblRequiredLibraryVersion = CreateInfoLabel("Required Library Version:", productInfo.RequiredLibraryVersion.ToString());
+            // Label lblSceneName = CreateInfoLabel("Scene Name:", productInfo.SceneName);
+            // Label lblSettingsAction = CreateInfoLabel("Settings Action:", productInfo.SettingsAction);
+            // Label lblSourceNameVersionCheck = CreateInfoLabel("Source Name Version Check:", productInfo.SourceNameVersionCheck);
+            // Label lblSourceNameVersionNumber = CreateInfoLabel("Source Name Version Number:", productInfo.SourceNameVersionNumber.ToString());
 
             Label line1 = CreateLine();
             Label line2 = CreateLine();
@@ -318,11 +320,11 @@ namespace StreamUP
             flowLayout.Controls.Add(lblProductName);
             flowLayout.Controls.Add(lblProductVersionNumber);
             flowLayout.Controls.Add(lblProductNumber);
-            flowLayout.Controls.Add(lblRequiredLibraryVersion);
-            flowLayout.Controls.Add(lblSceneName);
-            flowLayout.Controls.Add(lblSettingsAction);
-            flowLayout.Controls.Add(lblSourceNameVersionCheck);
-            flowLayout.Controls.Add(lblSourceNameVersionNumber);
+            // flowLayout.Controls.Add(lblRequiredLibraryVersion);
+            // flowLayout.Controls.Add(lblSceneName);
+            // flowLayout.Controls.Add(lblSettingsAction);
+            // flowLayout.Controls.Add(lblSourceNameVersionCheck);
+            // flowLayout.Controls.Add(lblSourceNameVersionNumber);
             flowLayout.Controls.Add(line1);
             flowLayout.Controls.Add(outtro);
             flowLayout.Controls.Add(streamUp);
@@ -343,6 +345,7 @@ namespace StreamUP
             aboutPanel.Controls.Add(flowLayout);
             return aboutPanel;
         }
+        
         private string GetNamesForCredits()
         {
             List<string> nonFinanceSupporters = new List<string>
@@ -389,6 +392,7 @@ namespace StreamUP
 
 
         }
+        
         private LinkLabel CreateLinkLabel(string text, string url, string subhead = "")
         {
             LinkLabel linkLabel = new LinkLabel
@@ -406,6 +410,7 @@ namespace StreamUP
             linkLabel.LinkClicked += (sender, e) => System.Diagnostics.Process.Start(url);
             return linkLabel;
         }
+        
         private Label CreateLine()
         {
 
@@ -424,6 +429,7 @@ namespace StreamUP
 
 
         }
+        
         private Label CreateInfoLabel(string text, string value)
         {
             Label label = new Label
@@ -438,6 +444,7 @@ namespace StreamUP
 
             return label;
         }
+        
         private Icon GetIconOrDefault(int imageNumber = -1)
         {
 
@@ -466,6 +473,7 @@ namespace StreamUP
 
             return icon;
         }
+        
         public void SetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -533,6 +541,7 @@ namespace StreamUP
 
             return tcs.Task;
         }
+        
         private Task<string> OpenFolderDialogAsync()
         {
             var tcs = new TaskCompletionSource<string>();
@@ -558,6 +567,7 @@ namespace StreamUP
 
             return tcs.Task;
         }
+        
         //Logging
         public void SaveButton_Click(object sender, EventArgs e, List<Control> layout)
         {
@@ -700,7 +710,6 @@ namespace StreamUP
             //? Reopen can be added here if we really desire it, I wasnt too fussed about it when i built it so i dint bother
         }
 
-
         public void InitializeDatabase(out string filePath)
         {
             _CPH.TryGetArg("saveFile", out string saveFile);
@@ -709,6 +718,7 @@ namespace StreamUP
             string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
             filePath = Path.Combine(dir, $"{saveFile}_ProductSettings.json");
+            UIResources.streamUpSettingsProgress++;
 
             Initialize(filePath);
         }

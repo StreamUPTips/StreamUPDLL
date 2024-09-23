@@ -23,6 +23,7 @@ namespace StreamUP
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
             _data = StreamUpInternalLoad(_saveName);
             _initialized = true;
+            UIResources.streamUpSettingsProgress++;
         }
 
         public Dictionary<string, object> StreamUpInternalLoad(string saveFile)
