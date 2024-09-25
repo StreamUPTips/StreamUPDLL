@@ -28,14 +28,14 @@ namespace StreamUP
 
             return true;
         }
-        public List<LeaderboardUser> GetLeaderboardUsers(List<UserVariableValue<object>> currentUsers, List<GroupUser> excludedUsers)
+        public List<LeaderboardUser> GetLeaderboardUsers(List<UserVariableValue<long>> currentUsers, List<GroupUser> excludedUsers)
         {
             // Sort the currentUsers list by Points property in descending order
             currentUsers = currentUsers.OrderByDescending(u => u.Value).ToList();
 
             List<LeaderboardUser> users = new List<LeaderboardUser>();
             int position = 1;
-            foreach (UserVariableValue<object> user in currentUsers)
+            foreach (UserVariableValue<long> user in currentUsers)
             {
                 if (!excludedUsers.Any(u => u.Type == user.UserType && u.Id == user.UserId))
                 {
