@@ -127,7 +127,7 @@ namespace StreamUP
             }
             else
             {
-                //Default Bet  if nothing entered
+                betPrize = defaultPrize;
             }
 
             //num
