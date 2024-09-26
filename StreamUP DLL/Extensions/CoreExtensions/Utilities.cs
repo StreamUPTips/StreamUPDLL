@@ -93,12 +93,12 @@ namespace StreamUP
     {
         public static string ToInvariantString(this double value)
         {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return value.ToString("0.0#", CultureInfo.InvariantCulture);
         }
 
         public static string ToInvariantString(this decimal value)
         {
-            return value.ToString(CultureInfo.InvariantCulture);
+            return value.ToString("0.0#", CultureInfo.InvariantCulture);
         }
     }
 
