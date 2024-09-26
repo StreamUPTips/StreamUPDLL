@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
@@ -80,11 +81,25 @@ namespace StreamUP
             };
 
             SetObsSourceSettings(sourceName, productVersionJson, obsConnection);
-            
+
 
             LogInfo($"Successfully set product OBS version");
             return true;
         }
 
     }
+
+    public static class NumericExtensions
+    {
+        public static string ToInvariantString(this double value)
+        {
+            return value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public static string ToInvariantString(this decimal value)
+        {
+            return value.ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
 }
