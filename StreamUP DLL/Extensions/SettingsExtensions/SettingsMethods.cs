@@ -1347,11 +1347,11 @@ namespace StreamUP
                     var selectedColor = colorDialog.Color;
                     input.BackColor = selectedColor;
                     input.ForeColor = selectedColor.GetBrightness() < 0.5 ? forecolour1 : forecolour3;
-                    long alpha = selectedColor.A;
-                    long green = selectedColor.G;
-                    long blue = selectedColor.B;
-                    long red = selectedColor.R;
-                    long obsColour = (alpha * 256 * 256 * 256) + (green * 256 * 256) + (blue * 256) + red;
+                    int alpha = selectedColor.A;
+                    int green = selectedColor.G;
+                    int blue = selectedColor.B;
+                    int red = selectedColor.R;
+                    long obsColour =  _CPH.ObsConvertRgb(alpha,red,green,blue);
                     valueLabel.Text = $"{obsColour}";
                     string hexValue = selectedColor.R.ToString("X2") + selectedColor.G.ToString("X2") + selectedColor.B.ToString("X2");
                     input.Text = "#" + hexValue;
