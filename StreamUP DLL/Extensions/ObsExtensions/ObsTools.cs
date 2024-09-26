@@ -9,7 +9,7 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         // OBS Tools
-        public bool ObsScreenshotSelectedSource(int obsConnection)
+        public bool ObsScreenshotSelectedSource(int obsConnection, out string filePath)
         {
             LogInfo("Getting info to screenshot current OBS source");
 
@@ -18,6 +18,7 @@ namespace StreamUP
             {
                 LogError("Unable to retrieve current selected source");
                 ShowToastNotification(NotificationType.Error, "Screenshot Failed", "Unable to retieve current seleced source");
+                filePath = null;
                 return false;
             }
 
@@ -26,6 +27,7 @@ namespace StreamUP
             {
                 LogError("Unable to retrieve OBS output filepath");
                 ShowToastNotification(NotificationType.Error, "Screenshot Failed", "Unable to retrieve OBS output filepath");
+                filePath = null;
                 return false;
             }
 
@@ -35,7 +37,7 @@ namespace StreamUP
 
             // Create full file path name
             string fileName = $"{selectedSource}_{currentTimeStr}.png";
-            string filePath = $"{obsOutputFilePath}\\{fileName}";
+            filePath = $"{obsOutputFilePath}\\{fileName}";
 
             // Escape backslashes
             string jsonFilePath = filePath.Replace("\\", "\\\\");
