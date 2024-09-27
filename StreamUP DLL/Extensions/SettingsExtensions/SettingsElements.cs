@@ -93,8 +93,6 @@ namespace StreamUP
         }
     }
 
-
-
     public class CustomNumericUpDown : NumericUpDown
     {
         private const int EM_SETMARGINS = 0xD3;
@@ -176,6 +174,7 @@ namespace StreamUP
             set { cornerRadius = value; SetRegion(); }
         }
     }
+    
     public class CustomTextBox : TextBox
     {
         private const int EM_SETMARGINS = 0xD3;

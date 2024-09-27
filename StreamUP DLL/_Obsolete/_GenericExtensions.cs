@@ -405,7 +405,5 @@ namespace StreamUP {
             obj.GetType().GetProperty(propertyName).SetValue(obj, value);
         }   
    
-   
-   
     }
 }
