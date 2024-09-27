@@ -1836,6 +1836,16 @@ namespace StreamUP
 
             return settings;
         }
+        
+        public List<Control> AddGroupsDrop(string description, string defaultValue, string saveName, string tabName = "General")
+        {
+            List<string> groups = _CPH.GetGroups();
+            string[] groupsArray = groups.ToArray();
+            Array.Sort(groupsArray);
+            List<Control> settings = new List<Control>();
+            settings.AddRange(AddDropDown(description, groupsArray, defaultValue, saveName, tabName));
+            return settings;
+        }
 
     }
 }
