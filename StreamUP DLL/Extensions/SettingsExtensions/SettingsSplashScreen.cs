@@ -91,5 +91,7 @@ namespace StreamUP
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
         }
+    
+    
     }
 }

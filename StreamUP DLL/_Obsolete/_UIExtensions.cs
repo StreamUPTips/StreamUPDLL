@@ -51,6 +51,7 @@ namespace StreamUP {
             CPH.ShowToastNotification(title, message);
         }
 
+        [Obsolete]
         public static void SUUIShowSettingsLoadingMessage(this IInlineInvokeProxy CPH, string title)
         {
             StreamUpLib sup = new StreamUpLib(CPH);
@@ -175,6 +176,7 @@ namespace StreamUP {
     
     }
 
+    [Obsolete]
     public static class AlertMessageVariableLists
     {
         // Misc
@@ -265,4 +267,6 @@ namespace StreamUP {
                                                     "%banType% = Ban Type\n" +
                                                     "%user% = Username";
     }
+
+
 }
