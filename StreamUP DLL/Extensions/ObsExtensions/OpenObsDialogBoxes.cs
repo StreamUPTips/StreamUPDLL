@@ -7,8 +7,9 @@ namespace StreamUP
             _CPH.ObsSendRaw("OpenInputPropertiesDialog", "{\"inputName\":\""+sourceName+"\"}", obsConnection);
         }
 
-
-
-
+        public void OpenInputInteractDialog(string sourceName, int obsConnection)
+        {
+            _CPH.ObsSendRaw("OpenInputInteractDialog", "{\"inputName\":\""+sourceName+"\"}", obsConnection);
+        }
     }
 }
