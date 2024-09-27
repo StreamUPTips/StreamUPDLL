@@ -104,7 +104,8 @@ namespace StreamUP
             {
                 ["sourceName"] = sourceName,
                 ["filterName"] = filterName,
-                ["filterSettings"] = filterSettings
+                ["filterSettings"] = filterSettings,
+                ["overlay"] = true
             };
 
             // Send the raw request to OBS
@@ -121,7 +122,8 @@ namespace StreamUP
             JObject requestData = new JObject
             {
                 ["inputName"] = inputName,
-                ["inputSettings"] = inputSettings
+                ["inputSettings"] = inputSettings,
+                ["overlay"] = true
             };
 
             // Send the raw request to OBS
