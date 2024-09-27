@@ -32,17 +32,17 @@ namespace StreamUP
 
             // Create the main form
             Form form = CreateMainForm(title, layout, productInfo, imageFilePath);
-
+            form.Load += (sender, e) => SaveButton_Click(sender, e, layout);
             // Close the progress bar
             UIResources.closeLoadingWindow = true;
-
+            
             return form;
         }
-        
+
         public Form CreateMainForm(string title, List<Control> layout, ProductInfo productInfo, int imageFilePath = -1)
         {
             // Initialise the progress
-            UIResources.streamUpSettingsCount = layout.Count + 7; 
+            UIResources.streamUpSettingsCount = layout.Count + 7;
 
             InitializeDatabase(out string filePath);
             UIResources.streamUpSettingsProgress++;
@@ -200,7 +200,7 @@ namespace StreamUP
             form.Controls.Add(buttonPanel);
             form.Controls.Add(statusBar);
             UIResources.streamUpSettingsProgress++;
-
+            
             return form;
         }
 
@@ -345,7 +345,7 @@ namespace StreamUP
             aboutPanel.Controls.Add(flowLayout);
             return aboutPanel;
         }
-        
+
         private string GetNamesForCredits()
         {
             List<string> nonFinanceSupporters = new List<string>
@@ -392,7 +392,7 @@ namespace StreamUP
 
 
         }
-        
+
         private LinkLabel CreateLinkLabel(string text, string url, string subhead = "")
         {
             LinkLabel linkLabel = new LinkLabel
@@ -410,7 +410,7 @@ namespace StreamUP
             linkLabel.LinkClicked += (sender, e) => System.Diagnostics.Process.Start(url);
             return linkLabel;
         }
-        
+
         private Label CreateLine()
         {
 
@@ -429,7 +429,7 @@ namespace StreamUP
 
 
         }
-        
+
         private Label CreateInfoLabel(string text, string value)
         {
             Label label = new Label
@@ -444,7 +444,7 @@ namespace StreamUP
 
             return label;
         }
-        
+
         private Icon GetIconOrDefault(int imageNumber = -1)
         {
 
@@ -473,7 +473,7 @@ namespace StreamUP
 
             return icon;
         }
-        
+
         public void SetButtonColor(Button button, string defaultValue)
         {
             // Convert the default value (assumed to be a hex color string) to a Color object
@@ -541,7 +541,7 @@ namespace StreamUP
 
             return tcs.Task;
         }
-        
+
         private Task<string> OpenFolderDialogAsync()
         {
             var tcs = new TaskCompletionSource<string>();
@@ -567,7 +567,7 @@ namespace StreamUP
 
             return tcs.Task;
         }
-        
+
         //Logging
         public void SaveButton_Click(object sender, EventArgs e, List<Control> layout)
         {
@@ -585,32 +585,32 @@ namespace StreamUP
                         LogInfo($"Save Name: {label.Name}, Value: {label.Text}");
                         if (!string.IsNullOrEmpty(label.Name))
                         {
-                           SaveSetting(label.Name, label.Text);
+                            SaveSetting(label.Name, label.Text);
                         }
                         break;
                     case NumericUpDown numericUpDown:
                         LogInfo($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
-                       SaveSetting(numericUpDown.Name, numericUpDown.Value.ToString());
+                        SaveSetting(numericUpDown.Name, numericUpDown.Value.ToString());
                         break;
                     case TextBox textBox:
                         LogInfo($"Save Name: {textBox.Name}, Text: {textBox.Text}");
-                       SaveSetting(textBox.Name, textBox.Text);
+                        SaveSetting(textBox.Name, textBox.Text);
                         break;
                     case CheckBox checkbox:
                         LogInfo($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
-                       SaveSetting(checkbox.Name, checkbox.Checked);
+                        SaveSetting(checkbox.Name, checkbox.Checked);
                         break;
                     case TrackBar trackbar:
                         LogInfo($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
-                       SaveSetting(trackbar.Name, trackbar.Value);
+                        SaveSetting(trackbar.Name, trackbar.Value);
                         break;
                     case Button button:
                         LogInfo($"Save Name: {button.Name}, Text: {button.Text}");
-                       SaveSetting(button.Name, button.Text);
+                        SaveSetting(button.Name, button.Text);
                         break;
                     case ComboBox comboBox:
                         LogInfo($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
-                       SaveSetting(comboBox.Name, comboBox.SelectedItem);
+                        SaveSetting(comboBox.Name, comboBox.SelectedItem);
                         break;
                     case CheckedListBox checkedListBox:
                         var checkedItemsDict = new Dictionary<string, bool>();
@@ -622,7 +622,7 @@ namespace StreamUP
                         }
                         var jsonData = JsonConvert.SerializeObject(checkedItemsDict);
                         LogInfo($"{checkedListBox.Name}, Items: {string.Join(", ", checkedItemsDict.Select(kv => $"[{kv.Key}, {kv.Value}]"))}");
-                       SaveSetting(checkedListBox.Name, checkedItemsDict);
+                        SaveSetting(checkedListBox.Name, checkedItemsDict);
                         break;
                     case DataGridView dataGridView:
                         if (dataGridView.Columns.Count == 1)
@@ -640,7 +640,7 @@ namespace StreamUP
                                 }
                             }
                             //LogInfo($"Save Name: {dataGridView.Name}, Data: {string.Join(",", dataRows.ToArray())}");
-                           SaveSetting(dataGridView.Name, dataRows);
+                            SaveSetting(dataGridView.Name, dataRows);
                         }
                         else if (dataGridView.Columns.Count >= 2)
                         {
@@ -673,12 +673,12 @@ namespace StreamUP
                             if (isIntDict)
                             {
 
-                               SaveSetting(dataGridView.Name, dataDictInt);
+                                SaveSetting(dataGridView.Name, dataDictInt);
                             }
                             else
                             {
 
-                               SaveSetting(dataGridView.Name, dataDictString);
+                                SaveSetting(dataGridView.Name, dataDictString);
                             }
 
 
@@ -687,8 +687,10 @@ namespace StreamUP
                         break;
                 }
             }
-
+            if(sender == saveButton)
+            {
             MessageBox.Show("Settings have been saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         public void ResetButton_Click(object sender, EventArgs e, List<Control> layout, Form form)
@@ -696,18 +698,19 @@ namespace StreamUP
             LogInfo("Pressed Reset");
 
             var numericUpDownsAndTextBoxes = layout
-         .OfType<TableLayoutPanel>()
-         .SelectMany(tableLayoutPanel => tableLayoutPanel.Controls.OfType<Control>());
+            .OfType<TableLayoutPanel>()
+            .SelectMany(tableLayoutPanel => tableLayoutPanel.Controls.OfType<Control>());
 
             foreach (var control in numericUpDownsAndTextBoxes)
             {
                 DeleteSetting(control.Name);
             }
             // Implement reset logic here
-            MessageBox.Show("Settings have been reset.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Settings have been reset back to defaults.\nThis UI will now close and attempt to reload so you will need to save your desired settings again.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             form.Close();
+            _CPH.TryGetArg("actionName", out string actionName);
+            _CPH.RunAction(actionName, false);
 
-            //? Reopen can be added here if we really desire it, I wasnt too fussed about it when i built it so i dint bother
         }
 
         public void InitializeDatabase(out string filePath)
@@ -725,27 +728,27 @@ namespace StreamUP
 
         public T GetSetting<T>(string settingName, T defaultValue)
         {
-            if(!_initialized)
+            if (!_initialized)
             {
-            InitializeDatabase(out string filePath);
+                InitializeDatabase(out string filePath);
             }
             return StreamUpInternalGet(settingName, defaultValue);
         }
 
         public void SaveSetting(string settingName, object newValue)
         {
-             if(!_initialized)
+            if (!_initialized)
             {
-            InitializeDatabase(out string filePath);
+                InitializeDatabase(out string filePath);
             }
             StreamUpInternalUpdate(settingName, newValue);
         }
 
         public void DeleteSetting(string settingName)
         {
-            if(!_initialized)
+            if (!_initialized)
             {
-            InitializeDatabase(out string filePath);
+                InitializeDatabase(out string filePath);
             }
             StreamUpInternalDelete(settingName);
         }
