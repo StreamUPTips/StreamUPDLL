@@ -157,7 +157,11 @@ namespace StreamUP
             return true;
         }    
     
-
+        public bool SetObsTextGDIFont(string sourceName, string face, int size, string style, int obsConnection)
+        {
+            _CPH.ObsSendRaw("SetInputSettings", "{\"inputName\":\""+ sourceName +"\",\"inputSettings\":{\"font\":{\"face\":\""+ face +"\",\"size\":"+ size +",\"style\":\""+style+"\"}},\"overlay\":true}", obsConnection);
+            return true;
+        }
     }
 }
 
