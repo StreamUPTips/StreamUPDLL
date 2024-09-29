@@ -7,6 +7,15 @@ namespace StreamUP
     {
         public bool InitialiseProduct(string actionName, string productNumber, ProductType productType)
         {
+
+            //#Add it here?
+            _CPH.TryGetArg("settingResetArgument", out bool onReset);
+            if(onReset)
+            {
+                LogError("User just reset, stopping process");
+                return false;
+
+            }
             // Check if already initialised
             if (IsProductInitialised(productNumber)) 
             {

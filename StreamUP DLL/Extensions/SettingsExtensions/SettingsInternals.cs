@@ -572,7 +572,7 @@ namespace StreamUP
         public void SaveButton_Click(object sender, EventArgs e, List<Control> layout)
         {
             LogInfo("Pressed Save");
-
+             _CPH.SetArgument("settingResetArgument", false);
             var numericUpDownsAndTextBoxes = layout
                 .OfType<TableLayoutPanel>()
                 .SelectMany(tableLayoutPanel => tableLayoutPanel.Controls.OfType<Control>());
@@ -708,6 +708,8 @@ namespace StreamUP
             // Implement reset logic here
             MessageBox.Show("Settings have been reset back to defaults.\nThis UI will now close and attempt to reload so you will need to save your desired settings again.", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             form.Close();
+            //todo Handle Returning False for reset
+            _CPH.SetArgument("settingResetArgument", true);
             _CPH.TryGetArg("actionName", out string actionName);
             _CPH.RunAction(actionName, false);
 
