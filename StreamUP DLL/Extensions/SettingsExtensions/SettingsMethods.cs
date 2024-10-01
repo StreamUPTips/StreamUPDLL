@@ -531,7 +531,7 @@ namespace StreamUP
             };
 
             input.Items.AddRange(dropdown);
-            if(defaultValue == "" || !input.Items.Contains(defaultValue))
+            if(string.IsNullOrEmpty(defaultValue) || !input.Items.Contains(defaultValue))
             {
                 input.SelectedIndex = 0 ;
             }
