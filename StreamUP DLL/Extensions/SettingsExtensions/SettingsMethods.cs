@@ -531,8 +531,14 @@ namespace StreamUP
             };
 
             input.Items.AddRange(dropdown);
+            if(defaultValue == "" || !input.Items.Contains(defaultValue))
+            {
+                input.SelectedIndex = 0 ;
+            }
+            else
+            {
             input.SelectedItem = GetSetting<string>(saveName, defaultValue);
-
+            }
             // Add the label and input to the table
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
@@ -1533,7 +1539,7 @@ namespace StreamUP
 
             return settingsTable;
         }
-        public Control AddFont(string description, string defaultName, string defaultSize, string defaultStyle, string saveName, string tabName = "General")
+        public Control AddFont(string description, string defaultName, int defaultSize, string defaultStyle, string saveName, string tabName = "General")
         {
             
 
@@ -1586,7 +1592,7 @@ namespace StreamUP
             var size = new Label
             {
                 Name = saveName + "Size",
-                Text = GetSetting<string>(saveName + "Size", defaultSize),
+                Text = GetSetting<string>(saveName + "Size", defaultSize.ToString()),
                 AutoSize = true,
                 //Margin = new Padding(10),
                 Font = valueFont,
@@ -1611,6 +1617,11 @@ namespace StreamUP
                 // and update the button text and value label with the selected color
                 // For example:
                 var fontDialog = new FontDialog();
+                FontFamily fontFamily = new FontFamily(defaultName);
+                FontStyle fontStyle = (FontStyle)Enum.Parse(typeof(FontStyle), defaultStyle, true);
+
+                // Set the default font using the converted values
+                fontDialog.Font = new Font(fontFamily, defaultSize, fontStyle);
                 if (fontDialog.ShowDialog() == DialogResult.OK)
                 {
 
