@@ -19,6 +19,9 @@ namespace StreamUP
             triggerData.TotalAmount = SUP.GetValueOrDefault<int>(sbArgs, "totalSubsGifted", -1);
             triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "user", "No arg 'user' found");
             triggerData.UserImage = SUP.GetTwitchProfilePicture(sbArgs, userType);
+            
+            triggerData.MonthDuration =   SUP.GetValueOrDefault<int>(sbArgs, "monthsGifted", 1);
+            triggerData.IsMultiMonth = SUP.GetValueOrDefault<int>(sbArgs, "monthsGifted", 1) == 1;
             return triggerData;
         }
     }

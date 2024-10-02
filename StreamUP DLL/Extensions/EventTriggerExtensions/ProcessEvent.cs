@@ -121,5 +121,9 @@ namespace StreamUP
         public int TotalAmount { get; set; } = -1;
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
+
+        public bool IsMultiMonth {get; set;} = false;
+        public int MonthDuration { get; set; } = -1;
+        public int MonthTenure { get; set; } = -1;
     }
 }
