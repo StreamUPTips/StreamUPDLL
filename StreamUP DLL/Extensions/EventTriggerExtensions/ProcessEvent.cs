@@ -38,6 +38,7 @@ namespace StreamUP
             { EventType.TwitchUserTimedOut, new TwitchUserTimedOutHandler() },
             { EventType.TwitchWatchStreak, new TwitchWatchStreakHandler() },
             { EventType.TwitchWhisper, new TwitchWhisperHandler() },
+            { EventType.TwitchViewerCountUpdate, new TwitchViewerCountUpdateHandler() },
 
             { EventType.YouTubeFirstWords, new YouTubeFirstWordsHandler() },
             { EventType.YouTubeGiftMembershipReceived, new YouTubeGiftMembershipReceivedHandler() },
@@ -46,6 +47,7 @@ namespace StreamUP
             { EventType.YouTubeMessage, new YouTubeMessageHandler() },
             { EventType.YouTubeNewSponsor, new YouTubeNewSponsorHandler() },
             { EventType.YouTubeNewSubscriber, new YouTubeNewSubscriberHandler() },
+            { EventType.YouTubeStatisticsUpdated, new YouTubeStatisticsUpdatedHandler() },
             { EventType.YouTubeSuperChat, new YouTubeSuperChatHandler() },
             { EventType.YouTubeSuperSticker, new YouTubeSuperStickerHandler() },
             { EventType.YouTubeUserBanned, new YouTubeUserBannedHandler() }
