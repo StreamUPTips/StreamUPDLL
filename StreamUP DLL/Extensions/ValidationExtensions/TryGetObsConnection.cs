@@ -10,7 +10,7 @@ namespace StreamUP
         {
             LogInfo("Getting obsConnection number from productSettings");
             // Retrieve ObsConnection from productSettings
-            if (productSettings.TryGetValue("ObsConnection", out object obsConnectionObj))
+            if (productSettings.TryGetValue("ObsConnection", out object obsConnectionObj) || productSettings.TryGetValue("obsConnection", out obsConnectionObj))
             {
                 obsConnection = Convert.ToInt32(obsConnectionObj);
                 LogInfo($"Successfully retrieved the obsConnection number [{obsConnection}]");

@@ -89,7 +89,7 @@ namespace StreamUP
             {
                 try
                 {
-                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool))
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool)|| typeof(T) == typeof(long))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }
