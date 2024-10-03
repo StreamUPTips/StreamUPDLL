@@ -13,8 +13,8 @@ namespace StreamUP
             double amount = 0.00;
             double bitCost = 0.01;
             double tierOne = 3.00;
-            double tierTwo = 4.50;
-            double tierThree = 6.00;
+            double tierTwo = 5.00;
+            double tierThree = 12.50;
             
             string tier = triggerData.Tier;
             EventType eventType = _CPH.GetEventType();
