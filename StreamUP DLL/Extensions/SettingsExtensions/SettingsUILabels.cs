@@ -67,7 +67,8 @@ namespace StreamUP
                                                     "%receiver% = User That Is Banned\n" +
                                                     "%user% = User Executing The Timeout";
 
-        public static string TwitchWatchStreak = "%watchStreak% = Current stream streak amount";
+        public static string TwitchWatchStreak =    "%user% = User with streak streak\n" +
+                                                    "%amount% = Current stream streak amount";
         
         public static string TwitchHypeTrainLevelUp =   "%contributors% = Amount of contributors\n" +
                                                         "%level% = Hype Train level\n" +

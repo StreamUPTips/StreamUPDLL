@@ -145,7 +145,7 @@ namespace StreamUP
                 currencySymbol = currencyCode;
             }
 
-            return $"{currencySymbol}{amount}";
+            return $"{currencySymbol}{amount.ToString("F2")}";
         }
     }
 }
