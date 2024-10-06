@@ -267,5 +267,29 @@ namespace StreamUP
             return true;
         }
 
+        public bool GetObsGdiTextSourceText(string sourceName, int obsConnection, out string outputText)
+        {
+            LogInfo($"Requesting text from source [{sourceName}]");
+
+            if (!GetObsSourceSettings(sourceName, obsConnection, out JObject sourceSettings))
+            {
+                LogError("Unable to retrieve sourceSettings");
+                outputText = null;
+                return false;
+            }
+
+            if (sourceSettings["text"] == null)
+            {
+                LogError("text not found in the response");
+                outputText = null;
+                return false;
+            }
+
+            outputText = sourceSettings["text"].ToString();
+            LogInfo("Successfully retrieved source transform");
+            return true;
+        }
+
+
     }
 }
