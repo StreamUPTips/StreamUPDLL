@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Streamer.bot.Plugin.Interface.Enums;
 using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
@@ -17,6 +18,13 @@ namespace StreamUP
         public string UserId { get; set; }
         public string UserName { get; set; }
 
+    }
+
+       public class CurrencyUser
+    {
+        public string UserName {get; set;}
+        public string UserId {get; set;}
+        public Platform Platform {get; set;}
     }
  
 
