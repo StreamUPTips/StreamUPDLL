@@ -42,7 +42,7 @@ namespace StreamUP
 
 
         }
-        
+
         public void SetTriggersForSlots()
         {
             string[] categories = { "Currency", "Slots" };
@@ -68,9 +68,9 @@ namespace StreamUP
             new("Raffle End (All Winners)", "raffleEndAllWinners", categories),
             new("Raffle End (Single Winner)", "raffleEndSingleWinner", categories),
             new("Raffle Join", "raffleJoinSuccess", categories),
-           
+
              };
-           SetCustomTriggers(customTriggers);
+            SetCustomTriggers(customTriggers);
 
         }
 
@@ -88,15 +88,36 @@ namespace StreamUP
             new("Gamble Loss", "gambleLoss",categories),
             new("Gamble Win", "gambleWin",categories),
             new("Gamble Push", "gamblePush",categories),
-            
+
              };
-           SetCustomTriggers(customTriggers);
+            SetCustomTriggers(customTriggers);
 
         }
 
-          public void SetTriggersForTimedVIP()
+        public void SetTriggersForHeist()
         {
-            string [] categories = {"Timed VIP"};
+            string[] categories = { "Currency", "Heist" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+            new("Heist Start", "heistStart",categories),
+            new("User Joined", "heistUserJoined",categories),
+            new("Heist End", "heistEnding",categories),
+            new("All Users Lost", "heistAllUsersLost",categories),
+            new("No User Win", "heistNoUsersWon",categories),
+            new("Single User Win", "heistSingleWin",categories),
+            new("Single User Loss", "heistSingleLoss",categories),
+            new("Users Lost", "heistUsersLost",categories),
+            new("Users Won", "heistUsersWon",categories),
+            new("Everyone Won", "heistEveryoneWon",categories),
+            
+             };
+            SetCustomTriggers(customTriggers);
+
+        }
+
+        public void SetTriggersForTimedVIP()
+        {
+            string[] categories = { "Timed VIP" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("New VIP", "timedVipnewVip", categories),

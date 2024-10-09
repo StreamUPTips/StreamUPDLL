@@ -34,7 +34,7 @@ namespace StreamUP
                 strokeColour
             }
         };
-            SetObsSourceFilterSettings(sourceName, filterName, changeStrokeColour, 0);
+            SetObsSourceFilterSettings(sourceName, filterName, changeStrokeColour, obsConnection);
             return true;
         }
     }
