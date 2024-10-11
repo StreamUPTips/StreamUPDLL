@@ -27,7 +27,7 @@ namespace StreamUP
                 ["requestData"] = requestData
             };
 
-            _CPH.ObsSendRaw("CallVendorRequest", requestData.ToString(), obsConnection);
+            _CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
             LogInfo($"Set show transition successfully");
             return true;
         }
@@ -53,7 +53,7 @@ namespace StreamUP
                 ["requestData"] = requestData
             };
 
-            _CPH.ObsSendRaw("CallVendorRequest", requestData.ToString(), obsConnection);
+            _CPH.ObsSendRaw("CallVendorRequest", request.ToString(), obsConnection);
             LogInfo($"Set hide transition successfully");
             return true;
         }

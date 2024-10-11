@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
 using static StreamUP.StreamUpLib;
+using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
 {
@@ -251,64 +252,13 @@ namespace StreamUP
         [Obsolete]
         private static List<string> GetSBActions(this IInlineInvokeProxy CPH, IDictionary<string, object> sbArgs)
         {
-            ClientWebSocket ws = new ClientWebSocket();
+            
             var sbActions = new List<string>();
-
-            var wsuri = sbArgs["websocketURI"].ToString();
-            try
+            List<ActionData> actions = CPH.GetActions();
+            foreach (ActionData action in actions)
             {
-                ws.ConnectAsync(new Uri(wsuri), CancellationToken.None).Wait();
+                sbActions.Add(action.Name);
             }
-            catch
-            {
-                System.Windows.Forms.MessageBox.Show("An error occurred while fetching Streamer.bot actions.\nPlease check your Streamer.bot websocket settings, make sure the internal websocket server is turned on and try again.\n\nThe websocket URL and port should match your Streamer.bot instance.", "StreamUP Settings UI - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return sbActions;
-            }
-
-            string response = string.Empty;
-            string json = string.Empty;
-            string data = JsonConvert.SerializeObject(
-                new
-                {
-                    request = "GetActions",
-                    id = "123"
-                }
-            );
-
-            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-            var dataSegment = new ArraySegment<byte>(dataBytes);
-            ws.SendAsync(dataSegment, WebSocketMessageType.Text, true, CancellationToken.None).Wait();
-            var buffer = new byte[8192];
-            var bufferSegment = new ArraySegment<byte>(buffer);
-            WebSocketReceiveResult result = ws.ReceiveAsync(bufferSegment, CancellationToken.None).Result;
-            response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
-            json += response;
-
-            if (result.EndOfMessage)
-            {
-                response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
-            }
-            else
-            {
-                while (!result.EndOfMessage)
-                {
-                    result = ws.ReceiveAsync(bufferSegment, CancellationToken.None).Result;
-                    response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
-                    json = json + response;
-                }
-
-                response = Encoding.UTF8.GetString(bufferSegment.Array, bufferSegment.Offset, result.Count);
-            }
-
-            JObject actionJson = JObject.Parse(json.ToString());
-            JArray actionName = actionJson.Value<JArray>("actions");
-            foreach (JObject item in actionName)
-            {
-                object name = item["name"].ToString();
-                sbActions.Add(name.ToString());
-            }
-
-            ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "No longer needed", CancellationToken.None).Wait();
             return sbActions;
         }
 
