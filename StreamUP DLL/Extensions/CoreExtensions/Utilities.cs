@@ -87,6 +87,28 @@ namespace StreamUP
             return true;
         }
 
+
+        public string CreateGUID(int count = 12)
+        {
+            //Declare string for alphabet
+            string randomIdString = "";
+            //Loop through the ASCII characters 65 to 90
+            for (int i = 1; i <= count; i++) //
+            {
+                int number = _CPH.Between(0, 35);
+                if (number < 10)
+                {
+                    randomIdString += number.ToString();
+                }
+                else
+                {
+                    int letter = number + 55;
+                    randomIdString += ((char)letter).ToString();
+                }
+            }
+            return randomIdString;
+        }
+
     }
 
     public static class NumericExtensions
