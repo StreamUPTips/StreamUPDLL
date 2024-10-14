@@ -29,6 +29,7 @@ namespace StreamUP
 
             // Convert productInfo string into ProductInfo class
             productInfo = JsonConvert.DeserializeObject<ProductInfo>(productInfoJson);
+    
             LogInfo("Retrieved productInfo successfully");
             return true;
         }
