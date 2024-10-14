@@ -48,6 +48,9 @@ namespace StreamUP
             triggerData.AmountCurrencyDecimal = finalAmount;
             triggerData.AmountCurrencyDouble = (double)finalAmount;
 
+            triggerData.AmountRaw = (double)inputAmount;
+            triggerData.FromCode = inputCurrencyCode;
+
             triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "message", "No arg 'message' found");
             triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "username", "No arg 'username' found");
             triggerData.UserImage = "https://streamer.bot/img/integrations/tipeestream.png";

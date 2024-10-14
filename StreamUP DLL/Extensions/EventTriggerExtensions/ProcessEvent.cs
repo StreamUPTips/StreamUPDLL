@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Streamer.bot.Common.Events;
 
 namespace StreamUP
@@ -16,6 +17,7 @@ namespace StreamUP
             { EventType.DonorDriveDonation, new DonorDriveDonationHandler() },
             { EventType.FourthwallDonation, new FourthwallDonationHandler() },
             { EventType.KofiDonation, new KofiDonationHandler() },
+            {EventType.PallyggCampaignTip, new PallyGGCampaignTipHandler()},
             { EventType.StreamElementsTip, new StreamElementsTipHandler() },
             { EventType.StreamlabsDonation, new StreamlabsDonationHandler() },
             { EventType.Test, new TestHandler() },
@@ -125,5 +127,8 @@ namespace StreamUP
         public bool IsMultiMonth {get; set;} = false;
         public int MonthDuration { get; set; } = -1;
         public int MonthTenure { get; set; } = -1;
+
+        public string FromCode {get; set;} = null;
+        public double AmountRaw {get; set;} = -1;
     }
 }

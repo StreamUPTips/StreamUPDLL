@@ -48,6 +48,9 @@ namespace StreamUP
             triggerData.AmountCurrencyDecimal = finalAmount;
             triggerData.AmountCurrencyDouble = (double)finalAmount;
 
+            triggerData.AmountRaw = (double)inputAmount;
+            triggerData.FromCode = inputCurrencyCode;
+
             triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "donationMessage", "No arg 'donationMessage' found");
             triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "donationFrom", "No arg 'donationFrom' found");
             triggerData.UserImage = "https://streamer.bot/img/integrations/streamlabs.png";
