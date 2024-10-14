@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace StreamUP
 {
-    public class KofiDonationHandler : IEventHandler
+    public class PallyGGCampaignTipHandler : IEventHandler
     {
         public TriggerData HandleEvent(IDictionary<string, object> sbArgs, StreamUpLib SUP)
         {
@@ -10,8 +10,8 @@ namespace StreamUP
             triggerData.Donation = true;
 
             // Get donation amount and currency code
-            decimal inputAmount = SUP.GetValueOrDefault<decimal>(sbArgs, "amount", -1);
-            string inputCurrencyCode = SUP.GetValueOrDefault<string>(sbArgs, "currency", "No arg 'currency' found");
+            decimal inputAmount = SUP.GetValueOrDefault<decimal>(sbArgs, "tipGrossAmount", -1);
+            string inputCurrencyCode = SUP.GetValueOrDefault<string>(sbArgs, "currency", "usd");
 
             // Get local currency
             bool gotLocalCurrency = SUP.GetLocalCurrencyCode(out string localCurrencyCode);
@@ -51,9 +51,9 @@ namespace StreamUP
             triggerData.AmountRaw = (double)inputAmount;
             triggerData.FromCode = inputCurrencyCode;
 
-            triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "message", "No arg 'message' found");
-            triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "from", "No arg 'from' found");
-            triggerData.UserImage = "https://cdn.prod.website-files.com/5c14e387dab576fe667689cf/64f1a9ddd0246590df69e9ef_ko-fi_logo_02-p-500.png";
+            triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "tipMessage", "No arg 'message' found");
+            triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "tipDisplayName", "No arg 'username' found");
+            triggerData.UserImage = "https://docs.streamer.bot/img/icons/pallygg.svg"; //# This is the only image i could find so ill leave it like this for now, in future maybe we should host our own images
             return triggerData;
         }
     }

@@ -54,6 +54,9 @@ namespace StreamUP
             triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "donorMessage", "No arg 'donorMessage' found");
             triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "donorName", "No arg 'donorName' found");
 
+            triggerData.AmountRaw = (double)inputAmount;
+            triggerData.FromCode = inputCurrencyCode;
+
             string donorAvatar = SUP.GetValueOrDefault<string>(sbArgs, "donorAvatarUrl", null);
             if (string.IsNullOrEmpty(donorAvatar))
             {

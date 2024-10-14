@@ -48,6 +48,9 @@ namespace StreamUP
             triggerData.AmountCurrencyDecimal = finalAmount;
             triggerData.AmountCurrencyDouble = (double)finalAmount;
 
+            triggerData.AmountRaw = (double)inputAmount;
+            triggerData.FromCode = inputCurrencyCode;
+
             triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "message", "No arg 'message' found");
             triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "username", "No arg 'username' found");
             triggerData.UserImage = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
