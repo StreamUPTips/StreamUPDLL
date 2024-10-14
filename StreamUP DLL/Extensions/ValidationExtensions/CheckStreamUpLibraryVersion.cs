@@ -20,7 +20,7 @@ namespace StreamUP
                 return false;
             }
 
-            LogInfo("StreamUP library version is sufficient");
+            LogInfo($"StreamUP library version is sufficient. currentVersion=[{currentVersion}], minimumRequiredVersion=[{minimumRequiredVersion}]");
             return true;
         }    
 
