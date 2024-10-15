@@ -31,7 +31,8 @@ namespace StreamUP
             catch (Exception e)
             {
                 LogError($"[Currency Core] Error getting points value for {platform} user ({userId}) -- {e}");
-                LogDebug($"[Currency Core] Error Pulling Points as 0");
+                SetUserPointsById(userId,platform,0,varName);
+                LogDebug($"[Currency Core] Error Pulling Points as 0, and Resetting user back to 0");
                 return 0;
             }
             _CPH.SetArgument("points", points);
@@ -64,6 +65,7 @@ namespace StreamUP
             catch (Exception e)
             {
                 LogError($"[Currency Core] Error getting points value for {platform} user ({user}) -- {e}");
+                SetUserPointsByUser(user,platform,0,varName);
                 LogDebug($"[Currency Core] Error Pulling Points as 0");
             }
             _CPH.SetArgument("points", points);
