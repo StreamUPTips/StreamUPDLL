@@ -91,5 +91,52 @@ namespace StreamUP
 
             throw new ArgumentException("Unsupported collection type");
         }
+
+         public T TryGetArgOrDefault<T>(string key, T defaultValue = default)
+        {
+            if (_CPH.TryGetArg(key, out object value))
+            {
+                try
+                {
+                    if (value is T variable)
+                    {
+                        return variable;
+                    }
+                    else if (typeof(T) == typeof(string) && value is Guid guidValue)
+                    {
+                        return (T)(object)guidValue.ToString(); 
+                    }
+                    else if (value is IConvertible)
+                    {
+                        return (T)Convert.ChangeType(value, typeof(T));
+                    }
+                    else
+                    {
+                        LogError($"Key '{key}' contains a value of type '{value.GetType()}' which cannot be converted to type '{typeof(T)}'.", "Type Conversion Error");
+                        return defaultValue;
+                    }
+                }
+                catch (InvalidCastException ex)
+                {
+                    LogError($"Error converting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Conversion Error");
+                    return defaultValue;
+                }
+                catch (FormatException ex)
+                {
+                    LogError($"Error formatting key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Format Error");
+                    return defaultValue;
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Unexpected error with key '{key}' to type '{typeof(T)}': {ex.Message}", $"{typeof(T).Name} Unexpected Error");
+                    return defaultValue;
+                }
+            }
+            else
+            {
+                LogError($"Key '{key}' not found in arguments.", "Key Not Found");
+                return defaultValue;
+            }
+        }
     }
 }
