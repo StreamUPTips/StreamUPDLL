@@ -9,30 +9,18 @@ namespace StreamUP
     {
         public long GetUserPointsById(string userId, Platform platform, string varName = "points")
         {
-            long points = 0; // Default value
-
+            long points;
             try
             {
-                switch (platform)
-                {
-                    case Platform.Twitch:
-                        var twitchPoints = _CPH.GetTwitchUserVarById<long?>(userId, varName, true);
-                        points = twitchPoints ?? 0;
-
-                        break;
-                    case Platform.YouTube:
-                        var youtubePoints = _CPH.GetYouTubeUserVarById<long?>(userId, varName, true);
-                        points = youtubePoints ?? 0;
-                        break;
-
-
-                }
+                var pointsVarValue = GetUserVariableById<long?>(userId,varName,platform,true,0);
+                points = pointsVarValue ?? 0;
             }
             catch (Exception e)
             {
                 LogError($"[Currency Core] Error getting points value for {platform} user ({userId}) -- {e}");
-                SetUserPointsById(userId,platform,0,varName);
+                SetUserVariableById(userId,varName,0,platform,true);
                 LogDebug($"[Currency Core] Error Pulling Points as 0, and Resetting user back to 0");
+                _CPH.SetArgument("points", 0);
                 return 0;
             }
             _CPH.SetArgument("points", points);
@@ -44,29 +32,21 @@ namespace StreamUP
 
         public long GetUserPointsByUser(string user, Platform platform, string varName = "points")
         {
-            long points = 0; // Default value
+            long points; // Default value
 
             try
             {
-                switch (platform)
-                {
-                    case Platform.Twitch:
-                        var twitchPoints = _CPH.GetTwitchUserVar<long?>(user, varName, true);
-                        points = twitchPoints ?? 0;
-
-                        break;
-                    case Platform.YouTube:
-                        var youtubePoints = _CPH.GetYouTubeUserVar<long?>(user, varName, true);
-                        points = youtubePoints ?? 0;
-                        break;
+                var pointsVarValue = GetUserVariable<long?>(user,varName,platform,true,0);
+                points = pointsVarValue ?? 0;
                
-                }
             }
             catch (Exception e)
             {
                 LogError($"[Currency Core] Error getting points value for {platform} user ({user}) -- {e}");
-                SetUserPointsByUser(user,platform,0,varName);
+                SetUserVariableById(user,varName,0,platform,true);
+                _CPH.SetArgument("points", 0);
                 LogDebug($"[Currency Core] Error Pulling Points as 0");
+                return 0;
             }
             _CPH.SetArgument("points", points);
             LogInfo($"[Currency Core] Getting User Points from {platform}, {user} has {points} points");
