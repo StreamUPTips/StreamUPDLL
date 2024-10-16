@@ -9,19 +9,9 @@ namespace StreamUP
         public void SetUserPointsById(string userId, Platform platform, long points, string varName = "points")
         {
 
-            switch (platform)
-            {
-                case Platform.Twitch:
-                    _CPH.SetTwitchUserVarById(userId, varName, points, true);
-                    break;
-                case Platform.YouTube:
-                    _CPH.SetYouTubeUserVarById(userId, varName, points, true);
-                    break;
-
-
-            }
-            long oldPoints = GetUserPointsById(userId, platform);
+            long oldPoints = GetUserPointsById(userId, platform, varName);
             _CPH.SetArgument("oldPoints", oldPoints);
+            SetUserVariableById(userId, varName, points, platform, true);
             _CPH.SetArgument("newPoints", points);
             LogInfo($"[Currency Core] Set user points to {userId} => {platform} => {points}");
         }
@@ -30,20 +20,12 @@ namespace StreamUP
         public void SetUserPointsByUser(string user, Platform platform, long points, string varName = "points")
         {
 
-
-            switch (platform)
-            {
-                case Platform.Twitch:
-                    _CPH.SetTwitchUserVar(user, varName, points, true);
-                    break;
-                case Platform.YouTube:
-                    _CPH.SetYouTubeUserVar(user, varName, points, true);
-                    break;
-
-
-            }
-            long oldPoints = GetUserPointsByUser(user, platform);
+            long oldPoints = GetUserPointsByUser(user, platform, varName);
             _CPH.SetArgument("oldPoints", oldPoints);
+
+            SetUserVariable(user, varName, points, platform, true);
+
+
             _CPH.SetArgument("newPoints", points);
             LogInfo($"[Currency Core] Set user points to {user} => {platform} => {points}");
 

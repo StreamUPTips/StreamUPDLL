@@ -19,7 +19,7 @@ namespace StreamUP
             }
             LogInfo($"[Currency Core] Adding {userId} Points => {points} + {pointsToAdd} = {newPoints}");
 
-            SetUserPointsById(userId, platform, newPoints);
+            SetUserPointsById(userId, platform, newPoints, varName);
 
             _CPH.SetArgument("oldPoints", points);
             _CPH.SetArgument("newPoints", newPoints);
@@ -39,7 +39,7 @@ namespace StreamUP
                 newPoints = 0;
             }
             LogInfo($"[Currency Core] Adding {user} Points =>  {points} + {pointsToAdd} = {newPoints}");
-            SetUserPointsByUser(user, platform, newPoints);
+            SetUserPointsByUser(user, platform, newPoints, varName);
             _CPH.SetArgument("oldPoints", points);
             _CPH.SetArgument("newPoints", newPoints);
             return newPoints;
