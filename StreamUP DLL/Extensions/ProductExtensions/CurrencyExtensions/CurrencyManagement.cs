@@ -54,7 +54,7 @@ namespace StreamUP
                 }
                 else
                 {
-                   LogInfo($"[Leaderboard - Points] WRN {user.UserType}-{user.UserId} - {user.UserName} In Group Not Added!");
+                    LogInfo($"[Leaderboard - Points] WRN {user.UserType}-{user.UserId} - {user.UserName} In Group Not Added!");
                 }
             }
 
@@ -76,7 +76,7 @@ namespace StreamUP
                         UserName = user.UserName,
                     };
                     users.Add(youtubeUser);
-                   LogInfo($"[YouTubeUser Found] {user.UserId} => {user.UserName}");
+                    LogInfo($"[YouTubeUser Found] {user.UserId} => {user.UserName}");
 
                 }
             }
@@ -120,10 +120,36 @@ namespace StreamUP
 
         }
 
+        public int AddPointsToAllUsers(long pointsToAdd, string varName = "points")
+        {
+            List<UserVariableValue<long>> userScores = GetAllPointUsers();
+            foreach (UserVariableValue<long> user in userScores)
+            {
+                Enum.TryParse(user.UserType, true, out Platform platform);
+                AddUserPointsById(user.UserId, platform, pointsToAdd, varName);
+            }
+            return userScores.Count;
+        }
+
+        public int SetPointsToAllUsers(long pointsToSet, string varName = "points")
+        {
+            List<UserVariableValue<long>> userScores = GetAllPointUsers();
+            foreach (UserVariableValue<long> user in userScores)
+            {
+                Enum.TryParse(user.UserType, true, out Platform platform);
+                SetUserPointsById(user.UserId, platform, pointsToSet,varName);
+            }
+            return userScores.Count;
+        }
+
+
+
+
+
         public bool DefaultPointHandler(string userId, Platform platform, long points, out long newPoints, string varName = "points")
         {
-            
-            SetUserPointsById(userId,platform,points,varName);
+
+            SetUserPointsById(userId, platform, points, varName);
             LogDebug($"User - {userId} fell below mark of points, rounding back up to {points}");
             newPoints = points;
             return true;
