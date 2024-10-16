@@ -122,7 +122,7 @@ namespace StreamUP
 
         public int AddPointsToAllUsers(long pointsToAdd, string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = GetAllPointUsers();
+            List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
             foreach (UserVariableValue<long> user in userScores)
             {
                 Enum.TryParse(user.UserType, true, out Platform platform);
@@ -133,7 +133,7 @@ namespace StreamUP
 
         public int SetPointsToAllUsers(long pointsToSet, string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = GetAllPointUsers();
+            List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
             foreach (UserVariableValue<long> user in userScores)
             {
                 Enum.TryParse(user.UserType, true, out Platform platform);
