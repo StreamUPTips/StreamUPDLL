@@ -66,6 +66,12 @@ namespace StreamUP
 
         public T TryGetValueOrRandom<T>(IEnumerable<T> collection, int index = -1)
         {
+            if(collection.Count == 0)
+            {
+                LogError("Collection is Empty, Returning null");
+                return null;
+
+            }
             if (collection is IList<T> list)
             {
                 // Handle lists or arrays
