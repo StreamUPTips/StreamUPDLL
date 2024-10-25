@@ -95,7 +95,9 @@ namespace StreamUP
                     }
                     else if (typeof(T) == typeof(Dictionary<string, bool>) ||
                              typeof(T) == typeof(Dictionary<string, string>) ||
-                             typeof(T) == typeof(Dictionary<string, int>))
+                             typeof(T) == typeof(Dictionary<string, int>) ||
+                             typeof(T) == typeof(List<(string Emote, int Payout , int Percentage)>)
+                             )
                     {
                         return JsonConvert.DeserializeObject<T>(jsonValue.ToString());
                     }
