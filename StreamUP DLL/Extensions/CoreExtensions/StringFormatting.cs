@@ -69,5 +69,18 @@ namespace StreamUP
             return combinedInputs.Length > 0 ? combinedInputs.ToString().TrimStart() : string.Empty;
 
         }
+
+        public bool RemoveUrlFromString(string inputText, string replacementText, out string outputText)
+        {
+            LogInfo($"Replacing Url from [{inputText}] with [{replacementText}]");
+
+            // This pattern matches URLs starting with http://, https://, or ftp:// followed by any characters until a space is encountered
+            string urlPattern = @"\b(http|https|ftp)://\S+";
+            Regex urlRegex = new Regex(urlPattern, RegexOptions.IgnoreCase);
+
+            outputText = urlRegex.Replace(inputText, replacementText);
+            LogInfo($"Successfully replaced Url. Output string: [{outputText}]");
+            return true;
+        }
     }
 }

@@ -18,7 +18,7 @@ namespace StreamUP
             List<GroupUser> users = [];
             if (usersInGroup.Count == 0)
             {
-                
+
                 LogError("No Users In Said Group");
                 return users;
             }
@@ -29,17 +29,37 @@ namespace StreamUP
             }
             else
             {
-                List<int> randomIndex = GetRandomNumbers(0,usersInGroup.Count,count);
-             
-                foreach(int i in randomIndex)
+                List<int> randomIndex = GetRandomNumbers(0, usersInGroup.Count, count);
+
+                foreach (int i in randomIndex)
                 {
                     users.Add(usersInGroup[i]);
                 }
 
-                
+
                 return users;
             }
 
+        }
+
+        public GroupUser GetRandomGroupUser(string groupName)
+        {
+            if (!_CPH.GroupExists(groupName))
+            {
+                _CPH.AddGroup(groupName);
+            }
+            List<GroupUser> usersInGroup = _CPH.UsersInGroup(groupName);
+
+            if (usersInGroup.Count == 0)
+            {
+
+                LogError("No Users In Said Group");
+                return default;
+            }
+
+            int index = _CPH.Between(0, usersInGroup.Count - 1);
+            GroupUser randomUser = usersInGroup[index];
+            return randomUser;
         }
 
     }
