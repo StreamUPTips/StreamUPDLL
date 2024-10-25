@@ -16,18 +16,7 @@ namespace StreamUP
             return AppDomain.CurrentDomain.BaseDirectory;
         }
 
-        public bool RemoveUrlFromString(string inputText, string replacementText, out string outputText)
-        {
-            LogInfo($"Replacing Url from [{inputText}] with [{replacementText}]");
-
-            // This pattern matches URLs starting with http://, https://, or ftp:// followed by any characters until a space is encountered
-            string urlPattern = @"\b(http|https|ftp)://\S+";
-            Regex urlRegex = new Regex(urlPattern, RegexOptions.IgnoreCase);
-
-            outputText = urlRegex.Replace(inputText, replacementText);
-            LogInfo($"Successfully replaced Url. Output string: [{outputText}]");
-            return true;
-        }
+      
 
         public T GetValueOrDefault<T>(IDictionary<string, object> dict, string key, T defaultValue = default)
         {
@@ -111,19 +100,7 @@ namespace StreamUP
             return randomIdString;
         }
 
-        public void WriteToTextFile(string textToSave, string fileName, string filePath)
-        {
-            string fileNameFull = $"{fileName}.txt";
-            Directory.CreateDirectory(filePath);
-            string completePath = Path.Combine(filePath, fileNameFull);
-            
-            // Use FileStream with FileShare.ReadWrite to allow other processes to read the file while it's being written.
-            using (var fileStream = new FileStream(completePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
-            using (var writer = new StreamWriter(fileStream, Encoding.UTF8))
-            {
-                writer.WriteLine(textToSave);
-            }
-        }
+        
 
 
     }
