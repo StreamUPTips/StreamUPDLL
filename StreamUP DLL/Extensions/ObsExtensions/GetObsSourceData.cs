@@ -173,6 +173,27 @@ namespace StreamUP
             return true;
         }
 
+        public bool GetObsSourceFilterSettings(string sourceName, string filterName, int obsConnection, out JObject filterSettings)
+        {
+            LogInfo($"Requesting source [{sourceName}] filter settings for filter [{filterName}]");
+
+            // Get source filter data
+            GetObsSourceFilterData(sourceName, filterName, obsConnection, out JObject filterData);
+
+            // Parse response
+            if (filterData["filterSettings"] == null)
+            {
+                LogError("filterSettings not found in the response");
+                filterSettings = null;
+                return false;
+            }
+            
+            filterSettings = (JObject)filterData["filterSettings"];
+            
+            LogInfo("Successfully retrieved source filter settings");
+            return true;
+        }
+
         public bool GetObsSourceShowTransition(string sceneName, string sourceName, int obsConnection, out JObject showTransition) //! Requires StreamUP OBS plugin
         {
             LogInfo($"Requesting show transition for source [{sourceName}] on scene [{sceneName}]");
