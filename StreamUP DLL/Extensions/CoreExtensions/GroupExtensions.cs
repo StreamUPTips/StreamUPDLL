@@ -15,7 +15,7 @@ namespace StreamUP
                 _CPH.AddGroup(groupName);
             }
             List<GroupUser> usersInGroup = _CPH.UsersInGroup(groupName);
-            List<GroupUser> users = [];
+            List<GroupUser> users = new List<GroupUser>();
             if (usersInGroup.Count == 0)
             {
 
