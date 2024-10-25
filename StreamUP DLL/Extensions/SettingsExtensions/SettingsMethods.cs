@@ -11,9 +11,10 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         //! Headings And Misc
-         public Control AddHeading(string headingText, string tabName = "General")
+
+        public Control AddHeading(string headingText, string tabName = "General")
         {
-          
+
 
             var heading = new Label
             {
@@ -32,7 +33,7 @@ namespace StreamUP
         }
         public Control AddLabel(string labelText, string tabName = "General")
         {
-        
+
             var label = new Label
             {
                 Text = labelText,
@@ -48,7 +49,6 @@ namespace StreamUP
 
             return label;
         }
-
         public Control AddInfo(string labelText, string tabName = "General")
         {
             var label = new Label
@@ -67,10 +67,9 @@ namespace StreamUP
 
             return label;
         }
-
         public Control AddLink(string labelText, string url, string tabName = "General")
         {
-            
+
 
             LinkLabel linkLabel = new LinkLabel
             {
@@ -90,7 +89,7 @@ namespace StreamUP
         }
         public Control AddLine(string tabName = "General")
         {
-            
+
 
             var rule = new Label
             {
@@ -105,13 +104,13 @@ namespace StreamUP
                 AutoSize = false,
             };
 
-            
+
             return rule;
 
         }
         public Control AddDescription(string labelText, string tabName = "General")
         {
-           
+
 
 
             var label = new Label
@@ -126,12 +125,12 @@ namespace StreamUP
                 Tag = tabName
             };
 
-            
+
             return label;
         }
         public Control AddSpace(string tabName = "General")
         {
-            
+
 
             var space = new Label
             {
@@ -147,13 +146,13 @@ namespace StreamUP
 
             };
 
-            
+
             return space;
 
         }
         public Control AddEnd(string tabName = "General")
         {
-            
+
 
             var space = new Label
             {
@@ -169,7 +168,7 @@ namespace StreamUP
 
             };
 
-            
+
             return space;
 
         }
@@ -178,7 +177,7 @@ namespace StreamUP
         //! TEXT Based
         public Control AddTextBox(string description, string defaultValue, string saveName, string tabName = "General")
         {
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -231,13 +230,13 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
 
 
-         
+
 
             return settingsTable;
         }
         public Control AddMultiLineTextBox(string description, string defaultValue, string saveName, string tabName = "General")
         {
-          
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -288,14 +287,14 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-           
-          
+
+
 
             return settingsTable;
         }
         public Control AddLimitText(string description, string defaultValue, int textLimit, string saveName, string tabName = "General")
         {
-          
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -352,7 +351,7 @@ namespace StreamUP
         }
         public Control AddList(string description, List<string> defaultValue, string saveName, string tabName = "General")
         {
-          
+
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -426,7 +425,7 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-         
+
 
             return settingsTable;
         }
@@ -482,13 +481,13 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-           
+
             return settingsTable;
         }
         public Control AddDropDown(string description, string[] dropdown, string defaultValue, string saveName, string tabName = "General")
         {
 
-           
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -531,18 +530,18 @@ namespace StreamUP
             };
 
             input.Items.AddRange(dropdown);
-            if(string.IsNullOrEmpty(defaultValue) || !input.Items.Contains(defaultValue))
+            if (string.IsNullOrEmpty(defaultValue) || !input.Items.Contains(defaultValue))
             {
-                input.SelectedIndex = 0 ;
+                input.SelectedIndex = 0;
             }
             else
             {
-            input.SelectedItem = GetSetting<string>(saveName, defaultValue);
+                input.SelectedItem = GetSetting<string>(saveName, defaultValue);
             }
             // Add the label and input to the table
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
-           
+
             return settingsTable;
 
 
@@ -550,7 +549,7 @@ namespace StreamUP
         }
         public Control AddStringDictionary(string description, string columnOneName, string columnTwoName, Dictionary<string, string> defaultValue, string saveName, string tabName = "General")
         {
-          
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -629,7 +628,7 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 0, 1);
 
             // Add the table layout to the list of controls
-            
+
 
             return settingsTable;
         }
@@ -683,13 +682,13 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-          
+
 
             return settingsTable;
         }
         public Control AddDecimal(string description, double defaultValue, int decimalPlaces, double increments, string saveName, string tabName = "General")
         {
-           
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -738,13 +737,13 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-            
+
 
             return settingsTable;
         }
         public Control AddTrackbar(string description, int defaultValue, int min, int max, string saveName, string tabName = "General")
         {
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -810,12 +809,12 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
             settingsTable.Controls.Add(valueLabel, 2, 0);
 
-           
+
             return settingsTable;
         }
         public Control AddIntDictionary(string description, string columnOneName, string columnTwoName, Dictionary<string, int> defaultValue, string saveName, string tabName = "General")
         {
-           
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -893,14 +892,14 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 0, 1);
 
-          
+
 
             return settingsTable;
         }
         //! BOOLS
         public Control AddTrueFalse(string description, bool defaultValue, string saveName, string tabName = "General")
         {
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -964,12 +963,12 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-           
+
             return settingsTable;
         }
         public Control AddYesNo(string description, bool defaultValue, string saveName, string tabName = "General")
         {
-           
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -1034,11 +1033,11 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-             return settingsTable;
+            return settingsTable;
         }
         public Control AddOnOff(string description, bool defaultValue, string saveName, string tabName = "General")
         {
-           
+
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -1102,13 +1101,13 @@ namespace StreamUP
             settingsTable.Controls.Add(label, 0, 0);
             settingsTable.Controls.Add(input, 1, 0);
 
-           
+
 
             return settingsTable;
         }
         public Control AddCustomBool(string description, bool defaultValue, string trueName, string trueColor, string falseName, string falseColor, string saveName, string tabName = "General")
         {
-            
+
 
             Color boolCustomTrueColor = ColorTranslator.FromHtml(trueColor);
             Color boolCustomFalseColor = ColorTranslator.FromHtml(falseColor);
@@ -1175,13 +1174,13 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
 
             // Add the table layout to the list of controls
-           
+
 
             return settingsTable;
         }
         public Control AddChecklist(string description, Dictionary<string, bool> checkListItems, string saveName, string tabName = "General")
         {
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -1248,7 +1247,7 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
 
             // Add the table layout to the list of controls
-           
+
 
             return settingsTable;
 
@@ -1256,7 +1255,7 @@ namespace StreamUP
         //! OTHERS
         public Control AddColour(string description, string defaultValue, string saveName, string tabName = "General")
         {
-            
+
 
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -1326,7 +1325,7 @@ namespace StreamUP
                     int green = selectedColor.G;
                     int blue = selectedColor.B;
                     int red = selectedColor.R;
-                    long obsColour =  _CPH.ObsConvertRgb(alpha,red,green,blue);
+                    long obsColour = _CPH.ObsConvertRgb(alpha, red, green, blue);
                     valueLabel.Text = $"{obsColour}";
                     string hexValue = selectedColor.R.ToString("X2") + selectedColor.G.ToString("X2") + selectedColor.B.ToString("X2");
                     input.Text = "#" + hexValue;
@@ -1357,23 +1356,23 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
             settingsTable.Controls.Add(valueLabel, 2, 0);
 
-           
+
 
             return settingsTable;
         }
         public Control AddColor(string description, string defaultValue, string saveName, string tabName = "General")
         {
-            
+
 
 
             return AddColour(description, defaultValue, saveName, tabName);
 
 
-          
+
         }
         public Control AddFile(string description, string saveName, string tabName = "General")
         {
-            
+
 
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -1451,13 +1450,13 @@ namespace StreamUP
             settingsTable.Controls.Add(valueLabel, 1, 0);
             settingsTable.Controls.Add(input, 2, 0);
 
-           
+
 
             return settingsTable;
         }
         public Control AddFolder(string description, string saveName, string tabName = "General")
         {
-            
+
 
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -1535,13 +1534,13 @@ namespace StreamUP
             settingsTable.Controls.Add(valueLabel, 1, 0);
             settingsTable.Controls.Add(input, 2, 0);
 
-           
+
 
             return settingsTable;
         }
         public Control AddFont(string description, string defaultName, int defaultSize, string defaultStyle, string saveName, string tabName = "General")
         {
-            
+
 
             TableLayoutPanel settingsTable = new TableLayoutPanel
             {
@@ -1642,7 +1641,7 @@ namespace StreamUP
             settingsTable.Controls.Add(style, 1, 1);
 
 
-           
+
 
             return settingsTable;
         }
@@ -1650,7 +1649,7 @@ namespace StreamUP
         {
 
 
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -1707,18 +1706,18 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
             toolTip.SetToolTip(input, "Run the Action");
             // Add the table layout to the list of controls
-           
+
             return settingsTable;
 
 
 
         }
 
-         public Control AddRunMethod(string description, string buttonText, string executeCode, string methodName, string tabName = "General")
+        public Control AddRunMethod(string description, string buttonText, string executeCode, string methodName, string tabName = "General")
         {
 
 
-            
+
 
             // Create a TableLayoutPanel to hold the label and NumericUpDown
             TableLayoutPanel settingsTable = new TableLayoutPanel
@@ -1767,7 +1766,7 @@ namespace StreamUP
             input.FlatAppearance.MouseDownBackColor = backColour1; // Click color
             input.Click += (sender, e) =>
             {
-                _CPH.ExecuteMethod(executeCode,methodName);
+                _CPH.ExecuteMethod(executeCode, methodName);
             };
 
             // Add the label and input to the table
@@ -1775,7 +1774,7 @@ namespace StreamUP
             settingsTable.Controls.Add(input, 1, 0);
             toolTip.SetToolTip(input, "Run the Action");
             // Add the table layout to the list of controls
-           
+
             return settingsTable;
 
 
@@ -1793,7 +1792,7 @@ namespace StreamUP
 
             string[] actionsArray = actionDropDown.ToArray();
             Array.Sort(actionsArray);
-            
+
             return AddDropDown(description, actionsArray, defaultValue, saveName, tabName);
 
 
@@ -1809,21 +1808,112 @@ namespace StreamUP
 
             string[] rewardArray = rewardDropdown.ToArray();
             Array.Sort(rewardArray);
-            
+
             return AddDropDown(description, rewardArray, defaultValue, saveName, tabName);
 
 
-          
+
         }
-        
+
         public Control AddGroupsDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<string> groups = _CPH.GetGroups();
             string[] groupsArray = groups.ToArray();
             Array.Sort(groupsArray);
-            
-             return AddDropDown(description, groupsArray, defaultValue, saveName, tabName);
-          
+
+            return AddDropDown(description, groupsArray, defaultValue, saveName, tabName);
+
+        }
+
+
+        //! Extensions Specific
+        public Control AddEmoteTable(string description, string columnOneName, string columnTwoName, string columnThreeName, List<(string Emote, int Payout , int Percentage)> defaultValue, string saveName, string tabName = "General")
+        {
+
+
+            // Create a TableLayoutPanel to hold the label and NumericUpDown
+            TableLayoutPanel settingsTable = new TableLayoutPanel
+            {
+                ColumnCount = 1,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Margin = new Padding(0),
+                Dock = DockStyle.Fill,
+                Tag = tabName
+
+            };
+
+            // Define column styles for better control over sizing
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column1Percent));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, column2Percent));
+
+            var label = new Label
+            {
+                Text = description,
+                AutoSize = true,
+                //Margin = new Padding(10),
+                Font = labelFont,
+                ForeColor = forecolour1,
+
+            };
+
+
+            var input = new CustomDataGridView
+            {
+                Name = saveName,
+                Height = 200,
+                //Margin = new Padding(10),
+                BackColor = backColour2,
+                ForeColor = forecolour1,
+                Font = entryFont,
+                BorderStyle = BorderStyle.None,
+                ColumnHeadersVisible = true,
+                RowHeadersVisible = true,
+                RowHeadersWidth = 25,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+                DefaultCellStyle = new DataGridViewCellStyle
+                {
+                    BackColor = backColour2,
+                    ForeColor = forecolour1,
+                    SelectionBackColor = backColour1,
+                    SelectionForeColor = forecolour1
+                },
+                EnableHeadersVisualStyles = false,
+                GridColor = backColour2,
+                AllowUserToDeleteRows = true,
+                Dock = DockStyle.Bottom,
+                Anchor = AnchorStyles.Right | AnchorStyles.Left | AnchorStyles.Top,
+                AutoSize = false,
+
+            };
+
+
+
+
+
+
+            input.Columns.Add("columnOne", columnOneName);
+            input.Columns.Add("columnTwo", columnTwoName);
+            input.Columns.Add("columnThree", columnThreeName);
+
+
+
+            List<(string Emote, int Payout , int Percentage)> rowsToAdd = GetSetting<List<(string Emote, int Payout , int Percentage)>>(saveName, defaultValue);
+            foreach (var entry in rowsToAdd)
+            {
+                input.Rows.Add(entry.Item1, entry.Item2, entry.Item3);
+            }
+
+
+
+            // Add the label and input to the table
+            settingsTable.Controls.Add(label, 0, 0);
+            settingsTable.Controls.Add(input, 1, 0);
+
+
+
+            return settingsTable;
         }
 
     }

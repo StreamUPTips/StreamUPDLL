@@ -35,7 +35,7 @@ namespace StreamUP
             form.Load += (sender, e) => SaveButton_Click(sender, e, layout);
             // Close the progress bar
             UIResources.closeLoadingWindow = true;
-            
+
             return form;
         }
 
@@ -200,7 +200,7 @@ namespace StreamUP
             form.Controls.Add(buttonPanel);
             form.Controls.Add(statusBar);
             UIResources.streamUpSettingsProgress++;
-            
+
             return form;
         }
 
@@ -572,7 +572,7 @@ namespace StreamUP
         public void SaveButton_Click(object sender, EventArgs e, List<Control> layout)
         {
             LogInfo("Pressed Save");
-             _CPH.SetArgument("settingResetArgument", false);
+            _CPH.SetArgument("settingResetArgument", false);
             var numericUpDownsAndTextBoxes = layout
                 .OfType<TableLayoutPanel>()
                 .SelectMany(tableLayoutPanel => tableLayoutPanel.Controls.OfType<Control>());
@@ -642,7 +642,7 @@ namespace StreamUP
                             //LogInfo($"Save Name: {dataGridView.Name}, Data: {string.Join(",", dataRows.ToArray())}");
                             SaveSetting(dataGridView.Name, dataRows);
                         }
-                        else if (dataGridView.Columns.Count >= 2)
+                        else if (dataGridView.Columns.Count == 2)
                         {
                             bool isIntDict = true;
                             var dataDictString = new Dictionary<string, string>();
@@ -684,12 +684,43 @@ namespace StreamUP
 
 
                         }
+                        else if (dataGridView.Columns.Count == 3)
+                        {
+
+                            if (dataGridView.Name.Contains("slots"))
+                            {
+                                var dataTuple = new List<(string Emote, string Payout, string Percentage)>();
+
+
+                                foreach (DataGridViewRow row in dataGridView.Rows)
+                                {
+
+                                    if (!row.IsNewRow)
+                                    {
+                                        string key = row.Cells[0].Value?.ToString();
+                                        string value1 = row.Cells[1].Value?.ToString();
+                                        string value2 = row.Cells[2].Value?.ToString();
+
+                                        // Add the tuple to the list
+                                        dataTuple.Add((Emote: key, Payout: value1, Percentage: value2));
+                                    }
+                                }
+
+
+                                SaveSetting(dataGridView.Name, dataTuple);
+                            }
+
+
+
+
+                        }
+
                         break;
                 }
             }
-            if(sender == saveButton)
+            if (sender == saveButton)
             {
-            MessageBox.Show("Settings have been saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Settings have been saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

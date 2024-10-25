@@ -8,7 +8,8 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public long GetBetSize(string input, long currentPoints, long minBet, long maxBet, long defaultPoints, long defaultBet, bool minError, bool maxError)
+       
+        public long GetBetSize(string input, long currentPoints, long minBet, long maxBet, long defaultBet, bool rangeError)
         {
            
             if (maxBet < 1)
@@ -64,7 +65,7 @@ namespace StreamUP
             //num
             if (betSize > maxBet)
             {
-                if(maxError)
+                if(rangeError)
                 {
                     return -1;
                 }
@@ -76,7 +77,7 @@ namespace StreamUP
 
             if (betSize < minBet)
             {
-                if(minError)
+                if(rangeError)
                 {
                     return -2;
                 }
@@ -90,12 +91,6 @@ namespace StreamUP
             {
                 betSize = 0;
             }
-
-            if (betSize == 0)
-            {
-                betSize = defaultPoints;
-            }
-
 
             return betSize;
         }
