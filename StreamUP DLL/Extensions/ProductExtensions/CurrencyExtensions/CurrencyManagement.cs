@@ -18,16 +18,6 @@ namespace StreamUP
             return userScores;
         }
 
-        public bool CurrencyError(int code, string message, string game = "Points Games")
-        {
-
-            _CPH.SetArgument("failReason", message);
-            _CPH.SetArgument("failCode", code);
-            LogError($"[{game}] {code} - {message}");
-            _CPH.TriggerCodeEvent("currencyFail");
-
-            return true;
-        }
         public List<LeaderboardUser> GetLeaderboardUsers(List<UserVariableValue<long>> currentUsers, List<GroupUser> excludedUsers)
         {
             // Sort the currentUsers list by Points property in descending order
