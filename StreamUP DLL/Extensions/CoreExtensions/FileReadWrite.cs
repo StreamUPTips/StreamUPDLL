@@ -6,7 +6,7 @@ namespace StreamUP
     partial class StreamUpLib
     {
 
-        public void WriteToTextFile(string textToSave, string fileName, string filePath)
+        public void WriteToTextFile(string textToSave, string fileName, string filePath) 
         {
             string fileNameFull = $"{fileName}.txt";
             Directory.CreateDirectory(filePath);
@@ -19,5 +19,39 @@ namespace StreamUP
                 writer.WriteLine(textToSave);
             }
         }
+
+        //CreateFile
+
+        //ClearFile
+
+        //GetLinesCount
+
+        //ReadLines(int count)
+
+        //ReadAllText
+
+        //ReadAllLines
+
+        //DeleteLines(int count)
+
+        //ReadLine
+
+        //DeleteLine
+
+        //RandomLine(bool remove)
+
+        //Remove Text
+
+        //GetIndex
+
+        //Turn 1 into 1st, 2 into 2nd 5 into 5th
+
+        //TextFileAppend
+
+        //TextFileWrite
+
+        //ShuffleLines
+
+        //WriteAtLine
     }
 }
