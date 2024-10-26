@@ -78,7 +78,7 @@
     <Compile Include="Extensions\TwitchExtensions\*.cs" />
     <Compile Include="Extensions\YouTubeExtensions\*.cs" />
     <Compile Include="Extensions\ValidationExtensions\*.cs" />
-    <Compile Include="Extensions\TheRunExtensions\*.cs" />
+    <Compile Include="Extensions\ProductExtensions\TheRunExtensions\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
