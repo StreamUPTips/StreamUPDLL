@@ -11,8 +11,6 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using Streamer.bot.Plugin.Interface.Model;
 using System.CodeDom;
 using System.Data.Common;

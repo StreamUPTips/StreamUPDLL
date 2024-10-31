@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -82,5 +84,25 @@ namespace StreamUP
             LogInfo($"Successfully replaced Url. Output string: [{outputText}]");
             return true;
         }
+
+        public bool ContainsIgnoreCase(List<string> users, string user)
+        {
+            bool containsIgnoreCase = users.Any(item => string.Equals(item, user, StringComparison.OrdinalIgnoreCase));
+            return containsIgnoreCase;
+        }
+
+        public string ToOrdinalSuffix(string word)
+        {
+            if (word.EndsWith("11") || word.EndsWith("12") || word.EndsWith("13"))
+            {
+                return word + "th";
+            }
+
+            return word + (word.EndsWith("1") ? "st" :
+                           word.EndsWith("2") ? "nd" :
+                           word.EndsWith("3") ? "rd" : "th");
+        }
+
+
     }
 }
