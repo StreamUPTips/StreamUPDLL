@@ -9,386 +9,320 @@ namespace StreamUP
     {
         public void TheRunTriggerHandler()
         {
-            string user;
-
             if (!_CPH.TryGetArg("message", out string returnedJsonStr))
             {
-                LogError("Unable to retrieve returnedJsonStr from the [message] arg");
+                LogError("Unable to retrieve message from the [message] arg");
                 return;
             }
 
-            // Parse message from TheRun.gg
+            // Parse JSON data
             JObject json = JObject.Parse(returnedJsonStr);
-
-            // Get username
-            user = json["user"]?.ToString() ?? "Unknown User";
-
-            // Get run json
-            var runJson = (JObject)json["run"];
+            var runJson = json["run"] as JObject;
             if (runJson == null)
             {
                 LogError("Run data not found.");
                 return;
             }
 
-            // Set general args
+            // Set up user and general arguments
+            string user = json["user"]?.ToString() ?? "Unknown User";
             SetGeneralArgs(runJson);
 
-            // Check if current split is less than previous global split index
-            int currentSplitIndex = (int)(runJson["currentSplitIndex"]?.ToObject<int>());
-
-            // Check if run reset
+            int currentSplitIndex = runJson["currentSplitIndex"]?.ToObject<int>() ?? -1;
             if (currentSplitIndex == -1)
             {
                 HandleResetEvent();
                 return;
             }
 
+            // Handle split events
             int previousGlobalSplitIndex = _CPH.GetGlobalVar<int>("theRunGgCurrentSplitIndex", false);
-
-            // Set split args
-            int previousSplitIndex = currentSplitIndex - 1;
-            var currentSplitData = new JObject();
-            var previousSplitData = new JObject();
-
-            // Check if split was undone
-            if (previousGlobalSplitIndex == currentSplitIndex + 1)
-            {
-                // Set previous split args
-                if (previousSplitIndex > -1)
-                {
-                    SetSegmentArgs(previousSplitIndex, runJson, false);
-                }
-
-                // Set current split args
-                SetSegmentArgs(currentSplitIndex, runJson, true);
-
-                HandleUndoSplitEvent(previousGlobalSplitIndex);
-                return;
-            }
-            
-            // Set previous split args
-            if (previousSplitIndex > -1)
-            {
-                previousSplitData = SetSegmentArgs(previousSplitIndex, runJson, false);
-            }
-
-            // Set current split args
-            currentSplitData = SetSegmentArgs(currentSplitIndex, runJson, true);
-
-            // Check if split was skipped
-            if (previousSplitData != null)
-            {
-                if (previousSplitData["splitTime"]?.ToObject<double?>() == null)
-                {
-                    HandleSkipSplitEvent(previousSplitData);
-                    return;
-                }
-            }
-
-            // Handle special events
-            HandleEvents(runJson, previousSplitData, currentSplitData);
-
-            HandleSplitDifference(runJson, previousSplitData);
+            var currentSplitData = HandleSplitEvents(runJson, currentSplitIndex, previousGlobalSplitIndex);
+            HandleEvents(runJson, currentSplitData);
         }
 
         private void SetGeneralArgs(JObject runJson)
         {
-            // Set args for gameData with time conversions
             var gameData = runJson["gameData"] as JObject;
             if (gameData != null)
             {
-                _CPH.SetArgument("gameData.category", gameData["run"]?.ToString());
-                _CPH.SetArgument("gameData.game", gameData["game"]?.ToString());
-                _CPH.SetArgument("gameData.platform", gameData["platform"]?.ToString());
-                _CPH.SetArgument("gameData.gameImage", runJson["gameImage"]?.ToString());
-
-                // Handle gameData.variables
-                var variables = gameData["variables"] as JObject;
-                if (variables != null)
-                {
-                    _CPH.SetArgument("gameData.layout", variables["Layout"]?.ToString());
-                    _CPH.SetArgument("gameData.playStyle", variables["Play Style"]?.ToString());
-                    _CPH.SetArgument("gameData.runType", variables["Run Type"]?.ToString());
-                    _CPH.SetArgument("gameData.version", variables["Version"]?.ToString());
-                }
+                SetGameDataArguments(gameData);
             }
 
-            // String and non-time arguments
             _CPH.SetArgument("data.currentComparison", runJson["currentComparison"]?.ToString());
             _CPH.SetArgument("data.currentSplitName", runJson["currentSplitName"]?.ToString());
             _CPH.SetArgument("data.currentSplitIndex", runJson["currentSplitIndex"]?.ToObject<int>());
 
-            // Root-level run arguments with converted times
-            _CPH.SetArgument("data.bestPossible", RoundDouble(runJson["bestPossible"]?.ToObject<double>()));
-            _CPH.SetArgument("data.currentPrediction", RoundDouble(runJson["currentPrediction"]?.ToObject<double>()));
-            _CPH.SetArgument("data.personalBest", RoundDouble(gameData["personalBest"]?.ToObject<double>()));
-            _CPH.SetArgument("data.personalBestDate", gameData["personalBestTime"]?.ToObject<DateTime>());
-            _CPH.SetArgument("data.finishedAttemptCount", gameData["finishedAttemptCount"]?.ToObject<int>());
-            _CPH.SetArgument("data.totalRunTime", RoundDouble(gameData["totalRunTime"]?.ToObject<double>()));
-            _CPH.SetArgument("data.timeToSave", RoundDouble(gameData["timeToSave"]?.ToObject<double>()));
-            _CPH.SetArgument("data.sumOfBests", RoundDouble(gameData["sumOfBests"]?.ToObject<double>()));
+            // Set time-related arguments
+            SetTimeArgument("data.bestPossible", runJson["bestPossible"]);
+            SetTimeArgument("data.currentPrediction", runJson["currentPrediction"]);
+            SetTimeArgument("data.personalBest", gameData?["personalBest"]);
+            SetTimeArgument("data.totalRunTime", gameData?["totalRunTime"]);
+            SetTimeArgument("data.timeToSave", gameData?["timeToSave"]);
+            SetTimeArgument("data.sumOfBests", gameData?["sumOfBests"]);
+        }
+
+        private void SetGameDataArguments(JObject gameData)
+        {
+            _CPH.SetArgument("gameData.category", gameData["run"]?.ToString());
+            _CPH.SetArgument("gameData.game", gameData["game"]?.ToString());
+            _CPH.SetArgument("gameData.platform", gameData["platform"]?.ToString());
+            _CPH.SetArgument("gameData.gameImage", gameData["gameImage"]?.ToString());
+
+            var variables = gameData["variables"] as JObject;
+            if (variables != null)
+            {
+                _CPH.SetArgument("gameData.layout", variables["Layout"]?.ToString());
+                _CPH.SetArgument("gameData.playStyle", variables["Play Style"]?.ToString());
+                _CPH.SetArgument("gameData.runType", variables["Run Type"]?.ToString());
+                _CPH.SetArgument("gameData.version", variables["Version"]?.ToString());
+            }
+        }
+
+        private JObject HandleSplitEvents(JObject runJson, int currentSplitIndex, int previousGlobalSplitIndex)
+        {
+            int previousSplitIndex = currentSplitIndex - 1;
+            JObject previousSplitData = (previousSplitIndex >= 0)
+                                        ? SetSegmentArgs(previousSplitIndex, runJson, false)
+                                        : null;
+
+            // Check for Undo Split or Skip Split scenarios
+            if (previousGlobalSplitIndex == currentSplitIndex + 1)
+            {
+                SetSegmentArgs(currentSplitIndex, runJson, true);
+                HandleUndoSplitEvent(previousGlobalSplitIndex);
+                return null;
+            }
+
+            var currentSplitData = SetSegmentArgs(currentSplitIndex, runJson, true);
+            if (previousSplitData != null && currentSplitIndex > 0 && previousSplitData["splitTime"]?.ToObject<double?>() == null)
+            {
+                HandleSkipSplitEvent(previousSplitData);
+                return null;
+            }
+
+            return currentSplitData;
+        }
+
+        private void HandleEvents(JObject runJson, JObject currentSplitData)
+        {
+            var events = runJson["events"] as JArray;
+            if (events == null)
+            {
+                LogInfo("No events found in run data.");
+                return;
+            }
+
+            foreach (JObject eventObj in events)
+            {
+                string eventType = eventObj["type"]?.ToString();
+                if (string.IsNullOrEmpty(eventType))
+                {
+                    LogDebug("Encountered an event without a type. Skipping.");
+                    continue;
+                }
+
+                JObject eventData = eventObj["data"] as JObject;
+                if (eventData == null)
+                {
+                    LogDebug($"Event '{eventType}' has no data payload. Skipping.");
+                    continue;
+                }
+
+                switch (eventType.ToLower())
+                {
+                    case "best_run_ever_event":
+                        HandleEventWithType(eventData, "BestRun");
+                        break;
+                    case "final_split_event":
+                        HandleEventWithType(eventData, "FinalSplit");
+                        break;
+                    case "run_ended_event":
+                        HandleEventWithType(eventData, "RunEnded");
+                        break;
+                    case "run_started_event":
+                        HandleEventWithType(eventData, "RunStarted");
+                        break;
+                    case "top_10_single_segment_event":
+                        HandleEventWithType(eventData, "Top10Single");
+                        break;
+                    case "top_10_total_segment_event":
+                        HandleEventWithType(eventData, "Top10Total");
+                        break;
+                    case "worst_10_single_segment_event":
+                        HandleEventWithType(eventData, "Worst10Single");
+                        break;
+                    case "gold_split_event":
+                        HandleEventWithType(eventData, "GoldSplit");
+                        break;
+                    default:
+                        LogDebug($"Unknown event type: {eventType}");
+                        break;
+                }
+            }
+        }
+
+        private void HandleEventWithType(JObject eventData, string eventPrefix)
+        {
+            string eventPrefixLower = eventPrefix.Length > 0 
+                ? char.ToLower(eventPrefix[0]) + eventPrefix.Substring(1) 
+                : eventPrefix;
+
+            if (eventData == null)
+            {
+                LogDebug($"No data available for event with prefix '{eventPrefixLower}'");
+                return;
+            }
+
+            foreach (var property in eventData.Properties())
+            {
+                double? propertyValue = null;
+                string argumentValue;
+
+                // Check if the property is numeric
+                if (property.Value.Type == JTokenType.Float || property.Value.Type == JTokenType.Integer)
+                {
+                    propertyValue = property.Value.ToObject<double>();
+                    // Convert numeric property to TimeSpan and format
+                    argumentValue = FormatTimeSpan(ConvertToTimeSpan(propertyValue.Value));
+                }
+                else if (property.Value.Type == JTokenType.String)
+                {
+                    // Check if the string can be parsed as a double
+                    if (double.TryParse(property.Value.ToString(), out double parsedValue))
+                    {
+                        propertyValue = parsedValue;
+                        // Convert parsable string to TimeSpan and format
+                        argumentValue = FormatTimeSpan(ConvertToTimeSpan(parsedValue));
+                    }
+                    else
+                    {
+                        // Treat as a regular string
+                        argumentValue = property.Value.ToString();
+                    }
+                }
+                else
+                {
+                    // Treat other non-numeric types as strings
+                    argumentValue = property.Value.ToString();
+                }
+
+                // Set the argument using either the formatted TimeSpan or the string value
+                _CPH.SetArgument($"{eventPrefixLower}.{property.Name}", argumentValue);
+            }
+
+            // Trigger the appropriate event in Streamer.Bot
+            _CPH.TriggerCodeEvent($"theRun{eventPrefix}");
         }
 
         public JObject SetSegmentArgs(int splitIndex, JObject runJson, bool isCurrentSplit)
         {
-            // Retrieve split object at the specified index
-            JObject splitData = (JObject)runJson["splits"][splitIndex];
+            // Retrieve split data from the JSON based on the splitIndex
+            JObject splitData = (JObject)runJson["splits"]?[splitIndex];
             if (splitData == null)
             {
                 LogError($"Split data not found at index {splitIndex}");
                 return null;
             }
 
-            // Set current split globals
+            // Set global variables if this is the current split
             if (isCurrentSplit)
             {
                 _CPH.SetGlobalVar("theRunGgCurrentSplitIndex", splitIndex, false);
-                _CPH.SetGlobalVar("theRunGgCurrentSplitName", splitData["name"]?.ToObject<string>(), false);
+                _CPH.SetGlobalVar("theRunGgCurrentSplitName", splitData["name"]?.ToString(), false);
             }
-            
-            // Define prefix based on whether it's the current or previous split
-            string split = isCurrentSplit ? "currentSplit" : "previousSplit";
 
-            // Set general split args
-            _CPH.SetArgument($"{split}.splitName", splitData["name"]?.ToObject<string>());
-            _CPH.SetArgument($"{split}.splitTime", RoundDouble(splitData["splitTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.bestPossibleTime", RoundDouble(splitData["bestPossibleTimeAtSplit"]?.ToObject<double?>()));
+            string prefix = isCurrentSplit ? "currentSplit" : "previousSplit";
 
-            // Set segment args
-            _CPH.SetArgument($"{split}.segment.averageTime", RoundDouble(splitData["average"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.segment.bestPossible", RoundDouble(splitData["single"]["bestPossible"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.segment.comparisonTime", RoundDouble(splitData["single"]["time"]?.ToObject<double?>()));
+            // Set the split name
+            _CPH.SetArgument($"{prefix}.splitName", splitData["name"]?.ToString());
 
-            // Set run args
-            _CPH.SetArgument($"{split}.run.splitTime", RoundDouble(splitData["pbSplitTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.run.predictedTotalTime", RoundDouble(splitData["predictedTotalTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.run.bestAchievedTime", RoundDouble(splitData["total"]["bestAchievedTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.run.bestPossibleTime", RoundDouble(splitData["total"]["bestPossibleTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.run.averageTime", RoundDouble(splitData["total"]["averageTime"]?.ToObject<double?>()));
-            _CPH.SetArgument($"{split}.run.comparisonTime", RoundDouble(splitData["total"]["time"]?.ToObject<double?>()));
+            // Set primary time-related arguments with robust null handling
+            SetTimeArgument($"{prefix}.splitTime", splitData["splitTime"]);
+            SetTimeArgument($"{prefix}.bestPossibleTime", splitData["bestPossibleTimeAtSplit"]);
+
+            // Handle 'segment' sub-properties
+            JObject singleSegmentData = splitData["single"] as JObject;
+            if (singleSegmentData != null)
+            {
+                SetTimeArgument($"{prefix}.segment.averageTime", singleSegmentData["averageTime"]);
+                SetTimeArgument($"{prefix}.segment.bestPossible", singleSegmentData["bestPossibleTime"]);
+                SetTimeArgument($"{prefix}.segment.comparisonTime", singleSegmentData["time"]);
+            }
+            else
+            {
+                LogDebug($"No 'single' segment data found for {prefix} at index {splitIndex}");
+            }
+
+            // Handle 'run' sub-properties under 'total' if available
+            JObject totalRunData = splitData["total"] as JObject;
+            if (totalRunData != null)
+            {
+                SetTimeArgument($"{prefix}.run.splitTime", totalRunData["pbSplitTime"]);
+                SetTimeArgument($"{prefix}.run.predictedTotalTime", totalRunData["predictedTotalTime"]);
+                SetTimeArgument($"{prefix}.run.bestAchievedTime", totalRunData["bestAchievedTime"]);
+                SetTimeArgument($"{prefix}.run.bestPossibleTime", totalRunData["bestPossibleTime"]);
+                SetTimeArgument($"{prefix}.run.averageTime", totalRunData["averageTime"]);
+                SetTimeArgument($"{prefix}.run.comparisonTime", totalRunData["time"]);
+            }
+            else
+            {
+                LogDebug($"No 'total' run data found for {prefix} at index {splitIndex}");
+            }
 
             return splitData;
         }
 
-        private double? RoundDouble(double? value)
+        private void SetSplitTimeArguments(JObject splitData, string splitPrefix)
         {
-            return value.HasValue ? Math.Round(value.Value, 0) : null;
-        }
+            SetTimeArgument($"{splitPrefix}.splitTime", splitData["splitTime"]);
+            SetTimeArgument($"{splitPrefix}.bestPossibleTime", splitData["bestPossibleTimeAtSplit"]);
 
-        private void HandleEvents(JObject runJson, JObject previousSplitData, JObject currentSplitData)
-        {
-            // Extract events array
-            JArray events = runJson["events"] as JArray;
-            if (events == null)
+            JObject segment = splitData["segment"] as JObject;
+            if (segment != null)
             {
-                LogInfo("No events found in run data.");
-                return;
-            }        
-        
-            // Iterate through each event
-            foreach (JObject eventObj in events)
+                SetTimeArgument($"{splitPrefix}.segment.averageTime", segment["average"]);
+                SetTimeArgument($"{splitPrefix}.segment.bestPossible", segment["bestPossible"]);
+                SetTimeArgument($"{splitPrefix}.segment.comparisonTime", segment["comparisonTime"]);
+            }
+
+            JObject run = splitData["run"] as JObject;
+            if (run != null)
             {
-                string eventType = eventObj["type"]?.ToString();
-                JObject eventData = eventObj["data"] as JObject;
-
-                // Check the event type and process accordingly
-                switch (eventType)
-                {
-                    case "best_run_ever_event":
-                        HandleBestRunEverEvent(eventData);
-                        break;
-
-                    case "final_split_event":
-                        HandleFinalSplitEvent(eventData);
-                        break;
-
-                    case "run_ended_event":
-                        HandleRunEndedEvent(eventData);
-                        break;
-
-                    case "run_started_event":
-                        HandleRunStartedEvent(eventData);
-                        break;
-
-                    case "top_10_single_segment_event":
-                        HandleTop10SingleSegmentEvent(eventData);
-                        break;
-
-                    case "top_10_total_segment_event":
-                        HandleTop10TotalSegmentEvent(eventData);
-                        break;
-
-                    case "worst_10_single_segment_event":
-                        HandleWorst10SingleSegmentEvent(eventData);
-                        break;
-                
-                    case "gold_split_event":
-                        HandleGoldSplitEvent(eventData);
-                        break;
-
-                    default:
-                        LogDebug($"Unknown event type: {eventType}");
-                        break;
-                }        
+                SetTimeArgument($"{splitPrefix}.run.splitTime", run["pbSplitTime"]);
+                SetTimeArgument($"{splitPrefix}.run.predictedTotalTime", run["predictedTotalTime"]);
+                SetTimeArgument($"{splitPrefix}.run.bestAchievedTime", run["bestAchievedTime"]);
+                SetTimeArgument($"{splitPrefix}.run.bestPossibleTime", run["bestPossibleTime"]);
+                SetTimeArgument($"{splitPrefix}.run.averageTime", run["averageTime"]);
+                SetTimeArgument($"{splitPrefix}.run.comparisonTime", run["comparisonTime"]);
             }
         }
 
-        private void HandleGoldSplitEvent(JObject eventData)
+        private void SetTimeArgument(string argumentName, JToken timeToken)
         {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? achievedTime = RoundDouble(eventData["data"]?["newGold"]?.ToObject<double?>());
-            double? targetTime = RoundDouble(eventData["data"]?["previousGold"]?.ToObject<double?>());
-            double? timeDifference = RoundDouble(eventData["data"]?["delta"]?.ToObject<double?>());
-
-            // Set arguments for event
-            _CPH.SetArgument("goldSegment.splitName", splitName);
-            _CPH.SetArgument("goldSegment.newGold", achievedTime);
-            _CPH.SetArgument("goldSegment.previousGold", targetTime);
-            _CPH.SetArgument("goldSegment.timeDifference", timeDifference);
-
-            _CPH.TriggerCodeEvent("theRunGoldSplit");
+            if (timeToken != null)
+            {
+                TimeSpan? timeSpan = ConvertToTimeSpan(timeToken.ToObject<double?>());
+                _CPH.SetArgument(argumentName, FormatTimeSpan(timeSpan));
+            }
+            else
+            {
+                _CPH.SetArgument(argumentName, null);
+            }
         }
 
-        private void HandleTop10SingleSegmentEvent(JObject eventData)
+        private TimeSpan? ConvertToTimeSpan(double? milliseconds)
         {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? achievedTime = RoundDouble(eventData["data"]?["achievedTime"]?.ToObject<double?>());
-            double? targetTime = RoundDouble(eventData["data"]?["targetTime"]?.ToObject<double?>());
-
-            // Calculate and format the time saved
-            double? timeSaved = targetTime - achievedTime;
-
-            // Set arguments for event
-            _CPH.SetArgument("top10.segment.splitName", splitName);
-            _CPH.SetArgument("top10.segment.achievedTime", achievedTime);
-            _CPH.SetArgument("top10.segment.targetTime", targetTime);
-            _CPH.SetArgument("top10.segment.timeDifference", timeSaved);
-
-            _CPH.TriggerCodeEvent("theRunTop10Single");
+            return milliseconds.HasValue
+                    ? TimeSpan.FromMilliseconds(milliseconds.Value)
+                    : null;
         }
 
-        private void HandleTop10TotalSegmentEvent(JObject eventData)
+        private string FormatTimeSpan(TimeSpan? timeSpan)
         {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? achievedTime = RoundDouble(eventData["data"]?["achievedTime"]?.ToObject<double?>());
-            double? targetTime = RoundDouble(eventData["data"]?["targetTime"]?.ToObject<double?>());
-
-            // Calculate and format the time saved
-            double? timeSaved = targetTime - achievedTime;
-
-            // Set arguments for event
-            _CPH.SetArgument("top10.total.splitName", splitName);
-            _CPH.SetArgument("top10.total.achievedTime", achievedTime);
-            _CPH.SetArgument("top10.total.targetTime", targetTime);
-            _CPH.SetArgument("top10.total.timeDifference", timeSaved);
-
-            _CPH.TriggerCodeEvent("theRunTop10Total");
-        }
-
-        private void HandleWorst10SingleSegmentEvent(JObject eventData)
-        {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? achievedTime = RoundDouble(eventData["data"]?["achievedTime"]?.ToObject<double?>());
-            double? targetTime = RoundDouble(eventData["data"]?["targetTime"]?.ToObject<double?>());
-
-            // Calculate and format the time lost
-            double? timeLost = achievedTime - targetTime;
-
-            // Set arguments for event
-            _CPH.SetArgument("worst10.segment.splitName", splitName);
-            _CPH.SetArgument("worst10.segment.achievedTime", achievedTime);
-            _CPH.SetArgument("worst10.segment.targetTime", targetTime);
-            _CPH.SetArgument("worst10.segment.timeDifference", timeLost);
-
-            _CPH.TriggerCodeEvent("theRunWorst10Single");
-        }
-
-        private void HandleFinalSplitEvent(JObject eventData)
-        {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? pbSplitTime = RoundDouble(eventData["data"]?["pbSplitTime"]?.ToObject<double?>());
-            double? expectedSplitTime = RoundDouble(eventData["data"]?["expectedSplitTime"]?.ToObject<double?>());
-
-            // Log formatted results or set arguments
-            _CPH.SetArgument("finalSplit.splitName", splitName);
-            _CPH.SetArgument("finalSplit.bestSegmentTime", pbSplitTime);
-            _CPH.SetArgument("finalSplit.expectedSegmentTime", expectedSplitTime);
-
-            _CPH.TriggerCodeEvent("theRunFinalSplit");
-        }
-
-        private void HandleRunEndedEvent(JObject eventData)
-        {
-            double? finalTime = RoundDouble(eventData["data"]?["finalTime"]?.ToObject<double?>());
-            double? predictedTime = RoundDouble(eventData["data"]?["predictedTime"]?.ToObject<double?>());
-            double? personalBest = RoundDouble(eventData["data"]?["personalBest"]?.ToObject<double?>());
-            double? deltaToPredictedTime = RoundDouble(eventData["data"]?["deltaToPredictedTime"]?.ToObject<double>());
-            double? deltaToPersonalBest = RoundDouble(eventData["data"]?["deltaToPersonalBest"]?.ToObject<double>());
-
-            // Set arguments for the run ended event
-            _CPH.SetArgument("runEnded.finalTime", finalTime);
-            _CPH.SetArgument("runEnded.predictedTime", predictedTime);
-            _CPH.SetArgument("runEnded.personalBest", personalBest);
-            _CPH.SetArgument("runEnded.deltaToPredicted", deltaToPredictedTime);
-            _CPH.SetArgument("runEnded.deltaToPersonalBest", deltaToPersonalBest);
-
-            _CPH.TriggerCodeEvent("theRunRunEnded");
-        }
-
-        private void HandleRunStartedEvent(JObject eventData)
-        {
-            double? personalBest = RoundDouble(eventData["data"]?["personalBest"]?.ToObject<double?>());
-            double? expectedEndTime = RoundDouble(eventData["data"]?["expectedEndTime"]?.ToObject<double?>());
-
-            // Set arguments for event
-            _CPH.SetArgument("runStarted.personalBest", personalBest);
-            _CPH.SetArgument("runStarted.expectedEndTime", expectedEndTime);
-
-            _CPH.TriggerCodeEvent("theRunRunStarted");
-        }
-
-        private void HandleBestRunEverEvent(JObject eventData)
-        {
-            string splitName = eventData["data"]?["splitName"]?.ToString() ?? "Unknown Split Name";
-
-            double? achievedTime = RoundDouble(eventData["data"]?["achievedTime"]?.ToObject<double?>());
-            double? targetTime = RoundDouble(eventData["data"]?["targetTime"]?.ToObject<double?>());
-
-            // Calculate the time difference and format with appropriate sign
-            double? timeDifference = achievedTime - targetTime;
-
-            // Set arguments for the event
-            _CPH.SetArgument("bestRunEver.splitName", splitName);
-            _CPH.SetArgument("bestRunEver.achievedTime", achievedTime);
-            _CPH.SetArgument("bestRunEver.targetTime", targetTime);
-            _CPH.SetArgument("bestRunEver.timeDifference", timeDifference);
-
-            _CPH.TriggerCodeEvent("theRunBestRun");
-        }
-
-        private void HandleSkipSplitEvent(JObject previousSplitData)
-        {
-            // Set arguments for the skip split event
-            _CPH.SetArgument("skippedSplit.splitName", previousSplitData["name"]?.ToObject<string>());
-
-            _CPH.TriggerCodeEvent("theRunSkipSplit");
-        }
-
-        private void HandleUndoSplitEvent(int splitIndex)
-        {     
-            // Set split args
-            _CPH.SetArgument("undoneSplit.splitIndex", splitIndex - 1);
-            //_CPH.SetArgument("undoneSplit.splitName", splitName);
-
-            _CPH.SetGlobalVar("theRunGgCurrentSplitIndex", splitIndex - 1, false);
-
-            _CPH.TriggerCodeEvent("theRunUndoSplit");
+            return timeSpan.HasValue
+                    ? timeSpan.Value.ToString(@"hh\:mm\:ss\.fff")
+                    : null;
         }
 
         private void HandleResetEvent()
@@ -396,99 +330,129 @@ namespace StreamUP
             _CPH.TriggerCodeEvent("theRunRunReset");
         }
 
-        private void HandleSplitDifference(JObject runJson, JObject previousSplitData)
+        private void HandleSkipSplitEvent(JObject previousSplitData)
         {
-            double? segmentBestPossibleTime = RoundDouble(previousSplitData["single"]["bestPossible"]?.ToObject<double?>());
-            double? runSplitTime = RoundDouble(previousSplitData["splitTime"]?.ToObject<double?>());
-            double? runTargetTime = RoundDouble(previousSplitData["total"]["time"]?.ToObject<double?>());
-            double? oldTimeDifference = _CPH.GetGlobalVar<double?>("theRunGgCurrentTimeDifference", true);
-            double? newTimeDifference;
-            double? timeSaveLossAmount;
-            bool goldSegment = false;
+            _CPH.SetArgument("skippedSplit.splitName", previousSplitData["name"]?.ToObject<string>());
+            _CPH.TriggerCodeEvent("theRunSkipSplit");
+        }
 
-            // Check if gold event
-            // Extract events array
-            JArray events = runJson["events"] as JArray;
-            if (events == null)
-            {
-                LogInfo("No events found in run data.");
-                return;
-            }        
-        
-            // Iterate through each event
-            foreach (JObject eventObj in events)
-            {
-                string eventType = eventObj["type"]?.ToString();
-                JObject eventData = eventObj["data"] as JObject;
+        private void HandleUndoSplitEvent(int splitIndex)
+        {
+            _CPH.SetArgument("undoneSplit.splitIndex", splitIndex - 1);
+            _CPH.TriggerCodeEvent("theRunUndoSplit");
+        }
 
-                // Check the event type and process accordingly
-                if (eventType == "gold_split_event")
+
+
+
+
+
+
+        /*
+                private void HandleSplitDifference(JObject runJson, JObject previousSplitData)
                 {
-                    goldSegment = true;
-                }        
-            }
-            _CPH.SetArgument("goldSegment", goldSegment);
-            
-            // Check if run is red or green
-            if (runSplitTime > runTargetTime)
-            {
-                newTimeDifference = runSplitTime - runTargetTime;
-                HandleRedSplitEvent(runSplitTime, runTargetTime, newTimeDifference);
-            }
-            else
-            {
-                newTimeDifference = runTargetTime - runSplitTime;
-                HandleGreenSplitEvent(runSplitTime, runTargetTime, newTimeDifference);            
-            }
-            _CPH.SetGlobalVar("theRunGgCurrentTimeDifference", newTimeDifference, true);
+                    double? runSplitTime = RoundDouble(previousSplitData["splitTime"]?.ToObject<double?>());
+                    double? runTargetTime = RoundDouble(previousSplitData["total"]["time"]?.ToObject<double?>());
+                    double? newTimeDifference = runTargetTime - runSplitTime;
+                    LogDebug($"runSplitTime={runSplitTime}, runTargetTime={runTargetTime}, newTimeDifference={newTimeDifference}");
 
-            // Check if there is a time save
-            if (oldTimeDifference > newTimeDifference)
-            {
-                timeSaveLossAmount = oldTimeDifference - newTimeDifference;
-                HandleTimeSaveEvent(timeSaveLossAmount);
-            }
-            else
-            {
-                timeSaveLossAmount = newTimeDifference - oldTimeDifference;
-                HandleTimeLossEvent(timeSaveLossAmount);
-            }
-        }
+                    bool goldSegment = false;
 
-        private void HandleTimeLossEvent(double? timeLossAmount)
-        {
-            _CPH.SetArgument("segmentComparison.timeDifference", timeLossAmount);
+                    // Check if gold event
+                    // Extract events array
+                    JArray events = runJson["events"] as JArray;
+                    if (events == null)
+                    {
+                        LogInfo("No events found in run data.");
+                        return;
+                    }
 
-            _CPH.TriggerCodeEvent("theRunTimeLoss");
-        }
+                    // Iterate through each event
+                    foreach (JObject eventObj in events)
+                    {
+                        string eventType = eventObj["type"]?.ToString();
+                        JObject eventData = eventObj["data"] as JObject;
 
-        private void HandleTimeSaveEvent(double? timeSaveAmount)
-        {
-            _CPH.SetArgument("segmentComparison.timeDifference", timeSaveAmount);
+                        // Check the event type and process accordingly
+                        if (eventType == "gold_split_event")
+                        {
+                            goldSegment = true;
+                        }
+                    }
+                    _CPH.SetArgument("goldSegment", goldSegment);
 
-            _CPH.TriggerCodeEvent("theRunTimeSave");
-        }
+                    // Check if run is red or green
+                    bool ahead;
+                    newTimeDifference = runSplitTime - runTargetTime;
+                    if (runSplitTime > runTargetTime)
+                    {
+                        HandleRedSplitEvent(runSplitTime, runTargetTime);
+                        ahead = false;
+                    }
+                    else
+                    {
+                        HandleGreenSplitEvent(runSplitTime, runTargetTime);
+                        ahead = true;
+                    }
 
-        private void HandleGreenSplitEvent(double? splitTime, double? targetTime, double? timeDifference)
-        {
-            // Set arguments for the green split event
-            _CPH.SetArgument("segmentComparison.splitTime", splitTime);
-            _CPH.SetArgument("segmentComparison.targetTime", targetTime);
-            _CPH.SetArgument("segmentComparison.timeDifference", timeDifference);
+                    // Check if there is a time save
+                    //HandleTimeSaveLossEvent(ahead, oldTimeDifference, newTimeDifference);
 
-            _CPH.TriggerCodeEvent("theRunGreenSplit");
-        }
+                    _CPH.SetGlobalVar("theRunGgCurrentTimeDifference", newTimeDifference, false);
+                }
 
-        private void HandleRedSplitEvent(double? splitTime, double? targetTime, double? timeDifference)
-        {
-            // Set arguments for the red split event
-            _CPH.SetArgument("segmentComparison.splitTime", splitTime);
-            _CPH.SetArgument("segmentComparison.targetTime", targetTime);
-            _CPH.SetArgument("segmentComparison.timeDifference", timeDifference);
 
-            _CPH.TriggerCodeEvent("theRunRedSplit");
-        }
 
+
+
+                private void HandleTimeSaveLossEvent(bool ahead, double? oldTimeDifference, double? newTimeDifference)
+                {
+                    double? timeSaveLossAmount =  newTimeDifference - oldTimeDifference;
+                    LogDebug($"timeSaveLossAmount=[{timeSaveLossAmount}], --> (newTimeDifference=[{newTimeDifference}] - oldTimeDifference=[{oldTimeDifference}])");
+
+                    if (timeSaveLossAmount < 0)
+                    {
+                        HandleTimeSaveEvent(timeSaveLossAmount);
+                    }
+                    else
+                    {
+                        HandleTimeLossEvent(timeSaveLossAmount);
+                    }
+
+                }
+
+                private void HandleTimeLossEvent(double? timeLossAmount)
+                {
+                    _CPH.SetArgument("segmentComparison.timeDifference", timeLossAmount);
+
+                    _CPH.TriggerCodeEvent("theRunTimeLoss");
+                }
+
+                private void HandleTimeSaveEvent(double? timeSaveAmount)
+                {
+                    _CPH.SetArgument("segmentComparison.timeDifference", timeSaveAmount);
+
+                    _CPH.TriggerCodeEvent("theRunTimeSave");
+                }
+
+                private void HandleGreenSplitEvent(double? splitTime, double? targetTime)
+                {
+                    // Set arguments for the green split event
+                    _CPH.SetArgument("segmentComparison.splitTime", splitTime);
+                    _CPH.SetArgument("segmentComparison.targetTime", targetTime);
+
+                    _CPH.TriggerCodeEvent("theRunGreenSplit");
+                }
+
+                private void HandleRedSplitEvent(double? splitTime, double? targetTime)
+                {
+                    // Set arguments for the red split event
+                    _CPH.SetArgument("segmentComparison.splitTime", splitTime);
+                    _CPH.SetArgument("segmentComparison.targetTime", targetTime);
+
+                    _CPH.TriggerCodeEvent("theRunRedSplit");
+                }
+        */
 
     }
 }

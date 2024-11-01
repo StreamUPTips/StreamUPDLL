@@ -8,31 +8,33 @@ namespace StreamUP
         {
             LogInfo("Setting up TheRun.gg triggers into Streamer.Bot");
 
-            string[] categories = { "TheRun.gg" };
+            string[] splits = { "TheRun.gg", "Splits" };
+            string[] general = { "TheRun.gg", "General" };
+            string[] performance = { "TheRun.gg", "Performance" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 
 
                 // Splits
-                new("Green Split", "theRunGreenSplit", categories),
-                new("Red Split", "theRunRedSplit", categories),
-                new("Gold Split", "theRunGoldSplit", categories),
-                new("Final Split", "theRunFinalSplit", categories),
-                new("Skip Split", "theRunSkipSplit", categories),
-                new("Undo Split", "theRunUndoSplit", categories),
-                new("Time Loss on Split", "theRunTimeLoss", categories),
-                new("Time Save on Split", "theRunTimeSave", categories),
+                new("Green Split", "theRunGreenSplit", splits),
+                new("Red Split", "theRunRedSplit", splits),
+                new("Gold Split", "theRunGoldSplit", splits),
+                new("Final Split", "theRunFinalSplit", splits),
+                new("Skip Split", "theRunSkipSplit", splits),
+                new("Undo Split", "theRunUndoSplit", splits),
+                new("Time Loss on Split", "theRunTimeLoss", splits),
+                new("Time Save on Split", "theRunTimeSave", splits),
                 
                 // General
-                new("Run Started", "theRunRunStarted", categories),
-                new("Run Ended", "theRunRunEnded", categories),
-                new("Run Reset", "theRunRunReset", categories),
+                new("Run Started", "theRunRunStarted", general),
+                new("Run Ended", "theRunRunEnded", general),
+                new("Run Reset", "theRunRunReset", general),
 
                 // Performance
-                new("Best Pace", "theRunBestRun", categories),
-                new("Top 10% Pace", "theRunTop10Total", categories),
-                new("Top 10% Split", "theRunTop10Single", categories),
-                new("Worst 10% Split", "theRunWorst10Single", categories),
+                new("Best Pace", "theRunBestRun", performance),
+                new("Top 10% Pace", "theRunTop10Total", performance),
+                new("Top 10% Split", "theRunTop10Single", performance),
+                new("Worst 10% Split", "theRunWorst10Single", performance),
             };
             SetCustomTriggers(customTriggers);
 
