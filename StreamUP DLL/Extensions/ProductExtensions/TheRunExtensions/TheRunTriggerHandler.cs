@@ -38,7 +38,18 @@ namespace StreamUP
             // Handle split events
             int previousGlobalSplitIndex = _CPH.GetGlobalVar<int>("theRunGgCurrentSplitIndex", false);
             var currentSplitData = HandleSplitEvents(runJson, currentSplitIndex, previousGlobalSplitIndex);
+
+            // Exit early if a skip or undo event was triggered
+            if (currentSplitData == null)
+            {
+                // Clear the previous pace difference to reset tracking after skip or undo
+                _CPH.SetGlobalVar("theRunGgPreviousPaceDifference", 0, false);
+                return;
+            }
+
+            // Proceed with event handling and tracking progress if no skip or undo event was triggered
             HandleEvents(runJson, currentSplitData);
+            TrackProgress(currentSplitIndex, runJson);
         }
 
         private void SetGeneralArgs(JObject runJson)
@@ -86,19 +97,20 @@ namespace StreamUP
                                         ? SetSegmentArgs(previousSplitIndex, runJson, false)
                                         : null;
 
-            // Check for Undo Split or Skip Split scenarios
+            // Check for Undo Split event
             if (previousGlobalSplitIndex == currentSplitIndex + 1)
             {
                 SetSegmentArgs(currentSplitIndex, runJson, true);
                 HandleUndoSplitEvent(previousGlobalSplitIndex);
-                return null;
+                return null;  // Exit early on undo
             }
 
+            // Check for Skip Split event
             var currentSplitData = SetSegmentArgs(currentSplitIndex, runJson, true);
             if (previousSplitData != null && currentSplitIndex > 0 && previousSplitData["splitTime"]?.ToObject<double?>() == null)
             {
                 HandleSkipSplitEvent(previousSplitData);
-                return null;
+                return null;  // Exit early on skip
             }
 
             return currentSplitData;
@@ -164,8 +176,8 @@ namespace StreamUP
 
         private void HandleEventWithType(JObject eventData, string eventPrefix)
         {
-            string eventPrefixLower = eventPrefix.Length > 0 
-                ? char.ToLower(eventPrefix[0]) + eventPrefix.Substring(1) 
+            string eventPrefixLower = eventPrefix.Length > 0
+                ? char.ToLower(eventPrefix[0]) + eventPrefix.Substring(1)
                 : eventPrefix;
 
             if (eventData == null)
@@ -343,116 +355,72 @@ namespace StreamUP
         }
 
 
+        public void TrackProgress(int currentSplitIndex, JObject runJson)
+        {
+            if (currentSplitIndex < 1)
+            {
+                LogDebug("Not enough data to calculate progress (first split or missing data).");
+                return;
+            }
 
+            // Get the "current" split as the most recently completed one
+            var previousSplitData = runJson["splits"]?[currentSplitIndex - 1] as JObject;
+            var comparisonTime = previousSplitData?["comparisons"]?["Personal Best"]?.ToObject<double?>();
 
+            if (previousSplitData != null && comparisonTime.HasValue)
+            {
+                // Check previous split pace against its comparison
+                double currentPaceDifference = CalculatePace(previousSplitData, comparisonTime.Value, currentSplitIndex - 1);
 
+                // Get the previous pace difference from a global variable
+                double previousPaceDifference = _CPH.GetGlobalVar<double>("theRunGgPreviousPaceDifference", false);
 
+                // Calculate and set whether time was saved or lost
+                DetermineTimeSavedOrLost(currentPaceDifference, previousPaceDifference);
 
-        /*
-                private void HandleSplitDifference(JObject runJson, JObject previousSplitData)
-                {
-                    double? runSplitTime = RoundDouble(previousSplitData["splitTime"]?.ToObject<double?>());
-                    double? runTargetTime = RoundDouble(previousSplitData["total"]["time"]?.ToObject<double?>());
-                    double? newTimeDifference = runTargetTime - runSplitTime;
-                    LogDebug($"runSplitTime={runSplitTime}, runTargetTime={runTargetTime}, newTimeDifference={newTimeDifference}");
+                // Update the global variable with the current pace difference for the next split comparison
+                _CPH.SetGlobalVar("theRunGgPreviousPaceDifference", currentPaceDifference, false);
+            }
+        }
 
-                    bool goldSegment = false;
+        private double CalculatePace(JObject previousSplitData, double comparisonTime, int splitIndex)
+        {
+            // Get the actual split time and convert to TimeSpan
+            double actualSplitMilliseconds = previousSplitData["splitTime"]?.ToObject<double?>() ?? 0;
+            TimeSpan actualSplitTime = ConvertToTimeSpan(actualSplitMilliseconds) ?? TimeSpan.Zero;
+            TimeSpan comparisonSplitTime = ConvertToTimeSpan(comparisonTime) ?? TimeSpan.Zero;
 
-                    // Check if gold event
-                    // Extract events array
-                    JArray events = runJson["events"] as JArray;
-                    if (events == null)
-                    {
-                        LogInfo("No events found in run data.");
-                        return;
-                    }
+            // Calculate the difference (positive if behind, negative if ahead)
+            TimeSpan timeDifference = actualSplitTime - comparisonSplitTime;
+            bool isAhead = timeDifference < TimeSpan.Zero;
 
-                    // Iterate through each event
-                    foreach (JObject eventObj in events)
-                    {
-                        string eventType = eventObj["type"]?.ToString();
-                        JObject eventData = eventObj["data"] as JObject;
+            // Set arguments and trigger events based on pace
+            _CPH.SetArgument("split.paceDifference", FormatTimeSpan(timeDifference));
+            _CPH.SetArgument("split.paceStatus", isAhead ? "ahead" : "behind");
+            _CPH.TriggerCodeEvent(isAhead ? "theRunGreenSplit" : "theRunRedSplit");
 
-                        // Check the event type and process accordingly
-                        if (eventType == "gold_split_event")
-                        {
-                            goldSegment = true;
-                        }
-                    }
-                    _CPH.SetArgument("goldSegment", goldSegment);
+            // Return the time difference in total milliseconds for tracking pace
+            return timeDifference.TotalMilliseconds;
+        }
 
-                    // Check if run is red or green
-                    bool ahead;
-                    newTimeDifference = runSplitTime - runTargetTime;
-                    if (runSplitTime > runTargetTime)
-                    {
-                        HandleRedSplitEvent(runSplitTime, runTargetTime);
-                        ahead = false;
-                    }
-                    else
-                    {
-                        HandleGreenSplitEvent(runSplitTime, runTargetTime);
-                        ahead = true;
-                    }
+        private void DetermineTimeSavedOrLost(double currentPaceDifference, double previousPaceDifference)
+        {
+            // Check if previous pace difference is zero (or default value) to prevent triggering comparison
+            if (previousPaceDifference == 0)
+            {
+                LogDebug("Skipping time comparison as previous pace difference is zero.");
+                return;
+            }
 
-                    // Check if there is a time save
-                    //HandleTimeSaveLossEvent(ahead, oldTimeDifference, newTimeDifference);
+            // Calculate the difference in pace
+            double paceDifferenceChange = currentPaceDifference - previousPaceDifference;
 
-                    _CPH.SetGlobalVar("theRunGgCurrentTimeDifference", newTimeDifference, false);
-                }
+            bool timeSaved = paceDifferenceChange < 0;
 
-
-
-
-
-                private void HandleTimeSaveLossEvent(bool ahead, double? oldTimeDifference, double? newTimeDifference)
-                {
-                    double? timeSaveLossAmount =  newTimeDifference - oldTimeDifference;
-                    LogDebug($"timeSaveLossAmount=[{timeSaveLossAmount}], --> (newTimeDifference=[{newTimeDifference}] - oldTimeDifference=[{oldTimeDifference}])");
-
-                    if (timeSaveLossAmount < 0)
-                    {
-                        HandleTimeSaveEvent(timeSaveLossAmount);
-                    }
-                    else
-                    {
-                        HandleTimeLossEvent(timeSaveLossAmount);
-                    }
-
-                }
-
-                private void HandleTimeLossEvent(double? timeLossAmount)
-                {
-                    _CPH.SetArgument("segmentComparison.timeDifference", timeLossAmount);
-
-                    _CPH.TriggerCodeEvent("theRunTimeLoss");
-                }
-
-                private void HandleTimeSaveEvent(double? timeSaveAmount)
-                {
-                    _CPH.SetArgument("segmentComparison.timeDifference", timeSaveAmount);
-
-                    _CPH.TriggerCodeEvent("theRunTimeSave");
-                }
-
-                private void HandleGreenSplitEvent(double? splitTime, double? targetTime)
-                {
-                    // Set arguments for the green split event
-                    _CPH.SetArgument("segmentComparison.splitTime", splitTime);
-                    _CPH.SetArgument("segmentComparison.targetTime", targetTime);
-
-                    _CPH.TriggerCodeEvent("theRunGreenSplit");
-                }
-
-                private void HandleRedSplitEvent(double? splitTime, double? targetTime)
-                {
-                    // Set arguments for the red split event
-                    _CPH.SetArgument("segmentComparison.splitTime", splitTime);
-                    _CPH.SetArgument("segmentComparison.targetTime", targetTime);
-
-                    _CPH.TriggerCodeEvent("theRunRedSplit");
-                }
-        */
-
+            // Set arguments and trigger events if there’s a time difference
+            _CPH.SetArgument("split.timeSavedOrLost", FormatTimeSpan(TimeSpan.FromMilliseconds(Math.Abs(paceDifferenceChange))));
+            _CPH.SetArgument("split.timeStatus", timeSaved ? "saved" : "lost");
+            _CPH.TriggerCodeEvent(timeSaved ? "theRunTimeSave" : "theRunTimeLoss");
+        }
     }
 }
