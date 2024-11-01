@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
 {
@@ -12,12 +11,18 @@ namespace StreamUP
             string[] categories = { "TheRun.gg" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
+                
+
                 // Splits
                 new("Green Split", "theRunGreenSplit", categories),
                 new("Red Split", "theRunRedSplit", categories),
                 new("Gold Split", "theRunGoldSplit", categories),
                 new("Final Split", "theRunFinalSplit", categories),
-
+                new("Skip Split", "theRunSkipSplit", categories),
+                new("Undo Split", "theRunUndoSplit", categories),
+                new("Time Loss on Split", "theRunTimeLoss", categories),
+                new("Time Save on Split", "theRunTimeSave", categories),
+                
                 // General
                 new("Run Started", "theRunRunStarted", categories),
                 new("Run Ended", "theRunRunEnded", categories),
