@@ -139,7 +139,7 @@ namespace StreamUP
             if (!DoesFileExist(filePath))
             {
                 LogError($"Error text file doesn't exist");
-                return [];
+                return new string[0];
             }
             string[] lines = File.ReadAllLines(filePath);
             int totalLines = lines.Length;
@@ -148,7 +148,7 @@ namespace StreamUP
             if (totalLines == 0)
             {
                 LogError("Error File is Empty");
-                return [];
+                return new string[0];
             }
             return lines;
 
@@ -366,7 +366,7 @@ namespace StreamUP
             if (!ContainsIgnoreCase(list, value))
             {
                 //? Not in File
-                return [];
+                return new int[0];
             }
 
             int placement = 1;
