@@ -106,7 +106,7 @@ namespace StreamUP
 
             string[] linesRemoved = lines.Skip(count).ToArray();
 
-            //!! File.WriteAllLines(filePath, linesRemoved);
+            WriteLines(filePath, linesRemoved);
             return true;
         }
         //# DeleteLine
@@ -118,7 +118,7 @@ namespace StreamUP
             if (index >= 0 && index < list.Count)
             {
                 list.RemoveAt(index);
-                //!! File.WriteAllLines(filePath, lines);
+                WriteLines(filePath, list.ToArray());
             }
             else
             {
