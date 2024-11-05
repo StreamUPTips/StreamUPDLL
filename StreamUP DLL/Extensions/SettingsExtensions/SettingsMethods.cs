@@ -1817,6 +1817,10 @@ namespace StreamUP
 
         public Control AddGroupsDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
+            if(!_CPH.GroupExists(defaultValue))
+            {
+                _CPH.AddGroup(defaultValue);
+            }
             List<string> groups = _CPH.GetGroups();
             string[] groupsArray = groups.ToArray();
             Array.Sort(groupsArray);
