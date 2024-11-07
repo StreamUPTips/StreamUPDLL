@@ -1,4 +1,3 @@
-using System.IO;
 using Streamer.bot.Plugin.Interface;
 
 namespace StreamUP
@@ -8,11 +7,13 @@ namespace StreamUP
     {
         private IInlineInvokeProxy _CPH;
         private string _ProductIdentifier;
+        private bool _DebugMode;
 
         public StreamUpLib(IInlineInvokeProxy cph, string productIdentifier)
         {
             _CPH = cph;
             _ProductIdentifier = productIdentifier;
+            _DebugMode = cph.GetGlobalVar<bool>("sup_debugMode");
         }
 
         public StreamUpLib(IInlineInvokeProxy cph)
