@@ -15,7 +15,7 @@ namespace StreamUP
 
             string todayFileName = $"{DateTime.Now:yyyyMMdd} - StreamUP.log";
             string todayPath = Path.Combine(logFolder, todayFileName);
-            
+
             // Use FileStream with FileShare.ReadWrite to allow other processes to read the file while it's being written.
             using (var fileStream = new FileStream(todayPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
             using (var writer = new StreamWriter(fileStream, Encoding.UTF8))
@@ -33,9 +33,14 @@ namespace StreamUP
                              [CallerMemberName] string memberName = "",
                              [CallerLineNumber] int lineNumber = 0)
         {
+            if (!_DebugMode)
+            {
+                return;
+            }
+
             // Format log message
             string formattedLogMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss:fff} DBG] [{_ProductIdentifier}] {memberName}({lineNumber}) :: {message}";
-            
+
             // Write to log
             WriteToLog(formattedLogMessage);
         }
@@ -46,7 +51,7 @@ namespace StreamUP
         {
             // Format log message
             string formattedLogMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss:fff} ERR] [{_ProductIdentifier}] {memberName}({lineNumber}) :: {message}";
-            
+
             // Write to log
             WriteToLog(formattedLogMessage);
         }
@@ -57,7 +62,7 @@ namespace StreamUP
         {
             // Format log message
             string formattedLogMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss:fff} INF] [{_ProductIdentifier}] {memberName}({lineNumber}) :: {message}";
-            
+
             // Write to log
             WriteToLog(formattedLogMessage);
         }
