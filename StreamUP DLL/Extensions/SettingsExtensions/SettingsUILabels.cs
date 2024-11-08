@@ -135,7 +135,7 @@ namespace StreamUP
             foreach (KeyValuePair<string, string> variable in data)
             {
 
-                dataString += $"%{variable.Key} = {variable.Value} \n";
+                dataString += $"%{variable.Key}% = {variable.Value} \n";
 
 
             }
