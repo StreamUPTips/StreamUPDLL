@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Streamer.bot.Plugin.Interface.Enums;
 using Streamer.bot.Plugin.Interface.Model;
@@ -20,7 +21,8 @@ namespace StreamUP
 
     }
 
-       public class CurrencyUser
+    [Serializable()]
+    public class CurrencyUser
     {
         public string UserName {get; set;}
         public string UserId {get; set;}

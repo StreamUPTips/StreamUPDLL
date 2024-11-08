@@ -11,6 +11,7 @@ namespace StreamUP
 
       private static readonly Dictionary<int, string> _errorMessages = new Dictionary<int, string>
     {
+        { 1000, "Something Went Wrong"},
         { 4501, "User can not afford to do this" },
         { 4502, "User’s request is over the limit" },
         { 4503, "User’s request is under the limit" },
