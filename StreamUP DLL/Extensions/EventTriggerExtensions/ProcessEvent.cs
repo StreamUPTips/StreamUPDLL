@@ -17,7 +17,7 @@ namespace StreamUP
             { EventType.DonorDriveDonation, new DonorDriveDonationHandler() },
             { EventType.FourthwallDonation, new FourthwallDonationHandler() },
             { EventType.KofiDonation, new KofiDonationHandler() },
-            {EventType.PallyggCampaignTip, new PallyGGCampaignTipHandler()},
+            { EventType.PallyggCampaignTip, new PallyGGCampaignTipHandler() },
             { EventType.StreamElementsTip, new StreamElementsTipHandler() },
             { EventType.StreamlabsDonation, new StreamlabsDonationHandler() },
             { EventType.Test, new TestHandler() },
