@@ -8,9 +8,12 @@ namespace StreamUP
         {
             LogInfo("Setting up TheRun.gg triggers into Streamer.Bot");
 
-            string[] splits = { "TheRun.gg", "Splits" };
-            string[] general = { "TheRun.gg", "General" };
-            string[] performance = { "TheRun.gg", "Performance" };
+            // Set debug mode on
+            _CPH.SetGlobalVar("sup_debugMode", true, true);
+
+            string[] splits = { "StreamUP", "TheRun.gg", "Splits" };
+            string[] general = { "StreamUP", "TheRun.gg", "General" };
+            string[] performance = { "StreamUP", "TheRun.gg", "Performance" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 
