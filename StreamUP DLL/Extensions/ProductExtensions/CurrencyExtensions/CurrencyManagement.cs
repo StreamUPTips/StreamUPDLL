@@ -104,7 +104,7 @@ namespace StreamUP
         {
             List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
             _CPH.Wait(100);
-            _CPH.UnsetAllUsersVar("points", true);
+            _CPH.UnsetAllUsersVar(varName, true);
             LogDebug("[Currency System Logging] Points have been reset");
             return userScores.Count;
 
