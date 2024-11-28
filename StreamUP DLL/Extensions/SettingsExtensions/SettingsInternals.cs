@@ -786,5 +786,10 @@ namespace StreamUP
             StreamUpInternalDelete(settingName);
         }
 
+        public void SettingsDispose()
+        {
+            _initialized = false;
+        }
+
     }
 }
