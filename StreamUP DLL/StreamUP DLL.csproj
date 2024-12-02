@@ -79,6 +79,8 @@
     <Compile Include="Extensions\YouTubeExtensions\*.cs" />
     <Compile Include="Extensions\ValidationExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\TheRunExtensions\*.cs" />
+    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
+    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
