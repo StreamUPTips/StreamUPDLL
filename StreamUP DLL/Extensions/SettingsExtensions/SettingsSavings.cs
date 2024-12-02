@@ -34,7 +34,7 @@ namespace StreamUP
           
             Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
             string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
-            LogInfo($"Loaded JSON: {jsonString}");
+            //LogInfo($"Loaded JSON: {jsonString}");
             return json;
         }
 
@@ -83,7 +83,7 @@ namespace StreamUP
         }
         public T StreamUpInternalGet<T>(string key, T defaultValue)
         {
-            LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
+            //LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
 
             if (_data.TryGetValue(key, out var jsonValue))
             {
@@ -176,6 +176,8 @@ namespace StreamUP
         {
             return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
         }
+
+        
 
     }
 }

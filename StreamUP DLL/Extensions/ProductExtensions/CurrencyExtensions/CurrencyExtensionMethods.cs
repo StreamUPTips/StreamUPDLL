@@ -12,7 +12,7 @@ namespace StreamUP
         public long GetBetSize(string input, long currentPoints, long minBet, long maxBet, long defaultBet, bool rangeError)
         {
            
-            if (maxBet < 1)
+            if (maxBet == 0 )
             {
                 maxBet = long.MaxValue;
             }
@@ -97,7 +97,7 @@ namespace StreamUP
 
          public long GetPrizeSize(string input, long minPrize, long maxPrize, long defaultPrize)
         {
-            if (maxPrize < 1)
+            if (maxPrize == 0)
             {
                 maxPrize = long.MaxValue;
             }
