@@ -30,8 +30,8 @@ namespace StreamUP
         {
             // Initialize the dictionary safely
 
-           //GetStreamerBotGlobalVar<Dictionary<string, object>>(saveFile, true, out Dictionary<string, object> json);
-          
+            //GetStreamerBotGlobalVar<Dictionary<string, object>>(saveFile, true, out Dictionary<string, object> json);
+
             Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
             string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
             //LogInfo($"Loaded JSON: {jsonString}");
@@ -52,8 +52,18 @@ namespace StreamUP
 
         public void StreamUpInternalUpdate(string key, object newValue)
         {
+            LogError(newValue.GetType().ToString());
             // Convert JArray to a serializable List<string> before storing
-            if (newValue is JArray jArray)
+            if (newValue is JArray eArray && typeof((string, int, int)).IsAssignableFrom(typeof(object)))
+            {
+                var tupleList = eArray.ToObject<List<(string Emote, int Payout, int Percentage)>>();
+                if (tupleList != null)
+                {
+                    _data[key] = tupleList;
+
+                }
+            }
+            else if (newValue is JArray jArray)
             {
                 // Convert to a List<string>
                 List<string> serializedList = jArray.ToObject<List<string>>();
@@ -89,14 +99,14 @@ namespace StreamUP
             {
                 try
                 {
-                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool)|| typeof(T) == typeof(long))
+                    if (typeof(T) == typeof(string) || typeof(T) == typeof(int) || typeof(T) == typeof(double) || typeof(T) == typeof(bool) || typeof(T) == typeof(long))
                     {
                         return (T)Convert.ChangeType(jsonValue, typeof(T));
                     }
                     else if (typeof(T) == typeof(Dictionary<string, bool>) ||
                              typeof(T) == typeof(Dictionary<string, string>) ||
                              typeof(T) == typeof(Dictionary<string, int>) ||
-                             typeof(T) == typeof(List<(string Emote, int Payout , int Percentage)>)
+                             typeof(T) == typeof(List<(string Emote, int Payout, int Percentage)>)
                              )
                     {
                         return JsonConvert.DeserializeObject<T>(jsonValue.ToString());
@@ -177,7 +187,7 @@ namespace StreamUP
             return JsonConvert.SerializeObject(dictionary, Formatting.Indented);
         }
 
-        
+
 
     }
 }

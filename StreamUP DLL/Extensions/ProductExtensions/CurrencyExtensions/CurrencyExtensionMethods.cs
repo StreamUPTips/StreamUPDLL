@@ -62,12 +62,12 @@ namespace StreamUP
                 betSize = currentPoints;
             }
 
-            //num
+            //# Bet Over Max
             if (betSize > maxBet)
             {
                 if(rangeError)
                 {
-                    return -1;
+                    return -2;
                 }
                 else
                 {
@@ -75,11 +75,12 @@ namespace StreamUP
                 }
             }
 
+            //# Bet Under Min
             if (betSize < minBet)
             {
                 if(rangeError)
                 {
-                    return -2;
+                    return -1;
                 }
                 else
                 {
