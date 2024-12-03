@@ -582,34 +582,34 @@ namespace StreamUP
                 switch (control)
                 {
                     case Label label:
-                        LogInfo($"Save Name: {label.Name}, Value: {label.Text}");
+                        
                         if (!string.IsNullOrEmpty(label.Name))
                         {
                             SaveSetting(label.Name, label.Text);
                         }
                         break;
                     case NumericUpDown numericUpDown:
-                        LogInfo($"Save Name: {numericUpDown.Name}, Value: {numericUpDown.Value}");
+                        
                         SaveSetting(numericUpDown.Name, numericUpDown.Value.ToString());
                         break;
                     case TextBox textBox:
-                        LogInfo($"Save Name: {textBox.Name}, Text: {textBox.Text}");
+                        
                         SaveSetting(textBox.Name, textBox.Text);
                         break;
                     case CheckBox checkbox:
-                        LogInfo($"Save Name: {checkbox.Name}, Text: {checkbox.Checked}");
+                        
                         SaveSetting(checkbox.Name, checkbox.Checked);
                         break;
                     case TrackBar trackbar:
-                        LogInfo($"Save Name: {trackbar.Name}, Text: {trackbar.Value}");
+                        
                         SaveSetting(trackbar.Name, trackbar.Value);
                         break;
                     case Button button:
-                        LogInfo($"Save Name: {button.Name}, Text: {button.Text}");
+                        
                         SaveSetting(button.Name, button.Text);
                         break;
                     case ComboBox comboBox:
-                        LogInfo($"Save Name: {comboBox.Name}, Text: {comboBox.SelectedItem}");
+                       
                         SaveSetting(comboBox.Name, comboBox.SelectedItem);
                         break;
                     case CheckedListBox checkedListBox:
@@ -621,7 +621,7 @@ namespace StreamUP
                             checkedItemsDict[itemName] = isChecked;
                         }
                         var jsonData = JsonConvert.SerializeObject(checkedItemsDict);
-                        LogInfo($"{checkedListBox.Name}, Items: {string.Join(", ", checkedItemsDict.Select(kv => $"[{kv.Key}, {kv.Value}]"))}");
+                       
                         SaveSetting(checkedListBox.Name, checkedItemsDict);
                         break;
                     case DataGridView dataGridView:
@@ -687,9 +687,9 @@ namespace StreamUP
                         else if (dataGridView.Columns.Count == 3)
                         {
 
-                            if (dataGridView.Name.Contains("slots"))
+                            if (dataGridView.Name.Contains("slot"))
                             {
-                                var dataTuple = new List<(string Emote, string Payout, string Percentage)>();
+                                var dataTuple = new List<(string Emote, int Payout, int Percentage)>();
 
 
                                 foreach (DataGridViewRow row in dataGridView.Rows)
@@ -698,11 +698,11 @@ namespace StreamUP
                                     if (!row.IsNewRow)
                                     {
                                         string key = row.Cells[0].Value?.ToString();
-                                        string value1 = row.Cells[1].Value?.ToString();
-                                        string value2 = row.Cells[2].Value?.ToString();
+                                        int value1 = int.Parse(row.Cells[1].Value?.ToString());
+                                        int value2 = int.Parse(row.Cells[2].Value?.ToString());
 
                                         // Add the tuple to the list
-                                        dataTuple.Add((Emote: key, Payout: value1, Percentage: value2));
+                                        dataTuple.Add((key, value1, value2));
                                     }
                                 }
 
@@ -770,6 +770,7 @@ namespace StreamUP
 
         public void SaveSetting(string settingName, object newValue)
         {
+            LogInfo($"Saving - {settingName} with {newValue}");
             if (!_initialized)
             {
                 InitializeDatabase(out string filePath);

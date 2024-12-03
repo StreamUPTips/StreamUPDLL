@@ -157,7 +157,30 @@ namespace StreamUP
             return true;
         }    
     
-        
+        public bool SetObsSceneItemIndex(string sceneName, string sourceName, int sceneItemIndex, int obsConnection)
+        {
+            LogInfo($"Setting scene item index for source [{sourceName}] in scene [{sceneName}] to [{sceneItemIndex}]");
+
+            // Pull sceneItemId
+            if (!GetObsSceneItemId(sceneName, sourceName, obsConnection, out int sceneItemId))
+            {
+                LogError($"Scene item ID for source [{sourceName}] in scene [{sceneName}] not found.");
+                return false;
+            }
+
+            // Prepare the request data
+            JObject requestData = new JObject
+            {
+                ["sceneName"] = sceneName,
+                ["sceneItemId"] = sceneItemId,
+                ["sceneItemIndex"] = sceneItemIndex
+            };
+
+            // Send the raw request to OBS
+            _CPH.ObsSendRaw("SetSceneItemIndex", requestData.ToString(), obsConnection);
+            LogInfo($"Successfully set scene item index for source [{sourceName}] in scene [{sceneName}] to [{sceneItemIndex}]");
+            return true;
+        }
     }
 }
 
