@@ -10,7 +10,7 @@ namespace StreamUP
 
         public bool DSILoader(int obsConnection)
         {
-            DSILoadInfo();
+            var dsiInfo = DSILoadInfo();
 
             if (!LoadExtensionsFromAPI())
             {
@@ -18,7 +18,7 @@ namespace StreamUP
                 return false;
             }
 
-            if (!GetInstalledExtensions())
+            if (!GetInstalledExtensions(dsiInfo))
             {
                 LogError("Failed to get installed extensions.");
                 return false;
@@ -26,7 +26,7 @@ namespace StreamUP
 
             SetBackgroundToLowestLayer(obsConnection);
 
-            DSISaveInfo();
+            DSISaveInfo(dsiInfo);
 
             return true;
         }
@@ -96,7 +96,7 @@ namespace StreamUP
 
         }
 
-        private bool GetInstalledExtensions()
+        private bool GetInstalledExtensions(DSIInfo dsiInfo)
         {
             dsiInfo.InstalledWidgets = new List<string>();
             dsiInfo.RotatorWidgets = new List<string>();

@@ -1,4 +1,3 @@
-
 using System.Collections.Generic;
 using Streamer.bot.Common.Events;
 
@@ -25,6 +24,19 @@ namespace StreamUP
 
             // Show the new widget
             _CPH.ObsShowSource("StreamUP Widgets • Dynamic Stream-Island", widgetName, obsConnection);
+
+            var dsiInfo = DSILoadInfo();
+
+            // End alert if it is currently active
+            if (dsiInfo.CurrentState == DSIInfo.DSIState.AlertActive)
+            {
+                int alertTime = GetValueOrDefault<int>(productSettings, "AlertTime", 5000);
+                _CPH.Wait(alertTime);
+                dsiInfo = DSILoadInfo();
+                dsiInfo.CurrentState = DSIInfo.DSIState.AlertEnding;
+                DSISaveInfo(dsiInfo);
+                DSISetState("", false);
+            }   
 
             LogDebug("Animated to next widget successfully.");
             return true;

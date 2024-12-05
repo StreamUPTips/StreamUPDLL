@@ -18,7 +18,8 @@ namespace StreamUP
             {
                 // Find out if the action was triggered by a timed action
                 EventType eventType = _CPH.GetEventType();
-                if (eventType == EventType.TimedAction)
+                var dsiInfo = DSILoadInfo();
+                if (eventType == EventType.TimedAction || dsiInfo.CurrentState == DSIInfo.DSIState.Default)
                 {
                     // If the action was triggered by a timed action, set the outline colour to the default colour
                     outlineColour = long.Parse(GetValueOrDefault<string>(productSettings, "DefaultOutlineColourOBS", "0"));
