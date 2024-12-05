@@ -5,7 +5,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public bool DSIAnimateToNextWidget(string widgetName, string widgetPrefix, Dictionary<string, object> productSettings, int obsConnection)
+        public bool DSIAnimateToNewWidgetSize(string widgetName, string widgetPrefix, Dictionary<string, object> productSettings, int obsConnection)
         {
             LogDebug("Animating to next widget...");
 
@@ -16,6 +16,12 @@ namespace StreamUP
             // Start the animation for the background to adjust to the new widget size
             _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "New Size Bounce", obsConnection);
             _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "Stroke Colour Set", obsConnection);
+
+            return true;
+        }
+
+        public bool DSIAnimateNewWidgetOn(string widgetName, string widgetPrefix, Dictionary<string, object> productSettings, int obsConnection)
+        {
             _CPH.Wait(500);
 
             // Play audio cue
