@@ -8,11 +8,11 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-       
+
         public long GetBetSize(string input, long currentPoints, long minBet, long maxBet, long defaultBet, bool rangeError)
         {
-           
-            if (maxBet == 0 )
+
+            if (maxBet == 0)
             {
                 maxBet = long.MaxValue;
             }
@@ -54,7 +54,7 @@ namespace StreamUP
             if (betSize == 0)
             {
 
-                 betSize = defaultBet;
+                betSize = defaultBet;
             }
 
             if (betSize > currentPoints)
@@ -65,26 +65,26 @@ namespace StreamUP
             //# Bet Over Max
             if (betSize > maxBet)
             {
-                if(rangeError)
+                if (rangeError)
                 {
                     return -2;
                 }
                 else
                 {
-                betSize = maxBet;
+                    betSize = maxBet;
                 }
             }
 
             //# Bet Under Min
             if (betSize < minBet)
             {
-                if(rangeError)
+                if (rangeError)
                 {
                     return -1;
                 }
                 else
                 {
-                betSize = minBet;
+                    betSize = minBet;
                 }
             }
 
@@ -96,7 +96,7 @@ namespace StreamUP
             return betSize;
         }
 
-         public long GetPrizeSize(string input, long minPrize, long maxPrize, long defaultPrize)
+        public long GetPrizeSize(string input, long minPrize, long maxPrize, long defaultPrize, bool rangeError)
         {
             if (maxPrize == 0)
             {
@@ -105,7 +105,7 @@ namespace StreamUP
 
             long betPrize = 0;
 
-           if (long.TryParse(input, out long num))
+            if (long.TryParse(input, out long num))
             {
                 betPrize = Math.Abs(num); //Turns Positive if negative
             }
@@ -127,14 +127,30 @@ namespace StreamUP
             }
 
             //num
+            //# Bet Over Max
             if (betPrize > maxPrize)
             {
-                betPrize = maxPrize;
+                if (rangeError)
+                {
+                    return -2;
+                }
+                else
+                {
+                    betPrize = maxPrize;
+                }
             }
 
+            //# Bet Under Min
             if (betPrize < minPrize)
             {
-                betPrize = minPrize;
+                if (rangeError)
+                {
+                    return -1;
+                }
+                else
+                {
+                    betPrize = minPrize;
+                }
             }
 
             if (betPrize == 0)
@@ -172,6 +188,6 @@ namespace StreamUP
                 return true;
             }
         }
-        
+
     }
 }
