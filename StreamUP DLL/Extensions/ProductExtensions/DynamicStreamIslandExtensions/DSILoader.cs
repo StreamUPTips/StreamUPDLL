@@ -26,9 +26,18 @@ namespace StreamUP
 
             SetBackgroundToLowestLayer(obsConnection);
 
+            ResetWidget();
+
             DSISaveInfo(dsiInfo);
 
             return true;
+        }
+
+        private void ResetWidget()
+        {
+            _CPH.ResumeActionQueue("StreamUP Widgets • DSI Widgets");
+            _CPH.ResumeActionQueue("StreamUP Widgets • DSI Triggers");
+            _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
         }
 
         private void SetBackgroundToLowestLayer(int obsConnection)
