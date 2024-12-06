@@ -29,19 +29,45 @@ namespace StreamUP
                     break;
                 case DSIInfo.DSIState.AlertStarting:
                     HandleAlertStarting(dsiInfo, actionName);
-                    return;  
+                    break;
                 case DSIInfo.DSIState.AlertEnding:
                     HandleAlertEnding(dsiInfo, actionName);
-                    return;  
+                    break;
+                case DSIInfo.DSIState.Locking:
+                    HandleLockingState(dsiInfo, actionName);
+                    break;
                 case DSIInfo.DSIState.Locked:
-                    dsiInfo.ActiveWidget = actionName;
+                    HandleLockedState(dsiInfo, actionName);
                     break;
                 case DSIInfo.DSIState.Static:
                     dsiInfo.ActiveWidget = actionName;
                     break;
             }
 
-            LogDebug($"State changed to: {dsiInfo.CurrentState}, Active Widget: {dsiInfo.ActiveWidget}");
+        }
+
+        private void HandleLockedState(DSIInfo dsiInfo, string actionName)
+        {
+            if (dsiInfo.AlertQueue > 0)
+            {
+                LogDebug("Alert queue is not empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
+            }
+            else
+            {
+                LogDebug("Alert queue is empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.Default;
+                _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
+            }
+            _CPH.ResumeActionQueue("StreamUP Widgets • DSI Widgets");
+            DSISaveInfo(dsiInfo);
+            DSISetState("", false);
+        }
+
+        private void HandleLockingState(DSIInfo dsiInfo, string actionName)
+        {
+            dsiInfo.CurrentState = DSIInfo.DSIState.Locked;
+            DSISaveInfo(dsiInfo);
         }
 
         private void DSIAlertAddToQueue(DSIInfo dsiInfo, string actionName)
@@ -131,12 +157,12 @@ namespace StreamUP
         public enum DSIState
         {
             Default,
+            Locking,
             Locked,
             AlertStarting,
             AlertActive,
             AlertEnding,
             Static
-            
         }
 
         public DSIState CurrentState { get; set; }

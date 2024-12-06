@@ -10,9 +10,13 @@ namespace StreamUP
             LogDebug("Animating to next widget...");
 
             // Hide all widgets and wait for the animation to complete
-            DSIHideAllWidgets(obsConnection);
-            _CPH.Wait(300);
-
+            var dsiInfo = DSILoadInfo();
+            if (dsiInfo.CurrentState != DSIInfo.DSIState.Locked)
+            {
+                DSIHideAllWidgets(obsConnection);
+                _CPH.Wait(300);   
+            }
+                    
             // Start the animation for the background to adjust to the new widget size
             _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "New Size Bounce", obsConnection);
             _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "Stroke Colour Set", obsConnection);
@@ -25,7 +29,7 @@ namespace StreamUP
             _CPH.Wait(500);
 
             // Play audio cue
-            PlayAudioCue(widgetPrefix, productSettings);
+            DSIPlayAudioCue(widgetPrefix, productSettings);
             _CPH.Wait(250);
 
             // Show the new widget
@@ -48,7 +52,7 @@ namespace StreamUP
             return true;
         }
 
-        private void PlayAudioCue(string widgetPrefix, Dictionary<string, object> productSettings)
+        public void DSIPlayAudioCue(string widgetPrefix, Dictionary<string, object> productSettings)
         {
             EventType eventType = _CPH.GetEventType();
             if (eventType == EventType.TimedAction)
