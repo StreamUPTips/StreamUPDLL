@@ -127,9 +127,9 @@ namespace StreamUP
                                                                 });
         public static string CustomTimed = CreateSettingsLabel(new Dictionary<string, string>{
                                                                 {"user", "The User who used the command"},
-                                                                {"timerId","The Number of points a person has"},
-                                                                {"timerTime", "The name of the points"},
-                                                                {"timerMessage", "The user whose points are been adjusted"},
+                                                                {"timerId","The ID of the Timer"},
+                                                                {"timerTime", "How often the Timer will post"},
+                                                                {"timerMessage", "The Message of the Timer"},
                                                                 });
 
 
