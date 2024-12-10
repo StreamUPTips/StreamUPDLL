@@ -18,7 +18,8 @@ namespace StreamUP
             {
                 // Find out if the action was triggered by a timed action
                 EventType eventType = _CPH.GetEventType();
-                if (eventType == EventType.TimedAction)
+                var dsiInfo = DSILoadInfo();
+                if (eventType == EventType.TimedAction || dsiInfo.CurrentState == DSIInfo.DSIState.Default)
                 {
                     // If the action was triggered by a timed action, set the outline colour to the default colour
                     outlineColour = long.Parse(GetValueOrDefault<string>(productSettings, "DefaultOutlineColourOBS", "0"));
@@ -58,8 +59,15 @@ namespace StreamUP
                         LogDebug("Outline setting is 'AlertsOnly'. Changed accent colour to '0'");
                     }
                     break;
-                // If accent mode is set to always on
-                case "Always On":
+                // If accent mode is set to always on (with alert colours)
+                case "Always On (With Alert Colours)":
+                    filterSettings.Add("setting_color_alpha", outlineColour);
+                    SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                    LogDebug($"Outline setting is 'AlwaysOn'. Changed accent colour to: [{outlineColour}]");
+                    break;
+                // If accent mode is set to always on (without alert colours)
+                case "Always On (With Default)":
+                    outlineColour = long.Parse(GetValueOrDefault<string>(productSettings, "DefaultOutlineColourOBS", "0"));
                     filterSettings.Add("setting_color_alpha", outlineColour);
                     SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
                     LogDebug($"Outline setting is 'AlwaysOn'. Changed accent colour to: [{outlineColour}]");

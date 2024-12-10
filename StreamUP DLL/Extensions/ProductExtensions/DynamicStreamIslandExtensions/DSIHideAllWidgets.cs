@@ -21,8 +21,17 @@ namespace StreamUP
                     if (item.IsGroup == true)
                     {
                         string sourceName = item.SourceName;
-                        _CPH.ObsHideSource("StreamUP Widgets • Dynamic Stream-Island", sourceName, obsConnection);
-                        LogDebug($"Hiding source: {sourceName}");
+                        switch (sourceName)
+                        {
+                            case "DSI • Alerts • Group":
+                                _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • Alerts • Group", "Opacity • OFF", obsConnection);
+                                LogDebug("Hiding source: DSI • Alerts • Group");
+                                break;
+                            default:
+                                _CPH.ObsHideSource("StreamUP Widgets • Dynamic Stream-Island", sourceName, obsConnection);
+                                LogDebug($"Hiding source: {sourceName}");
+                                break;
+                        }
                     }
                 }
             }

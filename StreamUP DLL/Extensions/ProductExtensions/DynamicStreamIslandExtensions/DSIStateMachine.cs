@@ -1,69 +1,145 @@
+using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using Newtonsoft.Json;
-using Streamer.bot.Common.Events;
 
 namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public DSIInfo dsiInfo { get; set; }
-
-        public StreamUpLib()
-        {
-            dsiInfo = new DSIInfo();
-        }
-
         // A method to set the state and perform state-specific logic
-        public void DSISetState(string actionName, DSIInfo.DSIState state)
+        public void DSISetState(string actionName, bool addToAlertQueue)
         {
-            DSILoadInfo();
+            var dsiInfo = DSILoadInfo();
 
-            EventType eventType = _CPH.GetEventType();
-            if (eventType == EventType.TimedAction)
+            if (addToAlertQueue)
             {
-                LogDebug("DSISetState called from a Timed Action.");
-                dsiInfo.CurrentState = DSIInfo.DSIState.Default;
+                DSIAlertAddToQueue(dsiInfo, actionName);
+                return;
             }
 
-            // Update the current state and active widget
-            dsiInfo.CurrentState = state;
-            dsiInfo.PreviousRotatorWidget = dsiInfo.ActiveWidget;
-
-            switch (state)
+            switch (dsiInfo.CurrentState)
             {
                 case DSIInfo.DSIState.Default:
-                    dsiInfo.RotatorIndex += 1;
-                    if (dsiInfo.RotatorIndex >= dsiInfo.RotatorWidgets.Count)
-                    {
-                        dsiInfo.RotatorIndex = 0;
-                    }
-                    dsiInfo.ActiveWidget = dsiInfo.RotatorWidgets[dsiInfo.RotatorIndex];
-                    _CPH.RunAction(dsiInfo.ActiveWidget, false);
+                    HandleRotator(dsiInfo);
+                    break;
+                case DSIInfo.DSIState.AlertStarting:
+                    HandleAlertStarting(dsiInfo, actionName);
+                    break;
+                case DSIInfo.DSIState.AlertEnding:
+                    HandleAlertEnding(dsiInfo, actionName);
+                    break;
+                case DSIInfo.DSIState.Locking:
+                    HandleLockingState(dsiInfo, actionName);
                     break;
                 case DSIInfo.DSIState.Locked:
-                    dsiInfo.ActiveWidget = actionName;
-                    break;
-                case DSIInfo.DSIState.Alert:
+                    HandleLockedState(dsiInfo, actionName);
                     break;
                 case DSIInfo.DSIState.Static:
                     dsiInfo.ActiveWidget = actionName;
                     break;
             }
 
-            // Save the updated state info
-            DSISaveInfo();
+        }
 
-            LogDebug($"State changed to: {dsiInfo.CurrentState}, Active Widget: {dsiInfo.ActiveWidget}");
+        private void HandleLockedState(DSIInfo dsiInfo, string actionName)
+        {
+            if (dsiInfo.AlertQueue > 0)
+            {
+                LogDebug("Alert queue is not empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
+            }
+            else
+            {
+                LogDebug("Alert queue is empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.Default;
+                _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
+            }
+            _CPH.ResumeActionQueue("StreamUP Widgets • DSI Widgets");
+
+            DSISaveInfo(dsiInfo);
+            DSISetState("", false);
+        }
+
+        private void HandleLockingState(DSIInfo dsiInfo, string actionName)
+        {
+            dsiInfo.CurrentState = DSIInfo.DSIState.Locked;
+            DSISaveInfo(dsiInfo);
+        }
+
+        private void DSIAlertAddToQueue(DSIInfo dsiInfo, string actionName)
+        {
+            // Add alert to queue
+            _CPH.DisableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
+            dsiInfo.AlertQueue += 1;
+            DSISaveInfo(dsiInfo);
+
+            while (dsiInfo.ActionInProgress)
+            {
+                LogDebug("Action in progress. Waiting...");
+                _CPH.Wait(100);
+                dsiInfo = DSILoadInfo();
+            }
+
+            _CPH.RunAction(actionName, false); 
+            if (dsiInfo.CurrentState == DSIInfo.DSIState.Default)
+            {
+                dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
+                DSISaveInfo(dsiInfo);
+                DSISetState("", false);
+            }
+            else
+            {
+                DSISaveInfo(dsiInfo);
+                LogDebug("Alert added to queue. Something is already active.");
+            }
+        }
+
+        private void HandleAlertEnding(DSIInfo dsiInfo, string actionName)
+        {
+            dsiInfo.AlertQueue -= 1;
+            if (dsiInfo.AlertQueue <= 0)
+            {
+                LogDebug("Alert queue is empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.Default;
+
+            }
+            else
+            {
+                LogDebug("Alert queue is not empty.");
+                dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
+            }
+                DSISaveInfo(dsiInfo);
+                DSISetState(actionName, false);        
+            }
+
+        private void HandleAlertStarting(DSIInfo dsiInfo, string actionName)
+        {
+            dsiInfo.CurrentState = DSIInfo.DSIState.AlertActive;
+            DSISaveInfo(dsiInfo);
+        }
+
+        private void HandleRotator(DSIInfo dsiInfo)
+        {
+            dsiInfo.RotatorIndex += 1;
+            if (dsiInfo.RotatorIndex >= dsiInfo.RotatorWidgets.Count)
+            {
+                dsiInfo.RotatorIndex = 0;
+            }
+            dsiInfo.ActiveWidget = dsiInfo.RotatorWidgets[dsiInfo.RotatorIndex];
+            DSISaveInfo(dsiInfo);
+            _CPH.RunAction(dsiInfo.ActiveWidget, false);   
+            _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");     
         }
 
         public DSIInfo DSILoadInfo()
         {
             // Ensure StateInfo is not null
             string dsiInfoString = _CPH.GetGlobalVar<string>("sup069_DSIState", true);
-            if (dsiInfo == null || string.IsNullOrEmpty(dsiInfoString))
+            var dsiInfo = new DSIInfo();
+            if (string.IsNullOrEmpty(dsiInfoString))
             {
                 LogError("StateInfo is null. Initialising StateInfo.");
-                dsiInfo = new DSIInfo();
                 string DSIInfoInit = JsonConvert.SerializeObject(dsiInfo);
                 _CPH.SetGlobalVar("sup069_DSIState", DSIInfoInit, true);
             }
@@ -74,7 +150,7 @@ namespace StreamUP
             return dsiInfo;
         }
     
-        public void DSISaveInfo()
+        public void DSISaveInfo(DSIInfo dsiInfo)
         {
             string dsiInfoString = JsonConvert.SerializeObject(dsiInfo);
             _CPH.SetGlobalVar("sup069_DSIState", dsiInfoString, true);
@@ -87,27 +163,32 @@ namespace StreamUP
         public enum DSIState
         {
             Default,
+            Locking,
             Locked,
-            Alert,
+            AlertStarting,
+            AlertActive,
+            AlertEnding,
             Static
         }
 
-
         public DSIState CurrentState { get; set; }
         public string ActiveWidget { get; set; }
-        public string PreviousRotatorWidget { get; set; }
         public List<string> InstalledWidgets { get; set; }
         public List<string> RotatorWidgets { get; set; }
         public int RotatorIndex { get; set; }
+        public int AlertQueue { get; set; }
+        public bool ActionInProgress { get; set; }
+        public bool StateMachineRunning { get; set; }
 
         public DSIInfo()
         {
             CurrentState = DSIState.Default;
             ActiveWidget = string.Empty;
-            PreviousRotatorWidget = string.Empty;
             InstalledWidgets = new List<string>();
             RotatorWidgets = new List<string>();
             RotatorIndex = 0;
+            AlertQueue = 0;
+            ActionInProgress = false;
         }
     }
 }
