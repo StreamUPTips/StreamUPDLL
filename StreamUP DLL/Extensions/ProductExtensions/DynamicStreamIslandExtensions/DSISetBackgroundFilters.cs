@@ -70,6 +70,7 @@ namespace StreamUP
             { "rectangle_height", maskHeight }
         };
             SetObsSourceFilterSettings("DSI • BG", "New Size", newSizeSettings, obsConnection);
+            _CPH.Wait(50);
 
             LogDebug("Background filters set successfully.");
             return true;

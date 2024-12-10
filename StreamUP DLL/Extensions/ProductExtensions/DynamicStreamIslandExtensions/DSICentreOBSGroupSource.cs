@@ -21,6 +21,7 @@ namespace StreamUP
                 ["positionY"] = newYPosition
             };
             SetObsSceneItemTransform(sceneName, groupName, transformSettings, obsConnection);
+            _CPH.Wait(50);
 
             LogDebug("Centred group successfully.");
             return true;

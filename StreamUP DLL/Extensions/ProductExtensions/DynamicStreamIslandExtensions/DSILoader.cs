@@ -26,18 +26,27 @@ namespace StreamUP
 
             SetBackgroundToLowestLayer(obsConnection);
 
-            ResetWidget();
+            ResetWidget(dsiInfo, obsConnection);
 
-            DSISaveInfo(dsiInfo);
 
             return true;
         }
 
-        private void ResetWidget()
+        private void ResetWidget(DSIInfo dsiInfo, int obsConnection)
         {
             _CPH.ResumeActionQueue("StreamUP Widgets • DSI Widgets");
             _CPH.ResumeActionQueue("StreamUP Widgets • DSI Triggers");
+            _CPH.ResumeActionQueue("StreamUP Widgets • DSI Non-Blocking");
             _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
+            _CPH.ObsShowSource("StreamUP Widgets • Dynamic Stream-Island", "DSI • Alerts • Group", obsConnection);
+
+            dsiInfo.CurrentState = DSIInfo.DSIState.Default;
+            dsiInfo.ActiveWidget = string.Empty;
+            dsiInfo.RotatorIndex = 0;
+            dsiInfo.AlertQueue = 0;
+            dsiInfo.ActionInProgress = false;            
+
+            DSISaveInfo(dsiInfo);
         }
 
         private void SetBackgroundToLowestLayer(int obsConnection)
@@ -48,7 +57,7 @@ namespace StreamUP
 
         private bool LoadExtensionsFromAPI()
         {
-            string uri = "https://api.streamup.tips/product/dsi/actions/v2";
+            string uri = "https://api.streamup.tips/product/dsi/extensions";
 
             try
             {
@@ -158,11 +167,12 @@ namespace StreamUP
         public class DSIExtensions
         {
             public string Name { get; set; }
+            public string ID { get; set; }
             public bool IsRotatorEnabled { get; set; }
 
             public override string ToString()
             {
-                return $"Name: {Name}, IsRotatorEnabled: {IsRotatorEnabled}";
+                return $"Name: {Name}, ActionID: {ID} IsRotatorEnabled: {IsRotatorEnabled}";
             }
         }
     }

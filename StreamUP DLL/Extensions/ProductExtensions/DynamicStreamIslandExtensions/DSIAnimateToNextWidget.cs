@@ -5,6 +5,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
+        private const string sceneName = "StreamUP Widgets • Dynamic Stream-Island";
         public bool DSIAnimateToNewWidgetSize(string widgetName, string widgetPrefix, Dictionary<string, object> productSettings, int obsConnection)
         {
             LogDebug("Animating to next widget...");
@@ -14,12 +15,13 @@ namespace StreamUP
             if (dsiInfo.CurrentState != DSIInfo.DSIState.Locked)
             {
                 DSIHideAllWidgets(obsConnection);
+                
                 _CPH.Wait(300);   
             }
                     
             // Start the animation for the background to adjust to the new widget size
-            _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "New Size Bounce", obsConnection);
-            _CPH.ObsShowFilter("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", "Stroke Colour Set", obsConnection);
+            _CPH.ObsShowFilter(sceneName, "DSI • BG", "New Size Bounce", obsConnection);
+            _CPH.ObsShowFilter(sceneName, "DSI • BG", "Stroke Colour Set", obsConnection);
 
             return true;
         }
@@ -33,7 +35,15 @@ namespace StreamUP
             _CPH.Wait(250);
 
             // Show the new widget
-            _CPH.ObsShowSource("StreamUP Widgets • Dynamic Stream-Island", widgetName, obsConnection);
+            switch (widgetName)
+            {
+                case "DSI • Alerts • Group":
+                    _CPH.ObsShowFilter(sceneName, widgetName, "Opacity • ON", obsConnection);
+                    break;
+                default:
+                    _CPH.ObsShowSource(sceneName, widgetName, obsConnection);
+                    break;
+            }
 
             var dsiInfo = DSILoadInfo();
 

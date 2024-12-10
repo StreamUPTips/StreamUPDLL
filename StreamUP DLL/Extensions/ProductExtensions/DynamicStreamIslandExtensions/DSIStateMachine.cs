@@ -7,7 +7,6 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-
         // A method to set the state and perform state-specific logic
         public void DSISetState(string actionName, bool addToAlertQueue)
         {
@@ -18,9 +17,6 @@ namespace StreamUP
                 DSIAlertAddToQueue(dsiInfo, actionName);
                 return;
             }
-
-            // Update the current state and active widget
-            dsiInfo.PreviousRotatorWidget = dsiInfo.ActiveWidget;
 
             switch (dsiInfo.CurrentState)
             {
@@ -60,6 +56,7 @@ namespace StreamUP
                 _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
             }
             _CPH.ResumeActionQueue("StreamUP Widgets • DSI Widgets");
+
             DSISaveInfo(dsiInfo);
             DSISetState("", false);
         }
@@ -75,6 +72,15 @@ namespace StreamUP
             // Add alert to queue
             _CPH.DisableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
             dsiInfo.AlertQueue += 1;
+            DSISaveInfo(dsiInfo);
+
+            while (dsiInfo.ActionInProgress)
+            {
+                LogDebug("Action in progress. Waiting...");
+                _CPH.Wait(100);
+                dsiInfo = DSILoadInfo();
+            }
+
             _CPH.RunAction(actionName, false); 
             if (dsiInfo.CurrentState == DSIInfo.DSIState.Default)
             {
@@ -167,21 +173,22 @@ namespace StreamUP
 
         public DSIState CurrentState { get; set; }
         public string ActiveWidget { get; set; }
-        public string PreviousRotatorWidget { get; set; }
         public List<string> InstalledWidgets { get; set; }
         public List<string> RotatorWidgets { get; set; }
         public int RotatorIndex { get; set; }
         public int AlertQueue { get; set; }
+        public bool ActionInProgress { get; set; }
+        public bool StateMachineRunning { get; set; }
 
         public DSIInfo()
         {
             CurrentState = DSIState.Default;
             ActiveWidget = string.Empty;
-            PreviousRotatorWidget = string.Empty;
             InstalledWidgets = new List<string>();
             RotatorWidgets = new List<string>();
             RotatorIndex = 0;
             AlertQueue = 0;
+            ActionInProgress = false;
         }
     }
 }
