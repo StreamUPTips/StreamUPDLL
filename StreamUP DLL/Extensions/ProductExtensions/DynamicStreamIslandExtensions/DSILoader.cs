@@ -26,11 +26,44 @@ namespace StreamUP
 
             SetBackgroundToLowestLayer(obsConnection);
 
+            SetRotatorSettings(dsiInfo);
+
             ResetWidget(dsiInfo, obsConnection);
 
 
             return true;
         }
+
+        public class ProductSettings
+        {
+            public bool TimeWidgetRotatorEnable { get; set; }
+            public bool DateWidgetRotatorEnable { get; set; }
+            public bool UptimeWidgetRotatorEnable { get; set; }
+            public bool TwitchViewerCountWidgetRotatorEnable { get; set; }
+        }
+        
+        private void SetRotatorSettings(DSIInfo dsiInfo)
+        {
+            // Get list of rotator widgets
+            List<string> rotatorWidgets = dsiInfo.RotatorWidgets;
+
+            ProductSettings productSettings = JsonConvert.DeserializeObject<ProductSettings>(_CPH.GetGlobalVar<string>("sup069_ProductSettings", true));
+
+            // Remove widgets from the list if they are disabled
+            if (!productSettings.TimeWidgetRotatorEnable)
+                rotatorWidgets.Remove("Dynamic Stream Island • TIME: Widget");
+            if (!productSettings.DateWidgetRotatorEnable)
+                rotatorWidgets.Remove("Dynamic Stream Island • DATE: Widget");
+            if (!productSettings.UptimeWidgetRotatorEnable)
+                rotatorWidgets.Remove("Dynamic Stream Island • STREAM UPTIME: Widget");
+            if (!productSettings.TwitchViewerCountWidgetRotatorEnable)
+                rotatorWidgets.Remove("Dynamic Stream Island • TWITCH VIEWER COUNT: Widget");
+
+            // Save the updated list
+            dsiInfo.RotatorWidgets = rotatorWidgets;
+
+        }
+
 
         private void ResetWidget(DSIInfo dsiInfo, int obsConnection)
         {
@@ -44,7 +77,7 @@ namespace StreamUP
             dsiInfo.ActiveWidget = string.Empty;
             dsiInfo.RotatorIndex = 0;
             dsiInfo.AlertQueue = 0;
-            dsiInfo.ActionInProgress = false;            
+            dsiInfo.ActionInProgress = false;
 
             DSISaveInfo(dsiInfo);
         }

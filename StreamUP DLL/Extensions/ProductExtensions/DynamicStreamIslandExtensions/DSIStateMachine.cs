@@ -18,10 +18,12 @@ namespace StreamUP
                 return;
             }
 
+            dsiInfo.LastActionRun = actionName;
+
             switch (dsiInfo.CurrentState)
             {
                 case DSIInfo.DSIState.Default:
-                    HandleRotator(dsiInfo);
+                    HandleRotator(dsiInfo, actionName);
                     break;
                 case DSIInfo.DSIState.AlertStarting:
                     HandleAlertStarting(dsiInfo, actionName);
@@ -81,7 +83,7 @@ namespace StreamUP
                 dsiInfo = DSILoadInfo();
             }
 
-            _CPH.RunAction(actionName, false); 
+            _CPH.RunAction(actionName, false);
             if (dsiInfo.CurrentState == DSIInfo.DSIState.Default)
             {
                 dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
@@ -101,17 +103,17 @@ namespace StreamUP
             if (dsiInfo.AlertQueue <= 0)
             {
                 LogDebug("Alert queue is empty.");
+                dsiInfo.AlertEnded = true;
                 dsiInfo.CurrentState = DSIInfo.DSIState.Default;
-
             }
             else
             {
                 LogDebug("Alert queue is not empty.");
                 dsiInfo.CurrentState = DSIInfo.DSIState.AlertStarting;
             }
-                DSISaveInfo(dsiInfo);
-                DSISetState(actionName, false);        
-            }
+            DSISaveInfo(dsiInfo);
+            DSISetState(actionName, false);
+        }
 
         private void HandleAlertStarting(DSIInfo dsiInfo, string actionName)
         {
@@ -119,8 +121,23 @@ namespace StreamUP
             DSISaveInfo(dsiInfo);
         }
 
-        private void HandleRotator(DSIInfo dsiInfo)
+        private void HandleRotator(DSIInfo dsiInfo, string actionName = "")
         {
+            LogDebug($"Handling rotator. There are {dsiInfo.RotatorWidgets.Count} widgets in the rotator list.");
+            if (dsiInfo.RotatorWidgets.Count <= 1)
+            {
+                if (dsiInfo.LastActionRun == "" || dsiInfo.LastActionRun != actionName || dsiInfo.AlertEnded == true)
+                {
+                    dsiInfo.ActiveWidget = dsiInfo.RotatorWidgets[0];
+                    DSISaveInfo(dsiInfo);
+                    _CPH.RunAction(dsiInfo.ActiveWidget, false);
+                    _CPH.DisableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
+                }
+                LogDebug($"There are {dsiInfo.RotatorWidgets.Count} in the rotator list. Skipping rotator.");
+
+                return;
+            }
+
             dsiInfo.RotatorIndex += 1;
             if (dsiInfo.RotatorIndex >= dsiInfo.RotatorWidgets.Count)
             {
@@ -128,8 +145,8 @@ namespace StreamUP
             }
             dsiInfo.ActiveWidget = dsiInfo.RotatorWidgets[dsiInfo.RotatorIndex];
             DSISaveInfo(dsiInfo);
-            _CPH.RunAction(dsiInfo.ActiveWidget, false);   
-            _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");     
+            _CPH.RunAction(dsiInfo.ActiveWidget, false);
+            _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
         }
 
         public DSIInfo DSILoadInfo()
@@ -149,7 +166,7 @@ namespace StreamUP
             LogDebug($"DSIInfo loaded: {dsiInfo}");
             return dsiInfo;
         }
-    
+
         public void DSISaveInfo(DSIInfo dsiInfo)
         {
             string dsiInfoString = JsonConvert.SerializeObject(dsiInfo);
@@ -179,6 +196,8 @@ namespace StreamUP
         public int AlertQueue { get; set; }
         public bool ActionInProgress { get; set; }
         public bool StateMachineRunning { get; set; }
+        public string LastActionRun { get; set; }
+        public bool AlertEnded { get; set; }
 
         public DSIInfo()
         {
@@ -189,6 +208,9 @@ namespace StreamUP
             RotatorIndex = 0;
             AlertQueue = 0;
             ActionInProgress = false;
+            StateMachineRunning = false;
+            LastActionRun = string.Empty;
+            AlertEnded = false;
         }
     }
 }
