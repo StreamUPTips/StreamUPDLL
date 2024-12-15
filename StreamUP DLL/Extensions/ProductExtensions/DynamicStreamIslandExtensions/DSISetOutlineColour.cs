@@ -41,7 +41,7 @@ namespace StreamUP
                 // If accent mode is set to Off
                 case "None":
                     filterSettings.Add("setting_color_alpha", 0);
-                    SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                    SetObsSourceFilterSettings("StreamUP Widgets • Dynamic Stream-Island", "Stroke Colour Set", filterSettings, obsConnection);
                     LogDebug("Outline setting is 'None'. Changed accent colour to '0'");
                     break;
                 // If accent mode is set to Alert only
@@ -49,27 +49,27 @@ namespace StreamUP
                     if (alert)
                     {
                         filterSettings.Add("setting_color_alpha", outlineColour);
-                        SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                        SetObsSourceFilterSettings("StreamUP Widgets • Dynamic Stream-Island", "Stroke Colour Set", filterSettings, obsConnection);
                         LogDebug($"Outline setting is 'AlertsOnly'. Changed accent colour to [{outlineColour}]");
                     }
                     else
                     {
                         filterSettings.Add("setting_color_alpha", 0);
-                        SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                        SetObsSourceFilterSettings("StreamUP Widgets • Dynamic Stream-Island", "Stroke Colour Set", filterSettings, obsConnection);
                         LogDebug("Outline setting is 'AlertsOnly'. Changed accent colour to '0'");
                     }
                     break;
                 // If accent mode is set to always on (with alert colours)
                 case "Always On (With Alert Colours)":
                     filterSettings.Add("setting_color_alpha", outlineColour);
-                    SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                    SetObsSourceFilterSettings("StreamUP Widgets • Dynamic Stream-Island", "Stroke Colour Set", filterSettings, obsConnection);
                     LogDebug($"Outline setting is 'AlwaysOn'. Changed accent colour to: [{outlineColour}]");
                     break;
                 // If accent mode is set to always on (without alert colours)
                 case "Always On (With Default)":
                     outlineColour = long.Parse(GetValueOrDefault<string>(productSettings, "DefaultOutlineColourOBS", "0"));
                     filterSettings.Add("setting_color_alpha", outlineColour);
-                    SetObsSourceFilterSettings("DSI • BG", "Stroke Colour Set", filterSettings, obsConnection);
+                    SetObsSourceFilterSettings("StreamUP Widgets • Dynamic Stream-Island", "Stroke Colour Set", filterSettings, obsConnection);
                     LogDebug($"Outline setting is 'AlwaysOn'. Changed accent colour to: [{outlineColour}]");
                     break;
             }

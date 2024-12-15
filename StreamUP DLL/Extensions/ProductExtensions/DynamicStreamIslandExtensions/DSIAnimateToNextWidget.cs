@@ -21,7 +21,7 @@ namespace StreamUP
                     
             // Start the animation for the background to adjust to the new widget size
             _CPH.ObsShowFilter(sceneName, "DSI • BG", "New Size Bounce", obsConnection);
-            _CPH.ObsShowFilter(sceneName, "DSI • BG", "Stroke Colour Set", obsConnection);
+            _CPH.ObsShowFilter(sceneName, "Stroke Colour Set", obsConnection);
 
             return true;
         }
@@ -40,6 +40,11 @@ namespace StreamUP
                 case "DSI • Alerts • Group":
                     _CPH.ObsShowFilter(sceneName, widgetName, "Opacity • ON", obsConnection);
                     break;
+                case "DSI • Goal Bar • Group":
+                    _CPH.ObsShowSource(sceneName, "DSI • Goal Bar • Text FG Group", obsConnection);
+                    _CPH.ObsShowSource(sceneName, "DSI • Goal Bar • Text BG Group", obsConnection);
+                    _CPH.ObsShowSource(sceneName, "DSI • BG Filler • Group", obsConnection);
+                    break;
                 default:
                     _CPH.ObsShowSource(sceneName, widgetName, obsConnection);
                     break;
@@ -57,17 +62,24 @@ namespace StreamUP
                 DSISaveInfo(dsiInfo);
                 DSISetState("", false);
             }   
-
+            else if (dsiInfo.AlertEnded == true)
+            {
+                dsiInfo.AlertEnded = false;
+                DSISaveInfo(dsiInfo);
+            }
+            
             LogDebug("Animated to next widget successfully.");
             return true;
         }
 
         public void DSIPlayAudioCue(string widgetPrefix, Dictionary<string, object> productSettings)
         {
+            var dsiInfo = DSILoadInfo();
+
             EventType eventType = _CPH.GetEventType();
-            if (eventType == EventType.TimedAction)
+            if (eventType == EventType.TimedAction || dsiInfo.AlertEnded == true)
             {
-                LogDebug("Action triggered by a timed action. Skipping sound effect.");
+                LogDebug("Action triggered by a timed action or from a finished alert. Skipping sound effect.");
                 return;
             }
             
