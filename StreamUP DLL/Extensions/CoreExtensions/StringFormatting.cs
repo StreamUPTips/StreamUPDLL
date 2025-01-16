@@ -103,6 +103,20 @@ namespace StreamUP
                            word.EndsWith("3") ? "rd" : "th");
         }
 
+        public string RemoveDiacritics(string text)
+        {
+            string normalizedString = text.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (char c in normalizedString)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    stringBuilder.Append(c);
+            }
+
+            LogInfo($"[Remove Diacritics] {text} == {stringBuilder}");
+            return stringBuilder.ToString();
+        }
+
 
     }
 }

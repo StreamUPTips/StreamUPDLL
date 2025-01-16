@@ -32,7 +32,7 @@ namespace StreamUP
 
         public void SetGenericCurrencyTriggers()
         {
-            string[] categories = { "Currency" };
+            string[] categories = { "StreamUP", "Currency" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("Generic Fail", "currencyFail" ,categories),
@@ -45,7 +45,7 @@ namespace StreamUP
 
         public void SetTriggersForSlots()
         {
-            string[] categories = { "Currency", "Slots" };
+            string[] categories = { "StreamUP", "Currency", "Slots" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
             new("Slots All-In Loss", "slotsAllInLoss", categories),
@@ -61,7 +61,7 @@ namespace StreamUP
 
         public void SetTriggersForRaffle()
         {
-            string[] categories = { "Currency", "Raffle" };
+            string[] categories = { "StreamUP", "Currency", "Raffle" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
             new("Raffle Start", "raffleStart", categories),
@@ -76,7 +76,7 @@ namespace StreamUP
 
         public void SetTriggersForGamble()
         {
-            string[] categories = { "Currency", "Gamble" };
+            string[] categories = { "StreamUP", "Currency", "Gamble" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
             new("Gamble All In Loss", "gambleAllInLoss",categories),
@@ -96,7 +96,7 @@ namespace StreamUP
 
         public void SetTriggersForHeist()
         {
-            string[] categories = { "Currency", "Heist" };
+            string[] categories = { "StreamUP", "Currency", "Heist" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
             new("Heist Start", "heistStart",categories),
@@ -109,7 +109,7 @@ namespace StreamUP
             new("Users Lost", "heistUsersLost",categories),
             new("Users Won", "heistUsersWon",categories),
             new("Everyone Won", "heistEveryoneWon",categories),
-            
+
              };
             SetCustomTriggers(customTriggers);
 
@@ -117,7 +117,7 @@ namespace StreamUP
 
         public void SetTriggersForTimedVIP()
         {
-            string[] categories = { "Timed VIP" };
+            string[] categories = { "StreamUP", "Timed VIP" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("New VIP", "timedVipnewVip", categories),
@@ -128,6 +128,23 @@ namespace StreamUP
             };
             SetCustomTriggers(customTriggers);
         }
+
+        public void SetTriggersForHangman()
+        {
+            string[] categories = { "StreamUP", "Hangman" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("Game Started", "hangmanStart", categories),
+                new("Game Ended", "hangmanEnd", categories),
+                new("Game Lost", "hangmanLost", categories),
+                new("Game Won", "hangmanWon", categories),
+                new("Correct Guess", "hangmanCorrect", categories),
+                new("Incorrect Guess", "hangmanIncorrect", categories),
+                new("Fail/Error", "hangmanFail", categories)     
+            };
+            SetCustomTriggers(customTriggers);
+        }
+
 
 
 
