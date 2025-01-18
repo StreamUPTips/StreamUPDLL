@@ -10,8 +10,9 @@ namespace StreamUP
             triggerData.Donation = true;
 
             // Get donation amount and currency code
-            decimal inputAmount = SUP.GetValueOrDefault<decimal>(sbArgs, "amount", -1);
-            string inputCurrencyCode = SUP.GetValueOrDefault<string>(sbArgs, "currency", "No arg 'currency' found");
+            decimal inputAmount = SUP.GetValueOrDefault<decimal>(sbArgs, "fw.amount", -1);
+
+            string inputCurrencyCode = SUP.GetValueOrDefault<string>(sbArgs, "fw.currency", "No arg 'fw.currency' found");
 
             // Get local currency
             bool gotLocalCurrency = SUP.GetLocalCurrencyCode(out string localCurrencyCode);
@@ -51,8 +52,8 @@ namespace StreamUP
             triggerData.AmountRaw = (double)inputAmount;
             triggerData.FromCode = inputCurrencyCode;
 
-            triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "message", "No arg 'message' found");
-            triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "username", "No arg 'username' found");
+            triggerData.Message = SUP.GetValueOrDefault<string>(sbArgs, "fw.message", "No arg 'fw.message' found");
+            triggerData.User = SUP.GetValueOrDefault<string>(sbArgs, "fw.username", "No arg 'fw.username' found");
             triggerData.UserImage = "https://fourthwall.com/homepage/static/logo-aae6bab7310025c5a3da5ed8acd67a8d.png";
             return triggerData;
         }

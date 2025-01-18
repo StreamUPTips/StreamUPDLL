@@ -20,10 +20,42 @@ namespace StreamUP
 
         public T GetValueOrDefault<T>(IDictionary<string, object> dict, string key, T defaultValue = default)
         {
-            if (dict != null && dict.TryGetValue(key, out var value) && value is T typedValue)
+            if (dict == null)
             {
-                return typedValue;
+                LogError("Dictionary is null.");
+                return defaultValue;
             }
+
+            if (dict.TryGetValue(key, out var value))
+            {
+                LogDebug($"Key '{key}' found with value: {value} (Type: {value?.GetType()})");
+                if (value is T typedValue)
+                {
+                    return typedValue;
+                }
+
+                // Attempt type conversion
+                if (value is IConvertible)
+                {
+                    try
+                    {
+                        return (T)Convert.ChangeType(value, typeof(T));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError($"Conversion error for key '{key}' with value '{value}': {ex.Message}");
+                    }
+                }
+                else
+                {
+                    LogError($"Key '{key}' value is not of type {typeof(T)} and cannot be converted.");
+                }
+            }
+            else
+            {
+                LogDebug($"Key '{key}' not found in dictionary.");
+            }
+
             return defaultValue;
         }
 
