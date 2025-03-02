@@ -76,7 +76,7 @@
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
     <Compile Include="Extensions\ObsExtensions\*.cs" />
     <Compile Include="Extensions\SettingsExtensions\*.cs" />
-    <Compile Include="Extensions\SettingsExtensions\*.xaml" />
+  
     <Compile Include="Extensions\UIExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\CurrencyExtensions\*.cs" />
@@ -86,6 +86,13 @@
     <Compile Include="Extensions\ProductExtensions\TheRunExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- This will automatically include XAML files in the project -->
+    <None Update="Extensions\SettingsExtensions\*.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

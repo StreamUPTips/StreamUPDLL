@@ -22,25 +22,32 @@ namespace StreamUP
 
         public UIElement AddButton()
         {
-            return new Button
+            Button button = new Button
             {
                 Content = "Click Me",
                 Width = 100,
-                Height = 50,
-                Background = new DynamicResourceExtension { ResourceKey = "ButtonBackground" },
-                Foreground = new DynamicResourceExtension { ResourceKey = "ButtonForeground" }
+                Height = 50
             };
+
+            // Apply dynamic resources for styling
+            button.SetResourceReference(Button.BackgroundProperty, "ButtonBackground");
+            button.SetResourceReference(Button.ForegroundProperty, "ButtonForeground");
+
+            return button;
         }
 
         public UIElement AddTextBox()
         {
-            return new TextBox
+            TextBox textBox = new TextBox
             {
-                Width = 200,
-                Background = new DynamicResourceExtension { ResourceKey = "WindowBackground" }
+                Width = 200
             };
-        }
 
+            // Apply dynamic resources for styling
+            textBox.SetResourceReference(Control.BackgroundProperty, "WindowBackground");
+
+            return textBox;
+        }
         public void ShowWindow(List<UIElement> settings)
         {
             Window window = new()
@@ -57,7 +64,7 @@ namespace StreamUP
             {
                 ((StackPanel)window.Content).Children.Add(element);
             }
-
+            SwitchTheme(true);
             window.ShowDialog(); // Keep window open until user closes it
         }
 
