@@ -60,6 +60,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
@@ -72,6 +76,7 @@
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
     <Compile Include="Extensions\ObsExtensions\*.cs" />
     <Compile Include="Extensions\SettingsExtensions\*.cs" />
+    <Compile Include="Extensions\SettingsExtensions\*.xaml" />
     <Compile Include="Extensions\UIExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\CurrencyExtensions\*.cs" />
