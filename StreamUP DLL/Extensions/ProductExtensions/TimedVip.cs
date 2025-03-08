@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Streamer.bot.Plugin.Interface.Enums;
 using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
@@ -14,6 +15,7 @@ namespace StreamUP
             _CPH.TriggerCodeEvent("timedVipFail");
             return true;
         }
+
         public int CurrentVipCount()
         {
             List<GroupUser> groupsUsers = _CPH.UsersInGroup("Timed VIPs");
@@ -33,13 +35,13 @@ namespace StreamUP
 
             if (mod && !allowMods)
             {
-               TimedVipError(2, "User is a Moderator and Moderators are not allowed to redeem.");
+                TimedVipError(2, "User is a Moderator and Moderators are not allowed to redeem.");
                 return false;
             }
 
             if (!inGroup && vip && !allowVIPs)
             {
-               TimedVipError(3, "User is already a Vip Permanently and VIPs are not allowed to redeem.");
+                TimedVipError(3, "User is already a Vip Permanently and VIPs are not allowed to redeem.");
                 return false;
             }
 
@@ -58,6 +60,7 @@ namespace StreamUP
 
             return true;
         }
+
         public int TimedVipDaysLeft(DateTime expireDate)
         {
             DateTime today = DateTime.Now;
@@ -75,6 +78,43 @@ namespace StreamUP
             _CPH.SetArgument("hoursLeft", hours);
             return hours;
         }
+
+
+        //! Fix These
+        public bool TimedVipRemoveMethod(string user)
+        {
+            _CPH.RemoveUserFromGroup(user, Platform.Twitch, "Timed Vips");
+            _CPH.TwitchRemoveVip(user);
+            _CPH.UnsetTwitchUserVar(user, "timedVipExpiryDate", true);
+            LogInfo($"[Timed Vip] {user} has been removed.");
+            return true;
+        }
+
+
+
+        // public DateTime TimedVipAddTimeMethod(string user, int timeToAdd)
+        // {
+        //     TwitchUserInfoEx userInfo = CPH.TwitchGetExtendedUserInfoByLogin(user);
+        //     string userId = userInfo.UserId;
+        //     string displayName = userInfo.UserName;
+        //     CPH.SetArgument("vipUser", displayName);
+        //     TimedVIPSettings productSettings = JsonConvert.DeserializeObject<TimedVIPSettings>(CPH.GetGlobalVar<string>($"sup0100_ProductSettings", true));
+        //     string type = productSettings.TimedVIPType;
+        //     DateTime usersExpireDate = CPH.GetTwitchUserVarById<DateTime?>(userId, "timedVipExpiryDate", true) ?? DateTime.Now;
+        //     DateTime newExpiry;
+        //     if (type == "Hours")
+        //     {
+        //         newExpiry = usersExpireDate.AddHours(timeToAdd);
+        //     }
+        //     else
+        //     {
+        //         newExpiry = usersExpireDate.AddDays(timeToAdd);
+
+        //     }
+
+        //     return newExpiry;
+
+        // }
 
     }
 }

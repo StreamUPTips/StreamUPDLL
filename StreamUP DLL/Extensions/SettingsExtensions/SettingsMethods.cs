@@ -1784,7 +1784,7 @@ namespace StreamUP
         public Control AddActionDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<ActionData> actions = _CPH.GetActions();
-            List<string> actionDropDown = new List<string>();
+            List<string> actionDropDown = new List<string>{"None Selected"};
             foreach (ActionData action in actions)
             {
                 actionDropDown.Add(action.Name);
@@ -1800,7 +1800,7 @@ namespace StreamUP
         public Control AddRewardDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
             List<TwitchReward> rewards = _CPH.TwitchGetRewards();
-            List<string> rewardDropdown = new List<string>();
+            List<string> rewardDropdown = new List<string>{"None Selected"};
             foreach (TwitchReward reward in rewards)
             {
                 rewardDropdown.Add(reward.Title);
