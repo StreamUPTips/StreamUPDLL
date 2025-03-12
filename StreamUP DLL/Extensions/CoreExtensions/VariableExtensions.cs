@@ -51,15 +51,15 @@ namespace StreamUP
             return true;
         }
 
-        public bool SetUserVariableById(string userName, string varName, object value, Platform platform, bool persisted)
+        public bool SetUserVariableById(string userId, string varName, object value, Platform platform, bool persisted)
         {
             if (platform == Platform.Twitch)
             {
-                _CPH.SetTwitchUserVarById(userName, varName, value, persisted);
+                _CPH.SetTwitchUserVarById(userId, varName, value, persisted);
             }
             if (platform == Platform.YouTube)
             {
-                _CPH.SetYouTubeUserVarById(userName, varName, value, persisted);
+                _CPH.SetYouTubeUserVarById(userId, varName, value, persisted);
             }
             return true;
         }
