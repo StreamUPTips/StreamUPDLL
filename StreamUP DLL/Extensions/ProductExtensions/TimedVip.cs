@@ -5,8 +5,16 @@ using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
 {
+    public class TimedVipUser //This was an idea i had Not but forgotten what i wanted to do with it so imma just leave it for now
+    {
+        public string UserName { get; set; }
+        public string UserId { get; set; }
+        public Enum Platform {get; set;}
+        public DateTime ExpirationDate { get; set; }
+    }
     public partial class StreamUpLib
     {
+    
         public bool TimedVipError(int code, string message)
         {
             _CPH.SetArgument("errorCode", code);

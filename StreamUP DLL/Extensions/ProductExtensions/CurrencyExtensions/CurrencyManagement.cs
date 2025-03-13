@@ -54,8 +54,8 @@ namespace StreamUP
         public List<YouTubeUser> GetYouTubeUsers(string input, string varName = "points")
         {
             List<YouTubeUser> users = new List<YouTubeUser>();
-            List<UserVariableValue<long>> userPointsList = _CPH.GetYouTubeUsersVar<long>(varName, true);
-            foreach (UserVariableValue<long> user in userPointsList)
+            List<UserVariableValue<string>> userPointsList = _CPH.GetYouTubeUsersVar<string>(varName, true);
+            foreach (UserVariableValue<string> user in userPointsList)
             {
                 string username = user.UserLogin;
                 if (input.ToLower() == username.ToLower())
