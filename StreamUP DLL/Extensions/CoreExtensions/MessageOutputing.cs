@@ -1,3 +1,4 @@
+using System;
 using Streamer.bot.Plugin.Interface.Enums;
 
 namespace StreamUP
@@ -10,6 +11,7 @@ namespace StreamUP
 
             _CPH.SendMessage(message,bot);
             _CPH.SendYouTubeMessage(message,bot);
+            //#_CPH.SendYouTubeMessage(message,bot,true, null); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
           
         }
 
@@ -23,9 +25,29 @@ namespace StreamUP
                 if(platform == Platform.YouTube)
                 {
                      _CPH.SendYouTubeMessage(message,bot,broadcastId);
+                     //#_CPH.SendYouTubeMessage(message,bot, true, broadcastId); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
                 }
 
         }
+
+         public void SendMessageBack(string message, bool bot = true, string broadcastId = null)
+        {
+
+            _CPH.TryGetArg("userType", out string platformString);
+            Enum.TryParse(platformString, true, out Platform platform);
+            if (platform == Platform.Twitch)
+            {
+                _CPH.SendMessage(message, bot);
+
+            }
+            if (platform == Platform.YouTube)
+            {
+                _CPH.SendYouTubeMessage(message, bot, broadcastId);
+                //#_CPH.SendYouTubeMessage(message,bot, true, broadcastId); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
+            }
+
+        }
+
 
 
     }
