@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Streamer.bot.Plugin.Interface.Enums;
 using Streamer.bot.Plugin.Interface.Model;
@@ -40,17 +41,13 @@ namespace StreamUP
     public partial class StreamUpLib
     {
 
-        public string GetDefinition(string word)
+        public async Task<string> GetDefinitionAsync(string word)
         {
             var dictUrl = $"https://api.dictionaryapi.dev/api/v2/entries/en/{word}";
             string wordDefinition;
-            using (WebClient client = new WebClient())
-            {
-                string dictString = client.DownloadString(dictUrl);
-                List<Hangman> json = JsonConvert.DeserializeObject<List<Hangman>>(dictString);
-                wordDefinition = json[0]?.meanings[0]?.definitions[0]?.definition ?? " ";
-            }
-
+            string dictString = await _httpClient.GetStringAsync(dictUrl);
+            List<Hangman> json = JsonConvert.DeserializeObject<List<Hangman>>(dictString);
+            wordDefinition = json[0]?.meanings[0]?.definitions[0]?.definition ?? " ";
             return wordDefinition;
         }
 
@@ -88,7 +85,7 @@ namespace StreamUP
             _CPH.SetArgument("scoreToAdd", scoreToAdd);
         }
 
-        
+
 
     }
 }
