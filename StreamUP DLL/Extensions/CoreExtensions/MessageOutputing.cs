@@ -10,8 +10,7 @@ namespace StreamUP
         {
 
             _CPH.SendMessage(message,bot);
-            _CPH.SendYouTubeMessage(message,bot);
-            //#_CPH.SendYouTubeMessage(message,bot,true, null); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
+            _CPH.SendYouTubeMessage(message,bot,true, null); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
           
         }
 
@@ -24,8 +23,8 @@ namespace StreamUP
                 }
                 if(platform == Platform.YouTube)
                 {
-                     _CPH.SendYouTubeMessage(message,bot,broadcastId);
-                     //#_CPH.SendYouTubeMessage(message,bot, true, broadcastId); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
+                     
+                     _CPH.SendYouTubeMessage(message,bot, true, broadcastId); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
                 }
 
         }
@@ -42,8 +41,7 @@ namespace StreamUP
             }
             if (platform == Platform.YouTube)
             {
-                _CPH.SendYouTubeMessage(message, bot, broadcastId);
-                //#_CPH.SendYouTubeMessage(message,bot, true, broadcastId); //SendYouTubeMessage(string message, bool useBot = true, bool fallback = true, string broadcastId = null)
+               _CPH.SendYouTubeMessage(message,bot, true, broadcastId);
             }
 
         }

@@ -160,8 +160,6 @@ namespace StreamUP {
                             break;
                     }
                     break;
-                case EventType.HotKeyPress:                   
-                    break;
                 case EventType.ChatWindowAction:
                 case 0:
                     triggerData.Message = sbArgs["message"].ToString();
