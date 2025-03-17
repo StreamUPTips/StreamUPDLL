@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Drawing.Drawing2D;
+using Microsoft.SqlServer.Server;
 using Streamer.bot.Common.Events;
 using Streamer.bot.Plugin.Interface.Model;
 
@@ -7,7 +8,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public double GetTwitchValue(TriggerData triggerData)
+        public double GetTwitchValue(TriggerData triggerData, string myCode)
         {
 
             double amount = 0.00;
@@ -80,7 +81,8 @@ namespace StreamUP
             }
 
 
-            return amount;
+            ConvertCurrency((decimal)amount, myCode, "USD", out decimal convertedAmount);
+            return (double)convertedAmount;
 
         }
     }
