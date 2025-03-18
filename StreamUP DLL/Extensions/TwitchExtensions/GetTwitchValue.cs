@@ -81,7 +81,7 @@ namespace StreamUP
             }
 
 
-            ConvertCurrency((decimal)amount, myCode, "USD", out decimal convertedAmount);
+            ConvertCurrency((decimal)amount, "USD", myCode, out decimal convertedAmount);
             return (double)convertedAmount;
 
         }
