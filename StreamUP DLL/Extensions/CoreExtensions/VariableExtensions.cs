@@ -64,6 +64,40 @@ namespace StreamUP
             return true;
         }
 
+       public bool UnsetUserVariable(string username, string varName, Platform platform, bool persisted)
+       {
+
+         if (platform == Platform.Twitch)
+            {
+                _CPH.UnsetTwitchUserVar(username, varName, persisted);
+            }
+            if (platform == Platform.YouTube)
+            {
+                _CPH.UnsetYouTubeUserVar(username, varName, persisted);
+            }
+        return true;
+       }
+       
+        public bool UnsetUserVariableBuId(string userId, string varName, Platform platform, bool persisted)
+       {
+
+         if (platform == Platform.Twitch)
+            {
+                _CPH.UnsetTwitchUserVarById(userId, varName, persisted);
+            }
+            if (platform == Platform.YouTube)
+            {
+                _CPH.UnsetYouTubeUserVarById(userId, varName, persisted);
+            }
+        return true;
+       }
+       
+       
+       
+       
+       
+       
+       
         public T TryGetValueOrRandom<T>(IEnumerable<T> collection, int index = -1)
         {
             if(collection.Count() == 0)
