@@ -78,7 +78,7 @@ namespace StreamUP
         return true;
        }
        
-        public bool UnsetUserVariableBuId(string userId, string varName, Platform platform, bool persisted)
+        public bool UnsetUserVariableById(string userId, string varName, Platform platform, bool persisted)
        {
 
          if (platform == Platform.Twitch)
