@@ -1,4 +1,4 @@
-/*
+
 using System;
 using System.Net.Http;
 using System.Text;
@@ -11,11 +11,11 @@ namespace StreamUP
     {
         
 
-        public async Task<bool> PostToBlueSky(HttpClient client, string username, string password, string message)
+        public async Task<bool> PostToBlueSky(string username, string password, string message)
         {
             // Login to get access token
             var loginData = JsonConvert.SerializeObject(new { identifier = username, password });
-            var loginResponse = await client.PostAsync("https://bsky.social/xrpc/com.atproto.server.createSession", new StringContent(loginData, Encoding.UTF8, "application/json"));
+            var loginResponse = await _httpClient.PostAsync("https://bsky.social/xrpc/com.atproto.server.createSession", new StringContent(loginData, Encoding.UTF8, "application/json"));
             if (!loginResponse.IsSuccessStatusCode)
             {
                 var loginError = await loginResponse.Content.ReadAsStringAsync();
@@ -44,7 +44,7 @@ namespace StreamUP
             },
                 Content = new StringContent(postData, Encoding.UTF8, "application/json")
             };
-            var postResponse = await client.SendAsync(postRequest);
+            var postResponse = await _httpClient.SendAsync(postRequest);
             if (!postResponse.IsSuccessStatusCode)
             {
                 var postError = await postResponse.Content.ReadAsStringAsync();
@@ -61,4 +61,3 @@ namespace StreamUP
 
     }
 }
-*/

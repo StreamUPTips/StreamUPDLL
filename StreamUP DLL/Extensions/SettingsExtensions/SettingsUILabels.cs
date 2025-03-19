@@ -125,6 +125,13 @@ namespace StreamUP
                                                                 {"setAmount", "The amount the points are been set to"},
                                                                 {"count", "The amount of users been adjusted."},
                                                                 });
+
+        public static string ModAdded = CreateSettingsLabel(new Dictionary<string, string>{
+                                                                {"user", "The one who uses the command"},
+                                                                {"commandName", "The name of said command"},
+                                                                {"countName","The name of said counter"},
+                                                                {"countValue", "The Value of said counter"}
+                                                                });
         public static string CustomTimed = CreateSettingsLabel(new Dictionary<string, string>{
                                                                 {"user", "The User who used the command"},
                                                                 {"timerId","The ID of the Timer"},

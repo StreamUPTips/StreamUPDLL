@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Windows.Forms;
 using Streamer.bot.Common.Events;
 
@@ -54,10 +55,12 @@ namespace StreamUP
             { EventType.YouTubeSuperSticker, new YouTubeSuperStickerHandler() },
             { EventType.YouTubeUserBanned, new YouTubeUserBannedHandler() }
         };
-
+ 
         public TriggerData ProcessEvent(IDictionary<string, object> sbArgs)
         {
             var eventType = _CPH.GetEventType();
+
+            LogInfo($"Processing event: {eventType.ToString()}");
 
             if (EventHandlers.TryGetValue(eventType, out IEventHandler handler))
             {

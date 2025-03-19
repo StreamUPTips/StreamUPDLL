@@ -8,12 +8,12 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public List<UserVariableValue<long>> GetAllPointUsers(string varName = "points")
+        public List<UserVariableValue<string>> GetAllPointUsers(string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = new List<UserVariableValue<long>>();
+            List<UserVariableValue<string>> userScores = new List<UserVariableValue<string>>();
 
-            userScores.AddRange(_CPH.GetTwitchUsersVar<long>(varName, true));
-            userScores.AddRange(_CPH.GetYouTubeUsersVar<long>(varName, true));
+            userScores.AddRange(_CPH.GetTwitchUsersVar<string>(varName, true));
+            userScores.AddRange(_CPH.GetYouTubeUsersVar<string>(varName, true));
 
             return userScores;
         }
@@ -54,8 +54,8 @@ namespace StreamUP
         public List<YouTubeUser> GetYouTubeUsers(string input, string varName = "points")
         {
             List<YouTubeUser> users = new List<YouTubeUser>();
-            List<UserVariableValue<long>> userPointsList = _CPH.GetYouTubeUsersVar<long>(varName, true);
-            foreach (UserVariableValue<long> user in userPointsList)
+            List<UserVariableValue<string>> userPointsList = _CPH.GetYouTubeUsersVar<string>(varName, true);
+            foreach (UserVariableValue<string> user in userPointsList)
             {
                 string username = user.UserLogin;
                 if (input.ToLower() == username.ToLower())
@@ -102,7 +102,7 @@ namespace StreamUP
 
         public int ResetAllUserPoints(string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
+            List<UserVariableValue<string>> userScores = GetAllPointUsers(varName);
             _CPH.Wait(100);
             _CPH.UnsetAllUsersVar(varName, true);
             LogDebug("[Currency System Logging] Points have been reset");
@@ -112,8 +112,8 @@ namespace StreamUP
 
         public int AddPointsToAllUsers(long pointsToAdd, string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
-            foreach (UserVariableValue<long> user in userScores)
+            List<UserVariableValue<string>> userScores = GetAllPointUsers(varName);
+            foreach (UserVariableValue<string> user in userScores)
             {
                 Enum.TryParse(user.UserType, true, out Platform platform);
                 AddUserPointsById(user.UserId, platform, pointsToAdd, varName);
@@ -123,8 +123,8 @@ namespace StreamUP
 
         public int SetPointsToAllUsers(long pointsToSet, string varName = "points")
         {
-            List<UserVariableValue<long>> userScores = GetAllPointUsers(varName);
-            foreach (UserVariableValue<long> user in userScores)
+            List<UserVariableValue<string>> userScores = GetAllPointUsers(varName);
+            foreach (UserVariableValue<string> user in userScores)
             {
                 Enum.TryParse(user.UserType, true, out Platform platform);
                 SetUserPointsById(user.UserId, platform, pointsToSet,varName);
