@@ -21,7 +21,7 @@ namespace StreamUP
                 { "monthsTotal", triggerData.MonthsTotal.ToString() ?? string.Empty },
                 { "receiver", triggerData.Receiver ?? string.Empty },                       
                 { "tier", triggerData.Tier ?? string.Empty },                               
-                { "monthsGifted", triggerData.TotalAmount.ToString() ?? string.Empty },
+                { "monthsGifted", triggerData.MonthsGifted.ToString() ?? string.Empty },
                 { "totalAmount", triggerData.TotalAmount.ToString() ?? string.Empty },
                 { "monthDuration", triggerData.MonthDuration.ToString() ?? string.Empty },
                 { "monthTenure", triggerData.MonthTenure.ToString() ?? string.Empty }
