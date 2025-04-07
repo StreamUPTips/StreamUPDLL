@@ -9,12 +9,25 @@ namespace StreamUP
     {
         public string UserName { get; set; }
         public string UserId { get; set; }
-        public Enum Platform {get; set;}
+        public Enum Platform { get; set; }
         public DateTime ExpirationDate { get; set; }
     }
     public partial class StreamUpLib
     {
-    
+        public void SetTriggersForTimedVIP()
+        {
+            string[] categories = { "StreamUP", "Timed VIP" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("New VIP", "timedVipnewVip", categories),
+                new("Time Added",  "timedViptimeAdded", categories),
+                new("Timed VIP Fail", "timedVipFail", categories),
+                new("Timed VIP Time Left", "timedVipTimeLeft", categories),
+                new("VIP Removed", "timedVipUserRemoved", categories)
+            };
+            SetCustomTriggers(customTriggers);
+        }
+
         public bool TimedVipError(int code, string message)
         {
             _CPH.SetArgument("errorCode", code);

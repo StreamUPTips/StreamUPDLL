@@ -50,6 +50,21 @@ namespace StreamUP
             wordDefinition = json[0]?.meanings[0]?.definitions[0]?.definition ?? " ";
             return wordDefinition;
         }
+        public void SetTriggersForHangman()
+        {
+            string[] categories = { "StreamUP", "Hangman" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("Game Started", "hangmanStart", categories),
+                new("Game Ended", "hangmanEnd", categories),
+                new("Game Lost", "hangmanLost", categories),
+                new("Game Won", "hangmanWon", categories),
+                new("Correct Guess", "hangmanCorrect", categories),
+                new("Incorrect Guess", "hangmanIncorrect", categories),
+                new("Fail/Error", "hangmanFail", categories)
+            };
+            SetCustomTriggers(customTriggers);
+        }
 
         public int GetScore(string userId, Platform platform)
         {
