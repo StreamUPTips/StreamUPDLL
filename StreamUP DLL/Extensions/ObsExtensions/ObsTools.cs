@@ -36,7 +36,8 @@ namespace StreamUP
             string currentTimeStr = currentTime.ToString("yyyyMMdd_HHmmss");
 
             // Create full file path name
-            string fileName = $"{selectedSource}_{currentTimeStr}.png";
+            string sanitisedSource = SanitiseFileName(selectedSource);
+            string fileName = $"{sanitisedSource}_{currentTimeStr}.png";
             filePath = $"{obsOutputFilePath}\\{fileName}";
 
             // Escape backslashes
