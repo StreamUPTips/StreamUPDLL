@@ -7,6 +7,18 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
+        private void SetDebugLogModeOn()
+        {
+            _CPH.SetGlobalVar("sup_debugMode", true);
+            LogInfo("Debug mode enabled.");
+        }
+
+        private void SetDebugLogModeOff()
+        {
+            _CPH.SetGlobalVar("sup_debugMode", false);
+            LogInfo("Debug mode disabled.");
+        }
+        
         private void WriteToLog(string logMessage)
         {
             // Get log folder
