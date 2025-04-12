@@ -92,6 +92,10 @@ namespace StreamUP
         return true;
        }
        
+       public T GetGlobal<T>(string varName, bool persisted, T defaultValue)
+       {
+        return _CPH.GetGlobalVar<T?>(varName,persisted) ?? defaultValue;
+       }
        
        
        
