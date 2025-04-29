@@ -71,28 +71,29 @@ namespace StreamUP
             int score = 0;
             if (platform == Platform.Twitch)
             {
-                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanScore", true) ?? 0;
+                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanRanking", true) ?? 0;
             }
 
             if (platform == Platform.YouTube)
             {
-                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanScore", true) ?? 0;
+                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanRanking", true) ?? 0;
             }
 
             return score;
         }
 
-        public void AddScore(string userId, int currentScore, int scoreToAdd, Platform platform)
+        public void AddScore(string userId, int scoreToAdd, Platform platform)
         {
+            int currentScore = GetScore(userId, platform);
             int newScore = currentScore + scoreToAdd;
             if (platform == Platform.Twitch)
             {
-                _CPH.SetTwitchUserVarById(userId, "hangmanScore", newScore, true);
+                _CPH.SetTwitchUserVarById(userId, "hangmanRanking", newScore, true);
             }
 
             if (platform == Platform.YouTube)
             {
-                _CPH.SetYouTubeUserVarById(userId, "hangmanScore", newScore, true);
+                _CPH.SetYouTubeUserVarById(userId, "hangmanRanking", newScore, true);
             }
 
             _CPH.SetArgument("oldScore", currentScore);

@@ -22,7 +22,7 @@ namespace StreamUP
     public void SetTriggersForModAddedCommands()
     {
       string[] commands = { "StreamUP", "Mod Added Commands", "Commands" };
-      string[] counts = { "StreamUP", "Mod Added Commands", "Commands" };
+      string[] counts = { "StreamUP", "Mod Added Commands", "Counts" };
       List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("Command Triggered", "macCommandTriggered", commands),
