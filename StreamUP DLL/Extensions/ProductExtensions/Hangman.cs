@@ -69,14 +69,15 @@ namespace StreamUP
         public int GetScore(string userId, Platform platform)
         {
             int score = 0;
+            int defaultRank = GetSetting<int>("hangmanRanking", 1500);
             if (platform == Platform.Twitch)
             {
-                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanRanking", true) ?? 0;
+                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanRanking", true) ?? defaultRank;
             }
 
             if (platform == Platform.YouTube)
             {
-                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanRanking", true) ?? 0;
+                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanRanking", true) ?? defaultRank;
             }
 
             return score;
