@@ -21,7 +21,7 @@ namespace StreamUP
                 return _CPH.GetYouTubeUserVar<T>(userName, varName, persisted) ?? defaultValue;
             }
 
-            return default;
+            return defaultValue;
         }
 
         public T GetUserVariableById<T>(string userId, string varName, Platform platform, bool persisted, T defaultValue)
@@ -35,7 +35,7 @@ namespace StreamUP
                 return _CPH.GetYouTubeUserVarById<T>(userId, varName, persisted) ?? defaultValue;
             }
 
-            return default;
+            return defaultValue;
         }
 
         public bool SetUserVariable(string userName, string varName, object value, Platform platform, bool persisted)
