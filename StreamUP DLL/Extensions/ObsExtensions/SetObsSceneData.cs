@@ -9,7 +9,7 @@ namespace StreamUP
         {
             LogInfo($"Setting OBS current DSK [{dskName}] to scene [{sceneName}]");
 
-            _CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"dsk_select_scene\",\"requestData\":{\"dsk_name\":\""+dskName+"\",\"scene\":\""+sceneName+"\"}}", obsConnection);
+            _CPH.ObsSendRaw("CallVendorRequest", "{\"vendorName\":\"downstream-keyer\",\"requestType\":\"dsk_select_scene\",\"requestData\":{\"dsk_name\":\"" + dskName + "\",\"scene\":\"" + sceneName + "\"}}", obsConnection);
 
             LogInfo($"Successfully current DSK scene [{sceneName}]");
             return true;
@@ -30,6 +30,14 @@ namespace StreamUP
             // Send the raw request to OBS
             _CPH.ObsSendRaw("SetSceneSceneTransitionOverride", requestData.ToString(), obsConnection);
             LogInfo($"Successfully set transition override for scene [{sceneName}] with transition [{transitionName}]");
+            return true;
+        }
+
+        public bool SetObsCurrentSceneTransition(string transitionName, int obsConnection)
+        {
+            LogInfo($"Setting current scene transition to [{transitionName}]");
+            _CPH.ObsSendRaw("SetCurrentSceneTransition", "{\"transitionName\":\"" + transitionName + "\"}", obsConnection);
+            LogInfo($"Successfully set current scene transition to [{transitionName}]");
             return true;
         }
     
