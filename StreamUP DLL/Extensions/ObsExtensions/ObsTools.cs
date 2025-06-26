@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Text;
 using Newtonsoft.Json.Linq;
@@ -127,7 +128,7 @@ namespace StreamUP
             return true;
         }
 
-        //#region Split text based on width
+        //# Split text based on width
         public string ObsSplitTextOnWidth(string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
             // Check current text width by setting initial text
@@ -290,10 +291,233 @@ namespace StreamUP
             {
                 lines.Add(currentLine); // Add the remaining line to the list
             }
-
             return lines;
-        }        
-        //#endregion
+        }
+        //#
 
+        public bool ObsVideoCaptureDevicesRefresh(int obsConnection)
+        {
+            LogDebug("Starting video capture device refresh");
+
+            // Get the list of dshow_input devices
+            string response = _CPH.ObsSendRaw("GetInputList", "{\"inputKind\":\"dshow_input\"}", obsConnection);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("No response from OBS when getting input list");
+                return false;
+            }
+
+            // Parse the JSON response
+            JObject responseObj = JObject.Parse(response);
+            if (responseObj["inputs"] == null)
+            {
+                LogError("inputs not found in the response");
+                return false;
+            }
+
+            // Extract input names from the inputs array and check which are active
+            JArray inputs = (JArray)responseObj["inputs"];
+            List<string> activeDevices = new List<string>();
+
+            foreach (JObject input in inputs)
+            {
+                if (input["inputName"] != null)
+                {
+                    string inputName = input["inputName"].ToString();
+                    
+                    // Get input settings to check if device is active
+                    string settingsResponse = _CPH.ObsSendRaw("GetInputSettings", $"{{\"inputName\":\"{inputName}\"}}", obsConnection);
+                    if (!string.IsNullOrEmpty(settingsResponse) && settingsResponse != "{}")
+                    {
+                        JObject settingsObj = JObject.Parse(settingsResponse);
+                        if (settingsObj["inputSettings"] != null && settingsObj["inputSettings"]["active"] != null)
+                        {
+                            bool isActive = (bool)settingsObj["inputSettings"]["active"];
+                            if (isActive)
+                            {
+                                activeDevices.Add(inputName);
+                                LogDebug($"Found active device to refresh: [{inputName}]");
+                            }
+                            else
+                            {
+                                LogDebug($"Skipping inactive device: [{inputName}]");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (activeDevices.Count == 0)
+            {
+                LogDebug("No active video capture devices found to refresh");
+                return true;
+            }
+
+            LogDebug($"Found {activeDevices.Count} active devices. Starting refresh cycle...");
+
+            // First deactivate all active devices
+            LogDebug("Deactivating active devices...");
+            foreach (string inputName in activeDevices)
+            {
+                LogDebug($"Deactivating device: [{inputName}]");
+                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"deactivate\"}}", obsConnection);
+            }
+
+            LogDebug("Deactivation complete. Waiting 1 second...");
+            _CPH.Wait(1000);
+
+            // Now reactivate all the devices that were active
+            LogDebug("Reactivating devices...");
+            foreach (string inputName in activeDevices)
+            {
+                LogDebug($"Reactivating device: [{inputName}]");
+                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"activate\"}}", obsConnection);
+            }
+
+            LogDebug("Video capture device refresh complete");
+            return true;
+        }
+
+        public bool ObsVideoCaptureDevicesEnable(int obsConnection)
+        {
+            LogDebug("Starting to enable inactive video capture devices");
+
+            // Get the list of dshow_input devices
+            string response = _CPH.ObsSendRaw("GetInputList", "{\"inputKind\":\"dshow_input\"}", obsConnection);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("No response from OBS when getting input list");
+                return false;
+            }
+
+            // Parse the JSON response
+            JObject responseObj = JObject.Parse(response);
+            if (responseObj["inputs"] == null)
+            {
+                LogError("inputs not found in the response");
+                return false;
+            }
+
+            // Extract input names from the inputs array
+            JArray inputs = (JArray)responseObj["inputs"];
+            List<string> inactiveDevices = new List<string>();
+
+            foreach (JObject input in inputs)
+            {
+                if (input["inputName"] != null)
+                {
+                    string inputName = input["inputName"].ToString();
+                    
+                    // Get input settings to check if device is active
+                    string settingsResponse = _CPH.ObsSendRaw("GetInputSettings", $"{{\"inputName\":\"{inputName}\"}}", obsConnection);
+                    if (!string.IsNullOrEmpty(settingsResponse) && settingsResponse != "{}")
+                    {
+                        JObject settingsObj = JObject.Parse(settingsResponse);
+                        if (settingsObj["inputSettings"] != null && settingsObj["inputSettings"]["active"] != null)
+                        {
+                            bool isActive = (bool)settingsObj["inputSettings"]["active"];
+                            if (!isActive)
+                            {
+                                inactiveDevices.Add(inputName);
+                                LogDebug($"Found inactive device: [{inputName}]");
+                            }
+                            else
+                            {
+                                LogDebug($"Device already active: [{inputName}]");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (inactiveDevices.Count == 0)
+            {
+                LogDebug("No inactive video capture devices found");
+                return true;
+            }
+
+            LogDebug($"Found {inactiveDevices.Count} inactive devices. Enabling them...");
+
+            // Enable all inactive devices
+            foreach (string inputName in inactiveDevices)
+            {
+                LogDebug($"Enabling device: [{inputName}]");
+                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"activate\"}}", obsConnection);
+            }
+
+            LogDebug("Video capture device enable operation complete");
+            return true;
+        }
+
+        public bool ObsVideoCaptureDevicesDisable(int obsConnection)
+        {
+            LogDebug("Starting to disable active video capture devices");
+
+            // Get the list of dshow_input devices
+            string response = _CPH.ObsSendRaw("GetInputList", "{\"inputKind\":\"dshow_input\"}", obsConnection);
+            if (string.IsNullOrEmpty(response) || response == "{}")
+            {
+                LogError("No response from OBS when getting input list");
+                return false;
+            }
+
+            // Parse the JSON response
+            JObject responseObj = JObject.Parse(response);
+            if (responseObj["inputs"] == null)
+            {
+                LogError("inputs not found in the response");
+                return false;
+            }
+
+            // Extract input names from the inputs array
+            JArray inputs = (JArray)responseObj["inputs"];
+            List<string> activeDevices = new List<string>();
+
+            foreach (JObject input in inputs)
+            {
+                if (input["inputName"] != null)
+                {
+                    string inputName = input["inputName"].ToString();
+                    
+                    // Get input settings to check if device is active
+                    string settingsResponse = _CPH.ObsSendRaw("GetInputSettings", $"{{\"inputName\":\"{inputName}\"}}", obsConnection);
+                    if (!string.IsNullOrEmpty(settingsResponse) && settingsResponse != "{}")
+                    {
+                        JObject settingsObj = JObject.Parse(settingsResponse);
+                        if (settingsObj["inputSettings"] != null && settingsObj["inputSettings"]["active"] != null)
+                        {
+                            bool isActive = (bool)settingsObj["inputSettings"]["active"];
+                            if (isActive)
+                            {
+                                activeDevices.Add(inputName);
+                                LogDebug($"Found active device: [{inputName}]");
+                            }
+                            else
+                            {
+                                LogDebug($"Device already inactive: [{inputName}]");
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (activeDevices.Count == 0)
+            {
+                LogDebug("No active video capture devices found");
+                return true;
+            }
+
+            LogDebug($"Found {activeDevices.Count} active devices. Disabling them...");
+
+            // Disable all active devices
+            foreach (string inputName in activeDevices)
+            {
+                LogDebug($"Disabling device: [{inputName}]");
+                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"activate\"}}", obsConnection);
+            }
+
+            LogDebug("Video capture device disable operation complete");
+            return true;
+        }
     }
 }
