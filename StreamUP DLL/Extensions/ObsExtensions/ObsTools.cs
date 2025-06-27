@@ -360,7 +360,7 @@ namespace StreamUP
             foreach (string inputName in activeDevices)
             {
                 LogDebug($"Deactivating device: [{inputName}]");
-                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"deactivate\"}}", obsConnection);
+                _CPH.ObsSendRaw("PressInputPropertiesButton", $"{{\"inputName\":\"{inputName}\",\"propertyName\":\"activate\"}}", obsConnection);
             }
 
             LogDebug("Deactivation complete. Waiting 1 second...");
