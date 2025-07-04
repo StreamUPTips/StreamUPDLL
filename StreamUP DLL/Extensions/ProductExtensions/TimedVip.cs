@@ -88,15 +88,23 @@ namespace StreamUP
         public DateTime TimedVipAddTime(string userId, Platform platform, int timeToAdd, string type)
         {
             DateTime expiryDate = GetUserVariableById<DateTime>(userId, "timedVipExpiryDate", platform, true, DateTime.Now);
+            if (expiryDate == DateTime.MinValue || expiryDate < DateTime.Now)
+            {
+                expiryDate = DateTime.Now;
+            }
+            _CPH.LogDebug($"Current Expiry Date for UserId: {userId} on Platform: {platform} is: {expiryDate}");
             if (type == "Hours")
             {
                 expiryDate = expiryDate.AddHours(timeToAdd);
+                _CPH.LogDebug($"Current Expiry HOURS for UserId: {userId} on Platform: {platform} is: {expiryDate}");
             }
             else
             {
                 expiryDate = expiryDate.AddDays(timeToAdd);
+                _CPH.LogDebug($"Current Expiry DAYS for UserId: {userId} on Platform: {platform} is: {expiryDate}");
 
             }
+            _CPH.LogDebug($"Adding {timeToAdd} {type} to UserId: {userId} on Platform: {platform}. New Expiry Date: {expiryDate}");
             SetUserVariableById(userId, "timedVipExpiryDate", expiryDate, platform, true);
             return expiryDate;
         }
