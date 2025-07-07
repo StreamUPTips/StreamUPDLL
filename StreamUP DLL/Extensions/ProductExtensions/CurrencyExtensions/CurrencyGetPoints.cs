@@ -9,11 +9,11 @@ namespace StreamUP
     {
         public long GetUserPointsById(string userId, Platform platform, string varName = "points")
         {
-            long points;
+            long points = 0;
             try
             {
-                var pointsVarValue = GetUserVariableById<long?>(userId,varName,platform,true,0);
-                points = pointsVarValue ?? 0;
+                points = GetUserVariableById<long>(userId,varName,platform,true,0);
+                
             }
             catch (Exception e)
             {
@@ -36,8 +36,8 @@ namespace StreamUP
 
             try
             {
-                var pointsVarValue = GetUserVariable<long?>(user,varName,platform,true,0);
-                points = pointsVarValue ?? 0;
+                points = GetUserVariable<long>(user,varName,platform,true,0);
+                
                
             }
             catch (Exception e)
