@@ -72,6 +72,7 @@
     <Compile Include="Extensions\EventTriggerExtensions\*.cs" />
     <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
     <Compile Include="Extensions\ObsExtensions\*.cs" />
+    <Compile Include="Extensions\ObsExtensions\ObsRawExtensions\*.cs" />
     <Compile Include="Extensions\SettingsExtensions\*.cs" />
     <Compile Include="Extensions\UIExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\*.cs" />
