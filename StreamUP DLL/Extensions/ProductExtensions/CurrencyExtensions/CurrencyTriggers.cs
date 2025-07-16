@@ -11,7 +11,14 @@ namespace StreamUP
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("Generic Fail", "currencyFail" ,categories),
-                //new("Points Updated","pointsUpdate" ,categories)
+                new("Get Points", "currencyGet" ,categories),
+                new("Add Points", "currencyAdd" ,categories),
+                new("Set Points", "currencySet" ,categories),
+                new("Reset Points", "currencyReset" ,categories),
+                new("Add To All", "currencyAddAll" ,categories),
+                new("Set All To", "currencySetAll" ,categories),
+                new("Log All", "currencyLog" ,categories),
+              
             };
             SetCustomTriggers(customTriggers);
 

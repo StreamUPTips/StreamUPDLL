@@ -1803,7 +1803,11 @@ namespace StreamUP
             List<string> rewardDropdown = new List<string>();
             foreach (TwitchReward reward in rewards)
             {
-                rewardDropdown.Add(reward.Title);
+                if (reward.IsOurs)
+                {
+
+                    rewardDropdown.Add(reward.Title);
+                }
             }
 
             string[] rewardArray = rewardDropdown.ToArray();
@@ -1817,7 +1821,7 @@ namespace StreamUP
 
         public Control AddGroupsDrop(string description, string defaultValue, string saveName, string tabName = "General")
         {
-            if(!_CPH.GroupExists(defaultValue))
+            if (!_CPH.GroupExists(defaultValue))
             {
                 _CPH.AddGroup(defaultValue);
             }
@@ -1831,7 +1835,7 @@ namespace StreamUP
 
 
         //! Extensions Specific
-        public Control AddEmoteTable(string description, string columnOneName, string columnTwoName, string columnThreeName, List<(string Emote, int Payout , int Percentage)> defaultValue, string saveName, string tabName = "General")
+        public Control AddEmoteTable(string description, string columnOneName, string columnTwoName, string columnThreeName, List<(string Emote, int Payout, int Percentage)> defaultValue, string saveName, string tabName = "General")
         {
 
 
@@ -1903,7 +1907,7 @@ namespace StreamUP
 
 
 
-            List<(string Emote, int Payout , int Percentage)> rowsToAdd = GetSetting<List<(string Emote, int Payout , int Percentage)>>(saveName, defaultValue);
+            List<(string Emote, int Payout, int Percentage)> rowsToAdd = GetSetting<List<(string Emote, int Payout, int Percentage)>>(saveName, defaultValue);
             foreach (var entry in rowsToAdd)
             {
                 input.Rows.Add(entry.Item1, entry.Item2, entry.Item3);

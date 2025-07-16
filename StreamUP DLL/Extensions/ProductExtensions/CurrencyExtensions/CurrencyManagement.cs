@@ -14,6 +14,8 @@ namespace StreamUP
 
             userScores.AddRange(_CPH.GetTwitchUsersVar<string>(varName, true));
             userScores.AddRange(_CPH.GetYouTubeUsersVar<string>(varName, true));
+            userScores.AddRange(_CPH.GetTrovoUsersVar<string>(varName, true));
+            userScores.AddRange(_CPH.GetKickUsersVar<string>(varName, true));
 
             return userScores;
         }
