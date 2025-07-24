@@ -313,7 +313,7 @@ namespace StreamUP
             LinkLabel andi = CreateLinkLabel("Andilippi", "https://doras.to/andi", "Founder");
             LinkLabel waldo = CreateLinkLabel("WaldoAndFriends", "https://doras.to/waldo", "Founder");
             LinkLabel silver = CreateLinkLabel("Silverlink", "https://doras.to/silverlink", "Founder");
-            LinkLabel terrierdarts = CreateLinkLabel("TerrierDarts", "https://doras.to/terrierdarts", "Developer");
+            LinkLabel terrierdarts = CreateLinkLabel("CodeWithTD", "https://doras.to/td", "Developer");
 
 
             flowLayout.Controls.Add(productInfoLabel);

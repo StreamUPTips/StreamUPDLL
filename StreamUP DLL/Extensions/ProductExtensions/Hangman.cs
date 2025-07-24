@@ -70,16 +70,7 @@ namespace StreamUP
         {
             int score = 0;
             int defaultRank = GetSetting<int>("hangmanRanking", 1500);
-            if (platform == Platform.Twitch)
-            {
-                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanRanking", true) ?? defaultRank;
-            }
-
-            if (platform == Platform.YouTube)
-            {
-                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanRanking", true) ?? defaultRank;
-            }
-
+            score = GetUserVariableById<int>(userId, "hangmanRanking", platform, true, defaultRank);
             return score;
         }
 
@@ -87,16 +78,7 @@ namespace StreamUP
         {
             int currentScore = GetScore(userId, platform);
             int newScore = currentScore + scoreToAdd;
-            if (platform == Platform.Twitch)
-            {
-                _CPH.SetTwitchUserVarById(userId, "hangmanRanking", newScore, true);
-            }
-
-            if (platform == Platform.YouTube)
-            {
-                _CPH.SetYouTubeUserVarById(userId, "hangmanRanking", newScore, true);
-            }
-
+            SetUserVariableById(userId, "hangmanRanking", newScore, platform, true);
             _CPH.SetArgument("oldScore", currentScore);
             _CPH.SetArgument("newScore", newScore);
             _CPH.SetArgument("scoreToAdd", scoreToAdd);

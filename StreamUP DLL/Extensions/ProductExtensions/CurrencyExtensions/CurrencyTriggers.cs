@@ -7,7 +7,7 @@ namespace StreamUP
     {
           public void SetGenericCurrencyTriggers()
         {
-            string[] categories = { "StreamUP", "Currency" };
+            string[] categories = { "StreamUP", "Currency", "Core" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
                 new("Generic Fail", "currencyFail" ,categories),

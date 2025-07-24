@@ -69,12 +69,12 @@ namespace StreamUP
             }
                 if (platform == Platform.Trovo)
             {
-                _CPH.SetTrovoUserVar(username,varName,value,persisted);
+                _CPH.SetTrovoUserVar(userName,varName,value,persisted);
             }
 
             if (platform == Platform.Kick)
             {
-                _CPH.SetKickUserVar(username,varName,value,persisted);
+                _CPH.SetKickUserVar(userName,varName,value,persisted);
             }
             _CPH.LogDebug($"Set User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
             return true;

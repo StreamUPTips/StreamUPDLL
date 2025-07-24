@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
+using Streamer.bot.Plugin.Interface;
 using Streamer.bot.Plugin.Interface.Model;
 
 namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        
+
         public bool Refund(bool refund = false, string productName = "General")
         {
             _CPH.TryGetArg("rewardId", out string reward);
@@ -43,5 +45,21 @@ namespace StreamUP
 
             return true;
         }
+
+        public string GetRewardID(string name)
+        {
+            List<TwitchReward> rewards = _CPH.TwitchGetRewards();
+
+            foreach (TwitchReward reward in rewards)
+            {
+                if (name.Equals(reward.Title, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return reward.Id;
+
+                }
+            }
+            return null;
+        }
+
     }
 }
