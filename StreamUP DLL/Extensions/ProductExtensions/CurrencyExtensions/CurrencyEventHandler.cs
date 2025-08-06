@@ -59,6 +59,7 @@ namespace StreamUP
             int points;
             int memberPoints;
             int monthsSubbed;
+            int gifts;
 
             switch (eventType)
             {
@@ -142,7 +143,7 @@ namespace StreamUP
                 //? Youtube Events
                 case EventType.YouTubeMembershipGift:
                     membershipName = TryGetArgOrDefault("tier", "notFoundErrorXYZ123");
-                    int gifts = TryGetArgOrDefault("gifts", 1);
+                    gifts = TryGetArgOrDefault("gifts", 1);
                     points = 0;
                     if (pointsPerMemberBoost)
                     {
@@ -182,7 +183,8 @@ namespace StreamUP
                     break;
                 case EventType.KickGiftSubscription:
                 case EventType.KickMassGiftSubscription:
-                    returnValue = pointsPerFollow;
+                    gifts = TryGetArgOrDefault("gifts", 1);
+                    returnValue = pointsPerKickGift * gifts;
                     break;
 
                 //? Trovo Events
