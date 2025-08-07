@@ -68,7 +68,7 @@ namespace StreamUP
 
         public int GetScore(string userId, Platform platform)
         {
-            int score = 0;
+            int score;
             int defaultRank = GetSetting<int>("hangmanRanking", 1500);
             score = GetUserVariableById<int>(userId, "hangmanRanking", platform, true, defaultRank);
             return score;
