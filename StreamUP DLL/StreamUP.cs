@@ -13,7 +13,7 @@ namespace StreamUP
         {
             _CPH = cph;
             _ProductIdentifier = productIdentifier;
-            _DebugMode = cph.GetGlobalVar<bool>("sup_debugMode", true);
+            _DebugMode = cph.GetGlobalVar<bool>("sup000_DebugMode", true);
         }
 
         public StreamUpLib(IInlineInvokeProxy cph)

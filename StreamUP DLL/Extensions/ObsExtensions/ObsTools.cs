@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Text;
 using Newtonsoft.Json.Linq;
@@ -36,7 +37,8 @@ namespace StreamUP
             string currentTimeStr = currentTime.ToString("yyyyMMdd_HHmmss");
 
             // Create full file path name
-            string fileName = $"{selectedSource}_{currentTimeStr}.png";
+            string sanitisedSource = SanitiseFileName(selectedSource);
+            string fileName = $"{sanitisedSource}_{currentTimeStr}.png";
             filePath = $"{obsOutputFilePath}\\{fileName}";
 
             // Escape backslashes
@@ -126,7 +128,7 @@ namespace StreamUP
             return true;
         }
 
-        //#region Split text based on width
+        //# Split text based on width
         public string ObsSplitTextOnWidth(string productNumber, int obsConnection, OBSSceneType parentSourceType, string sceneName, string sourceName, string rawText, int maxWidth, int maxHeight)
         {
             // Check current text width by setting initial text
@@ -289,11 +291,8 @@ namespace StreamUP
             {
                 lines.Add(currentLine); // Add the remaining line to the list
             }
-
             return lines;
         }
-        //#endregion
-
         public bool ObsVideoCaptureDevicesRefresh(int obsConnection)
         {
             LogDebug("Starting video capture device refresh");
@@ -435,6 +434,7 @@ namespace StreamUP
                 return true;
             }
 
+
             LogDebug($"Found {inactiveDevices.Count} inactive devices. Enabling them...");
 
             // Enable all inactive devices
@@ -518,7 +518,5 @@ namespace StreamUP
             LogDebug("Video capture device disable operation complete");
             return true;
         }
-    
-
     }
 }

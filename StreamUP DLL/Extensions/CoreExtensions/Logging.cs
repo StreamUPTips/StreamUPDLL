@@ -7,6 +7,18 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
+        private void SetDebugLogModeOn()
+        {
+            _CPH.SetGlobalVar("sup000_DebugMode", true, true);
+            LogInfo("Debug mode enabled.");
+        }
+
+        private void SetDebugLogModeOff()
+        {
+            _CPH.SetGlobalVar("sup000_DebugMode", false, true);
+            LogInfo("Debug mode disabled.");
+        }
+        
         private void WriteToLog(string logMessage)
         {
             // Get log folder
@@ -55,7 +67,7 @@ namespace StreamUP
             // Write to log
             WriteToLog(formattedLogMessage);
         }
-
+ 
         public void LogInfo(string message,
                              [CallerMemberName] string memberName = "",
                              [CallerLineNumber] int lineNumber = 0)

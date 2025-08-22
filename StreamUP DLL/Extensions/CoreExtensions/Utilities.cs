@@ -16,7 +16,7 @@ namespace StreamUP
             return AppDomain.CurrentDomain.BaseDirectory;
         }
 
-      
+
 
         public T GetValueOrDefault<T>(IDictionary<string, object> dict, string key, T defaultValue = default)
         {
@@ -132,7 +132,17 @@ namespace StreamUP
             return randomIdString;
         }
 
-        
+        private string SanitiseFileName(string input)
+        {
+            // Replace invalid filename characters with underscores
+            var invalidChars = Path.GetInvalidFileNameChars();
+            foreach (char c in invalidChars)
+            {
+                input = input.Replace(c, '_');
+            }
+            return input;
+        }
+
 
 
     }

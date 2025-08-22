@@ -17,6 +17,9 @@ namespace StreamUP
             {
                 Platform.Twitch => _CPH.GetTwitchUserVar<object>(userName, varName, persisted),
                 Platform.YouTube => _CPH.GetYouTubeUserVar<object>(userName, varName, persisted),
+                Platform.Trovo => _CPH.GetTrovoUserVar<object>(userName, varName, persisted),
+                Platform.Kick => _CPH.GetKickUserVar<object>(userName, varName, persisted),
+
                 _ => null
             };
 
@@ -36,6 +39,8 @@ namespace StreamUP
             {
                 Platform.Twitch => _CPH.GetTwitchUserVarById<object>(userId, varName, persisted),
                 Platform.YouTube => _CPH.GetYouTubeUserVarById<object>(userId, varName, persisted),
+                Platform.Trovo => _CPH.GetTrovoUserVarById<object>(userId, varName, persisted),
+                Platform.Kick => _CPH.GetKickUserVarById<object>(userId, varName, persisted),
                 _ => null
             };
 
@@ -63,6 +68,16 @@ namespace StreamUP
             {
                 _CPH.SetYouTubeUserVar(userName, varName, value, persisted);
             }
+                if (platform == Platform.Trovo)
+            {
+                _CPH.SetTrovoUserVar(userName,varName,value,persisted);
+            }
+
+            if (platform == Platform.Kick)
+            {
+                _CPH.SetKickUserVar(userName,varName,value,persisted);
+            }
+
             _CPH.LogDebug($"Set User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
             return true;
         }
@@ -77,6 +92,17 @@ namespace StreamUP
             {
                 _CPH.SetYouTubeUserVarById(userId, varName, value, persisted);
             }
+
+            if (platform == Platform.Trovo)
+            {
+                _CPH.SetTrovoUserVarById(userId,varName,value,persisted);
+            }
+
+            if (platform == Platform.Kick)
+            {
+                _CPH.SetKickUserVarById(userId,varName,value,persisted);
+            }
+
             _CPH.LogDebug($"Setting User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
             return true;
         }
@@ -92,6 +118,15 @@ namespace StreamUP
             {
                 _CPH.UnsetYouTubeUserVar(username, varName, persisted);
             }
+                if (platform == Platform.Trovo)
+            {
+                _CPH.UnsetTrovoUserVar(username,varName,persisted);
+            }
+
+            if (platform == Platform.Kick)
+            {
+                _CPH.UnsetKickUserVar(username,varName,persisted);
+            }
             _CPH.LogDebug($"Unset User Variable: {varName} for UserId: {username} on Platform: {platform} with Persisted: {persisted}");
             return true;
         }
@@ -106,6 +141,15 @@ namespace StreamUP
             if (platform == Platform.YouTube)
             {
                 _CPH.UnsetYouTubeUserVarById(userId, varName, persisted);
+            }
+                if (platform == Platform.Trovo)
+            {
+                _CPH.UnsetTrovoUserVarById(userId,varName,persisted);
+            }
+
+            if (platform == Platform.Kick)
+            {
+                _CPH.UnsetKickUserVarById(userId,varName,persisted);
             }
             _CPH.LogDebug($"Unset User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted}");
             return true;

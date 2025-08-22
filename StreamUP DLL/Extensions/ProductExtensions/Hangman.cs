@@ -50,36 +50,35 @@ namespace StreamUP
             wordDefinition = json[0]?.meanings[0]?.definitions[0]?.definition ?? " ";
             return wordDefinition;
         }
+        public void SetTriggersForHangman()
+        {
+            string[] categories = { "StreamUP", "Hangman" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("Game Started", "hangmanStart", categories),
+                new("Game Ended", "hangmanEnd", categories),
+                new("Game Lost", "hangmanLost", categories),
+                new("Game Won", "hangmanWon", categories),
+                new("Correct Guess", "hangmanCorrect", categories),
+                new("Incorrect Guess", "hangmanIncorrect", categories),
+                new("Fail/Error", "hangmanFail", categories)
+            };
+            SetCustomTriggers(customTriggers);
+        }
 
         public int GetScore(string userId, Platform platform)
         {
-            int score = 0;
-            if (platform == Platform.Twitch)
-            {
-                score = _CPH.GetTwitchUserVarById<int?>(userId, "hangmanScore", true) ?? 0;
-            }
-
-            if (platform == Platform.YouTube)
-            {
-                score = _CPH.GetYouTubeUserVarById<int?>(userId, "hangmanScore", true) ?? 0;
-            }
-
+            int score;
+            int defaultRank = GetSetting<int>("hangmanRanking", 1500);
+            score = GetUserVariableById<int>(userId, "hangmanRanking", platform, true, defaultRank);
             return score;
         }
 
-        public void AddScore(string userId, int currentScore, int scoreToAdd, Platform platform)
+        public void AddScore(string userId, int scoreToAdd, Platform platform)
         {
+            int currentScore = GetScore(userId, platform);
             int newScore = currentScore + scoreToAdd;
-            if (platform == Platform.Twitch)
-            {
-                _CPH.SetTwitchUserVarById(userId, "hangmanScore", newScore, true);
-            }
-
-            if (platform == Platform.YouTube)
-            {
-                _CPH.SetYouTubeUserVarById(userId, "hangmanScore", newScore, true);
-            }
-
+            SetUserVariableById(userId, "hangmanRanking", newScore, platform, true);
             _CPH.SetArgument("oldScore", currentScore);
             _CPH.SetArgument("newScore", newScore);
             _CPH.SetArgument("scoreToAdd", scoreToAdd);

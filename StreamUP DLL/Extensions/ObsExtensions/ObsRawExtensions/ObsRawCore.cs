@@ -1,3 +1,9 @@
+
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+
 namespace StreamUP
 {
     public partial class StreamUpLib
@@ -28,7 +34,7 @@ namespace StreamUP
             return false;
         }
 
-        private JObject BuildObsRequest(string requestType, object data = null)
+        public JObject BuildObsRequest(string requestType, object data = null)
         {
             return new JObject
             {
