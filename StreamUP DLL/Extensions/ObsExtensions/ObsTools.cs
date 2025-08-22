@@ -293,8 +293,6 @@ namespace StreamUP
             }
             return lines;
         }
-        //#
-
         public bool ObsVideoCaptureDevicesRefresh(int obsConnection)
         {
             LogDebug("Starting video capture device refresh");
@@ -435,6 +433,7 @@ namespace StreamUP
                 LogDebug("No inactive video capture devices found");
                 return true;
             }
+
 
             LogDebug($"Found {inactiveDevices.Count} inactive devices. Enabling them...");
 

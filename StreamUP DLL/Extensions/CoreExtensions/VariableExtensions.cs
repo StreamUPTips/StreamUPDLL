@@ -19,6 +19,7 @@ namespace StreamUP
                 Platform.YouTube => _CPH.GetYouTubeUserVar<object>(userName, varName, persisted),
                 Platform.Trovo => _CPH.GetTrovoUserVar<object>(userName, varName, persisted),
                 Platform.Kick => _CPH.GetKickUserVar<object>(userName, varName, persisted),
+
                 _ => null
             };
 
@@ -76,6 +77,7 @@ namespace StreamUP
             {
                 _CPH.SetKickUserVar(userName,varName,value,persisted);
             }
+
             _CPH.LogDebug($"Set User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
             return true;
         }
@@ -90,6 +92,7 @@ namespace StreamUP
             {
                 _CPH.SetYouTubeUserVarById(userId, varName, value, persisted);
             }
+
             if (platform == Platform.Trovo)
             {
                 _CPH.SetTrovoUserVarById(userId,varName,value,persisted);
