@@ -48,7 +48,16 @@
     <Reference Include="Streamer.bot.Common">
       <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
     </Reference>
-  
+    <Reference Include="Microsoft.Web.WebView2.Core">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Wpf">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.Wpf.dll</HintPath>
+    </Reference>
+    
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
