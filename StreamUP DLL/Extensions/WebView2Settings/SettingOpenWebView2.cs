@@ -82,7 +82,7 @@ namespace StreamUP
                         ";
                             await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(css);
                             webView.CoreWebView2.WebMessageReceived += WebViewOnWebMessageReceived;
-                            webView.Source = new Uri($"http://127.0.0.1:5501/"); //! THIS IS THE WEBSITE URL
+                            webView.Source = new Uri($"https://viewer.streamup.tips/"); //! THIS IS THE WEBSITE URL
                         }
                         catch (Exception ex)
                         {
