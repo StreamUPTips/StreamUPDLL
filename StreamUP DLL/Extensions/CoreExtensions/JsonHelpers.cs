@@ -9,6 +9,10 @@ namespace StreamUP
         
         public JObject ReadJsonFromFile(string path)
         {
+            if (!File.Exists(path))
+            {
+                File.WriteAllText(path, "{}\n");
+            }
             string json = File.ReadAllText(path);
             return JObject.Parse(json);
         }

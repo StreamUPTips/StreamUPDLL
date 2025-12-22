@@ -93,6 +93,7 @@
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
     <Compile Include="Extensions\AndiExtensions\*.cs" />
+    <Compile Include="Extensions\WebView2Settings\*.cs" />
 
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

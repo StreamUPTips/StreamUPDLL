@@ -171,7 +171,7 @@ namespace StreamUP
                 }
 
                 string streamerBotFolder = AppDomain.CurrentDomain.BaseDirectory;
-                string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "product-settings");
+                string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "Data");
                 Directory.CreateDirectory(streamUpFolder);
                 string fileName = $"{productNumber}_ProductSettings.json";
                 string filePath = Path.Combine(streamUpFolder, fileName);
