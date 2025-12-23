@@ -14,6 +14,7 @@ using System.Drawing.Imaging;
 using Streamer.bot.Plugin.Interface.Model;
 using System.CodeDom;
 using System.Data.Common;
+using System.Net.Http;
 
 namespace StreamUP
 {
@@ -45,6 +46,56 @@ namespace StreamUP
             SetCustomTriggers(customTriggers);
         }
 
+        public JObject GetPokemonDataById(int id, string streamUPStreamerKey)
+        {
+            // Implementation to retrieve Pokémon data by ID
+            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var pokemonJson = _httpClient.GetStringAsync("https://api.streamup.tips/pokemon/index/" + id).Result;
+            return JObject.Parse(pokemonJson);
+        }
+
+        public JObject GetPokemonDataByName(string name, string streamUPStreamerKey)
+        {
+            // Implementation to retrieve Pokémon data by name
+            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var pokemonJson = _httpClient.GetStringAsync("https://api.streamup.tips/pokemon/name/" + name).Result;
+            return JObject.Parse(pokemonJson);
+        }
+
+        public JObject GetPokemonDataFromScreen()
+        {
+            string pokemonInfoJson = _CPH.GetGlobalVar<string>("pafCurrentPokemonJson");
+            JObject pokemon = JObject.Parse(pokemonInfoJson);
+            return pokemon;
+            // Implementation to retrieve Pokémon data from screen
+        }
+
+        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey)
+        {
+            // Implementation to catch a Pokémon
+            var data = new StringContent(catchInfo.ToString(), Encoding.UTF8, "application/json");
+            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var catchResult = _httpClient.PostAsync("https://api.streamup.tips/pokemon/catch?language=en", data).Result;
+            if (catchResult.IsSuccessStatusCode)
+            {
+                var response = catchResult.Content.ReadAsStringAsync().Result;
+                bool caught = bool.Parse(response);
+                if (caught)
+                {
+                    return "caught";
+                }
+                else
+                {
+                    return "escaped";
+                }
+            }
+            if (catchResult.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return "unauthorized";
+            }
+            return catchResult.StatusCode.ToString();
+        }
+
         public bool PokemonAndFriendsFail(int code, string message)
         {
             _CPH.SetArgument("errorCode", code);
@@ -52,6 +103,10 @@ namespace StreamUP
             LogError($"[PAF] • {code} - {message}");
             _CPH.TriggerCodeEvent("pafError");
             return true;
+            //! - Errors
+            //1 - No Valid Input or Pokemon on screen. Please check and try again later.
+            //2 - A catch is already in progress. Please wait for it to complete before trying again.
+            //3 - No Pokemon on screen.
         }
     }
 }
