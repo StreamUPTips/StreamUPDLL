@@ -34,7 +34,7 @@ namespace StreamUP
             bool pointsPerGiftBoost = GetSetting<bool>("pointsPerGiftBoost", false);
             //! Youtube Event Settings
             int pointsPerSub = GetSetting<int>("pointsPerSub", 100);
-            Dictionary<string, int> pointsYouTubeMembers = GetSetting<Dictionary<string, int>>("pointsYouTubeMembers", []);
+            Dictionary<string, int> pointsYouTubeMembers = GetSetting<Dictionary<string, int>>("pointsYouTubeMembers", new Dictionary<string, int>());
             int pointsPerMember = GetSetting<int>("pointsPerMember", 500);
             int pointsPerMemberMonth = GetSetting<int>("pointsPerMemberMonth", 10);
             int pointsPerGiftedMember = GetSetting<int>("pointsPerGiftedMember", 500);
