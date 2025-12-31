@@ -29,7 +29,8 @@ namespace StreamUP
 
         public void OpenSettingsMenu(string productName, JObject jsonPulling)
         {
-             _initialJson = jsonPulling;
+            _initialJson = jsonPulling;
+            LoadProductInfo(_initialJson);
             Thread thread = new Thread(() =>
             {
                 try
@@ -500,5 +501,49 @@ namespace StreamUP
                 return false;
             }
         }
+
+        private bool LoadProductInfo(JObject jsonData)
+        {
+            try
+            {
+                if (jsonData == null)
+                {
+                    _CPH.LogError("JSON data is null, cannot load ProductInfo");
+                    return false;
+                }
+
+                var productInfo = new ProductInfo
+                {
+                    ProductName = jsonData["productName"]?.ToString() ?? "Unknown",
+                    ProductNumber = jsonData["productNumber"]?.ToString() ?? "UNKNOWN",
+                    ProductVersionNumber = ParseVersionString(jsonData["productVersion"]?.ToString()),
+                    RequiredLibraryVersion = ParseVersionString(jsonData["libraryVersion"]?.ToString()),
+                    SceneName = jsonData["sceneName"]?.ToString(),
+                    SourceNameVersionNumber = ParseVersionString(jsonData["sceneVersion"]?.ToString()),
+                    SettingsAction = jsonData["settingsAction"]?.ToString(),
+                };
+
+                _CPH.SetGlobalVar($"{productInfo.ProductNumber}_ProductInfo", productInfo, false);
+                _CPH.LogInfo($"ProductInfo loaded: {productInfo.ProductName} ({productInfo.ProductNumber})");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError($"Error loading ProductInfo: {ex.Message}");
+                return false;
+            }
+        }
+
+        private Version ParseVersionString(string versionString)
+        {
+            if (string.IsNullOrEmpty(versionString))
+                return new Version(0, 0, 0, 0);
+
+            if (Version.TryParse(versionString, out var version))
+                return version;
+
+            return new Version(0, 0, 0, 0);
+        }
+
     }
 }
