@@ -319,7 +319,7 @@ namespace StreamUP
         private string ResolveSettingsFilePath()
         {
             string streamerBotFolder = AppDomain.CurrentDomain.BaseDirectory;
-            string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "product-settings");
+            string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "Data");
             if (!Directory.Exists(streamUpFolder))
             {
                 return null;

@@ -35,7 +35,7 @@ namespace StreamUP
                 //new("Greatball Thrown", "pafGreatballThrown", commands),
                 //new("Ultraball Thrown", "pafUltraballThrown", commands),
                 //new("Masterball Thrown", "pafMasterballThrown", commands),
-                new("Catch Failed", "pafCatchFailed", commands),
+                new("Catch Failed/Escaped", "pafCatchFailed", commands),
                 new("Pokémon Error", "pafError", commands),
                 new("Pokedex Checked", "pafPokedexChecked", commands)
                 //Inventory?
