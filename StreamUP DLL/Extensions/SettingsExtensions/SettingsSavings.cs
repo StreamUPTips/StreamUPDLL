@@ -45,7 +45,7 @@ namespace StreamUP
         {
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
             var json = JsonConvert.SerializeObject(_data);
-            //_CPH.SetGlobalVar(_saveName, json, true);
+            _CPH.SetGlobalVar(_saveName, json, true);
             //string jsonString = JsonConvert.SerializeObject(_data, Formatting.Indented);
             var cleanedDict = DeserializeDictionary(json);
             string jsonString = ConvertDictionaryToJsonString(cleanedDict);
