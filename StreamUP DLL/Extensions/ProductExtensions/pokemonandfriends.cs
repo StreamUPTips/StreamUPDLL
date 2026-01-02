@@ -46,36 +46,48 @@ namespace StreamUP
             SetCustomTriggers(customTriggers);
         }
 
-        public JObject GetPokemonDataById(int id, string streamUPStreamerKey)
+        public string GetPokemonDataById(int id, string streamUPStreamerKey)
         {
-            // Implementation to retrieve Pokémon data by ID
-            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
-            var pokemonJson = _httpClient.GetStringAsync("https://api.streamup.tips/pokemon/index/" + id).Result;
-            return JObject.Parse(pokemonJson);
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.streamup.tips/pokemon/index/{id}");
+            request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var response = _httpClient.SendAsync(request).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                LogError($"GetPokemonDataById: ({response.StatusCode}) error.");
+                return "{}";
+            }
+            var pokemonJson = response.Content.ReadAsStringAsync().Result;
+            return pokemonJson;
         }
 
-        public JObject GetPokemonDataByName(string name, string streamUPStreamerKey)
+        public string GetPokemonDataByName(string name, string streamUPStreamerKey)
         {
-            // Implementation to retrieve Pokémon data by name
-            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
-            var pokemonJson = _httpClient.GetStringAsync("https://api.streamup.tips/pokemon/name/" + name).Result;
-            return JObject.Parse(pokemonJson);
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.streamup.tips/pokemon/name/{name}");
+            request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var response = _httpClient.SendAsync(request).Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                LogError($"GetPokemonDataByName: ({response.StatusCode}) error.");
+                return "{}";
+            }
+            var pokemonJson = response.Content.ReadAsStringAsync().Result;
+            return pokemonJson;
         }
 
-        public JObject GetPokemonDataFromScreen()
+        public string GetPokemonDataFromScreen()
         {
             string pokemonInfoJson = _CPH.GetGlobalVar<string>("pafCurrentPokemonJson");
-            JObject pokemon = JObject.Parse(pokemonInfoJson);
-            return pokemon;
+            return pokemonInfoJson;
             // Implementation to retrieve Pokémon data from screen
         }
 
         public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey)
         {
-            // Implementation to catch a Pokémon
             var data = new StringContent(catchInfo.ToString(), Encoding.UTF8, "application/json");
-            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
-            var catchResult = _httpClient.PostAsync("https://api.streamup.tips/pokemon/catch?language=en", data).Result;
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.streamup.tips/pokemon/catch?language=en");
+            request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            request.Content = data;
+            var catchResult = _httpClient.SendAsync(request).Result;
             if (catchResult.IsSuccessStatusCode)
             {
                 var response = catchResult.Content.ReadAsStringAsync().Result;
@@ -93,12 +105,10 @@ namespace StreamUP
             {
                 return "unauthorized";
             }
-
             return catchResult.StatusCode.ToString();
         }
-        public JObject PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage)
+        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage)
         {
-            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             string pokeURI = $"https://api.streamup.tips/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}";
             if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
             {
@@ -111,8 +121,9 @@ namespace StreamUP
                     pokeURI = $"https://api.streamup.tips/pokemon/name/{selectedPokemon}";
                 }
             }
-
-            var pokemonInfoResponse = _httpClient.GetAsync(pokeURI).Result;
+            var request = new HttpRequestMessage(HttpMethod.Get, pokeURI);
+            request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            var pokemonInfoResponse = _httpClient.SendAsync(request).Result;
             string pokemonInfoJson = string.Empty;
             if (pokemonInfoResponse.IsSuccessStatusCode)
             {
@@ -120,7 +131,6 @@ namespace StreamUP
             }
             else
             {
-                // Handle unsuccessful response
                 if (pokemonInfoResponse.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     LogError("Pokémon and Friends: Not authorized to make requests, please check your StreamUP Streamer key!");
@@ -129,10 +139,9 @@ namespace StreamUP
                 {
                     LogError($"Pokémon and Friends: An ({pokemonInfoResponse.StatusCode}) error occurred.");
                 }
-                return new JObject();
+                return "{}";
             }
-            JObject pokemon = JObject.Parse(pokemonInfoJson.ToString());
-            return pokemon;
+            return pokemonInfoJson;
         }
         public bool PokemonAndFriendsFail(int code, string message)
         {
