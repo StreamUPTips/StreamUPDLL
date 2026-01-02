@@ -93,9 +93,47 @@ namespace StreamUP
             {
                 return "unauthorized";
             }
+
             return catchResult.StatusCode.ToString();
         }
+        public JObject PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage)
+        {
+            _httpClient.DefaultRequestHeaders.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
+            string pokeURI = $"https://api.streamup.tips/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}";
+            if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
+            {
+                if (int.TryParse(selectedPokemon, out int pokeId))
+                {
+                    pokeURI = $"https://api.streamup.tips/pokemon/index/{pokeId}";
+                }
+                else
+                {
+                    pokeURI = $"https://api.streamup.tips/pokemon/name/{selectedPokemon}";
+                }
+            }
 
+            var pokemonInfoResponse = _httpClient.GetAsync(pokeURI).Result;
+            string pokemonInfoJson = string.Empty;
+            if (pokemonInfoResponse.IsSuccessStatusCode)
+            {
+                pokemonInfoJson = pokemonInfoResponse.Content.ReadAsStringAsync().Result;
+            }
+            else
+            {
+                // Handle unsuccessful response
+                if (pokemonInfoResponse.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    LogError("Pokémon and Friends: Not authorized to make requests, please check your StreamUP Streamer key!");
+                }
+                else
+                {
+                    LogError($"Pokémon and Friends: An ({pokemonInfoResponse.StatusCode}) error occurred.");
+                }
+                return new JObject();
+            }
+            JObject pokemon = JObject.Parse(pokemonInfoJson.ToString());
+            return pokemon;
+        }
         public bool PokemonAndFriendsFail(int code, string message)
         {
             _CPH.SetArgument("errorCode", code);
