@@ -22,7 +22,7 @@ namespace StreamUP
         {
             _filePath = filePath;
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
-            _data = StreamUpInternalLoad(_saveName);
+            _data = StreamUpInternalLoad(_filePath);
             _initialized = true;
             UIResources.streamUpSettingsProgress++;
         }
