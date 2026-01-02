@@ -21,16 +21,36 @@ namespace StreamUP
         private const int MaxObsConnectionIndex = 20;
         private bool hasLoggedObsCheckError;
         private int preferredObsConnectionIndex = -1;
+        private string _currentProductNumber = "UNKNOWN";
+
         [DllImport("dwmapi.dll", PreserveSig = true)]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        private static extern int DwmSetWindowAttribute(
+            IntPtr hwnd,
+            int attr,
+            ref int attrValue,
+            int attrSize
+        );
+
         private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
         private JObject _initialJson;
 
-
-        public void OpenSettingsMenu(string productName, JObject jsonPulling)
+        /// <summary>
+        /// Open the WebView2-based settings menu for a product.
+        /// </summary>
+        /// <param name="productName">Display name of the product</param>
+        /// <param name="jsonPulling">Initial product data containing productInfo, settings, etc.</param>
+        public void OpenSettingsMenuV2(string productName, JObject jsonPulling)
         {
             _initialJson = jsonPulling;
             LoadProductInfo(_initialJson);
+
+            // Extract product number for later use
+            JObject productInfo = _initialJson?["productInfo"] as JObject;
+            if (productInfo != null)
+            {
+                _currentProductNumber = productInfo["productNumber"]?.ToString() ?? "UNKNOWN";
+            }
+
             Thread thread = new Thread(() =>
             {
                 try
@@ -42,7 +62,9 @@ namespace StreamUP
                         StartPosition = FormStartPosition.CenterScreen,
                         ClientSize = new Size(800, 900),
                         MinimumSize = new Size(600, 600),
-                        BackColor = lightTheme ? Color.FromArgb(245, 245, 245) : Color.FromArgb(32, 32, 32),
+                        BackColor = lightTheme
+                            ? Color.FromArgb(245, 245, 245)
+                            : Color.FromArgb(32, 32, 32),
                         ForeColor = lightTheme ? Color.Black : Color.FromArgb(224, 224, 224),
                         Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point)
                     };
@@ -57,13 +79,15 @@ namespace StreamUP
                         if (!lightTheme)
                         {
                             int useDark = 1;
-                            DwmSetWindowAttribute(form.Handle, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useDark, sizeof(int));
+                            DwmSetWindowAttribute(
+                                form.Handle,
+                                DWMWA_USE_IMMERSIVE_DARK_MODE,
+                                ref useDark,
+                                sizeof(int)
+                            );
                         }
                     };
-                    var webView = new WebView2
-                    {
-                        Dock = DockStyle.Fill
-                    };
+                    var webView = new WebView2 { Dock = DockStyle.Fill };
                     form.Controls.Add(webView);
                     form.Load += async (_, __) =>
                     {
@@ -71,7 +95,8 @@ namespace StreamUP
                         {
                             await webView.EnsureCoreWebView2Async(null);
                             webView2Core = webView.CoreWebView2;
-                            string css = $@"
+                            string css =
+                                $@"
                             const s = document.createElement('style');
                             s.textContent = `
                                 html, body {{
@@ -81,9 +106,11 @@ namespace StreamUP
                             `;
                             document.head.appendChild(s);
                         ";
-                            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(css);
+                            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                                css
+                            );
                             webView.CoreWebView2.WebMessageReceived += WebViewOnWebMessageReceived;
-                            webView.Source = new Uri($"https://viewer.streamup.tips/"); //! THIS IS THE WEBSITE URL
+                            webView.Source = new Uri($"https://viewer.streamup.tips/");
                         }
                         catch (Exception ex)
                         {
@@ -105,26 +132,26 @@ namespace StreamUP
             thread.Start();
         }
 
-        private void WebViewOnWebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs evt)
+        private void WebViewOnWebMessageReceived(
+            object sender,
+            CoreWebView2WebMessageReceivedEventArgs evt
+        )
         {
             try
             {
                 var json = evt.WebMessageAsJson;
                 var message = JsonConvert.DeserializeObject<JObject>(json);
-                // ======================================================
-                // 🔥 OPTION 3 — Webpage Requests Initial Actions/Groups/Rewards
-                // ======================================================
+
                 if (message?["action"]?.ToString() == "requestInitialData")
                 {
                     SendInitialData(_initialJson);
                     return;
                 }
 
-                // ======================================================
                 switch (message?["action"]?.ToString())
                 {
                     case "loadSettings":
-                        LoadAndSendSettings();
+                        LoadAndSendSettingsV2();
                         return;
                     case "selectFile":
                         SelectFile(message);
@@ -142,7 +169,7 @@ namespace StreamUP
 
                 if (message?["settings"] != null)
                 {
-                    SaveSettings(message);
+                    SaveSettingsV2(message);
                 }
             }
             catch (Exception ex)
@@ -152,34 +179,47 @@ namespace StreamUP
             }
         }
 
-        private void SaveSettings(JObject message)
+        /// <summary>
+        /// Save settings received from WebView2 to file and cache.
+        /// Uses SettingsControllerV2 for all file I/O operations.
+        /// </summary>
+        private void SaveSettingsV2(JObject message)
         {
             try
             {
                 var settings = message["settings"] as JObject;
-                string productNumber = message["productNumber"]?.ToString() ?? "UNKNOWN";
-                if (settings == null)
+                var productInfo = message["productInfo"] as JObject;
+                var obsConnection = message["obsConnection"] ?? 0;
+
+                if (settings == null || productInfo == null)
                 {
-                    _CPH.LogError("No settings found in message");
+                    _CPH.LogError("Missing settings or productInfo in message");
                     return;
                 }
 
-                var cleanedValues = new Dictionary<string, object>();
-                foreach (var kvp in settings)
+                string productNumber = productInfo["productNumber"]?.ToString() ?? "UNKNOWN";
+
+                // Load current data to preserve all sections
+                JObject currentData = LoadProductDataV2(productNumber);
+                if (currentData == null)
                 {
-                    object valueToSave = ConvertJTokenToNative(kvp.Value);
-                    cleanedValues[kvp.Key] = valueToSave;
+                    currentData = new JObject();
                 }
 
-                string streamerBotFolder = AppDomain.CurrentDomain.BaseDirectory;
-                string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "Data");
-                Directory.CreateDirectory(streamUpFolder);
-                string fileName = $"{productNumber}_ProductSettings.json";
-                string filePath = Path.Combine(streamUpFolder, fileName);
-                string jsonOutput = JsonConvert.SerializeObject(cleanedValues, Formatting.Indented);
-                File.WriteAllText(filePath, jsonOutput);
-                _CPH.LogInfo($"Settings saved successfully to: {filePath}");
-                _CPH.LogInfo($"Saved {cleanedValues.Count} settings for product {productNumber}");
+                // Update sections with new data
+                currentData["productInfo"] = productInfo;
+                currentData["obsConnection"] = obsConnection;
+                currentData["settings"] = settings;
+
+                // Save complete data structure using SettingsControllerV2
+                if (SaveProductDataV2(productNumber, currentData))
+                {
+                    _CPH.LogInfo($"Settings saved successfully for product {productNumber}");
+                }
+                else
+                {
+                    _CPH.LogError($"Failed to save settings for product {productNumber}");
+                }
             }
             catch (Exception ex)
             {
@@ -188,28 +228,61 @@ namespace StreamUP
             }
         }
 
-        private void LoadAndSendSettings()
+        /// <summary>
+        /// Load settings from file/cache and send to WebView2.
+        /// Uses SettingsControllerV2 for all file I/O operations.
+        /// </summary>
+        private void LoadAndSendSettingsV2()
         {
             try
             {
-                string filePath = ResolveSettingsFilePath();
-                if (filePath == null)
+                // Use current product number if available
+                string productNumber = _currentProductNumber;
+                if (productNumber == "UNKNOWN" && _initialJson != null)
                 {
-                    _CPH.LogInfo("No saved settings files found");
+                    JObject productInfo = _initialJson["productInfo"] as JObject;
+                    if (productInfo != null)
+                    {
+                        productNumber = productInfo["productNumber"]?.ToString() ?? "UNKNOWN";
+                    }
+                }
+
+                // Load product data using SettingsControllerV2 (cache-first approach)
+                JObject data = LoadProductDataV2(productNumber);
+                if (data == null)
+                {
+                    _CPH.LogInfo("No saved settings found");
                     return;
                 }
 
-                _CPH.LogInfo($"Loading settings from: {filePath}");
-                string jsonContent = File.ReadAllText(filePath);
-                var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
+                // Extract sections from loaded data
+                var productInfo2 = data["productInfo"] as JObject;
+                var obsConnection = data["obsConnection"] ?? 0;
+                var settings = data["settings"] as JObject;
+
+                if (productInfo2 == null)
+                {
+                    _CPH.LogError("Loaded settings missing productInfo");
+                    return;
+                }
+
+                if (settings == null)
+                {
+                    settings = new JObject();
+                    _CPH.LogInfo("No user settings found, using empty settings object");
+                }
+
+                // Send complete structure to viewer
                 var response = new
                 {
                     action = "applySettings",
+                    productInfo = productInfo2,
+                    obsConnection = obsConnection,
                     settings = settings
                 };
                 string responseJson = JsonConvert.SerializeObject(response);
                 webView2Core?.PostWebMessageAsJson(responseJson);
-                _CPH.LogInfo($"Loaded and sent {settings.Count} settings to UI");
+                _CPH.LogInfo($"Loaded and sent settings to UI for product {productNumber}");
             }
             catch (Exception ex)
             {
@@ -226,9 +299,11 @@ namespace StreamUP
                 string fileType = message["fileType"]?.ToString();
                 var openFileDialog = new System.Windows.Forms.OpenFileDialog();
                 if (fileType == "image")
-                    openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.webp|All Files|*.*";
+                    openFileDialog.Filter =
+                        "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.webp|All Files|*.*";
                 else if (fileType == "audio")
-                    openFileDialog.Filter = "Audio Files|*.mp3;*.wav;*.ogg;*.aac;*.m4a|All Files|*.*";
+                    openFileDialog.Filter =
+                        "Audio Files|*.mp3;*.wav;*.ogg;*.aac;*.m4a|All Files|*.*";
                 else
                     openFileDialog.Filter = "All Files|*.*";
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -317,40 +392,6 @@ namespace StreamUP
             return null;
         }
 
-        private string ResolveSettingsFilePath()
-        {
-            string streamerBotFolder = AppDomain.CurrentDomain.BaseDirectory;
-            string streamUpFolder = Path.Combine(streamerBotFolder, "StreamUP", "Data");
-            if (!Directory.Exists(streamUpFolder))
-            {
-                return null;
-            }
-
-            var settingsFiles = Directory.GetFiles(streamUpFolder, "*_ProductSettings.json");
-            return settingsFiles.Length > 0 ? settingsFiles[0] : null;
-        }
-
-        private string TryLoadProductName()
-        {
-            try
-            {
-                string filePath = ResolveSettingsFilePath();
-                if (filePath == null)
-                {
-                    return null;
-                }
-
-                string jsonContent = File.ReadAllText(filePath);
-                var settings = JsonConvert.DeserializeObject<JObject>(jsonContent);
-                return settings?["productName"]?.ToString() ?? settings?["ProductName"]?.ToString();
-            }
-            catch (Exception ex)
-            {
-                _CPH.LogError("Unable to read product name from settings: " + ex.Message);
-                return null;
-            }
-        }
-
         private void SendInitialData(JObject jsonString)
         {
             try
@@ -431,7 +472,11 @@ namespace StreamUP
 
         private int ResolveObsConnectionIndex(Dictionary<int, bool> states)
         {
-            if (preferredObsConnectionIndex >= 0 && states.TryGetValue(preferredObsConnectionIndex, out bool preferredConnected) && preferredConnected)
+            if (
+                preferredObsConnectionIndex >= 0
+                && states.TryGetValue(preferredObsConnectionIndex, out bool preferredConnected)
+                && preferredConnected
+            )
             {
                 return preferredObsConnectionIndex;
             }
@@ -451,7 +496,8 @@ namespace StreamUP
         {
             try
             {
-                var token = message?["preferredIndex"] ?? message?["index"] ?? message?["connectionId"];
+                var token =
+                    message?["preferredIndex"] ?? message?["index"] ?? message?["connectionId"];
                 if (token == null)
                 {
                     return;
@@ -512,19 +558,34 @@ namespace StreamUP
                     return false;
                 }
 
+                var productInfoObj = jsonData["productInfo"] as JObject;
+                if (productInfoObj == null)
+                {
+                    _CPH.LogError("JSON data missing productInfo object");
+                    return false;
+                }
+
                 var productInfo = new ProductInfo
                 {
-                    ProductName = jsonData["productName"]?.ToString() ?? "Unknown",
-                    ProductNumber = jsonData["productNumber"]?.ToString() ?? "UNKNOWN",
-                    ProductVersionNumber = ParseVersionString(jsonData["productVersion"]?.ToString()),
-                    RequiredLibraryVersion = ParseVersionString(jsonData["libraryVersion"]?.ToString()),
-                    SceneName = jsonData["sceneName"]?.ToString(),
-                    SourceNameVersionNumber = ParseVersionString(jsonData["sceneVersion"]?.ToString()),
-                    SettingsAction = jsonData["settingsAction"]?.ToString(),
+                    ProductName = productInfoObj["productName"]?.ToString() ?? "Unknown",
+                    ProductNumber = productInfoObj["productNumber"]?.ToString() ?? "UNKNOWN",
+                    ProductVersionNumber = ParseVersionString(
+                        productInfoObj["productVersion"]?.ToString()
+                    ),
+                    RequiredLibraryVersion = ParseVersionString(
+                        productInfoObj["libraryVersion"]?.ToString()
+                    ),
+                    SceneName = productInfoObj["sceneName"]?.ToString(),
+                    SourceNameVersionNumber = ParseVersionString(
+                        productInfoObj["sceneVersion"]?.ToString()
+                    ),
+                    SettingsAction = productInfoObj["settingsAction"]?.ToString(),
                 };
 
                 _CPH.SetGlobalVar($"{productInfo.ProductNumber}_ProductInfo", productInfo, false);
-                _CPH.LogInfo($"ProductInfo loaded: {productInfo.ProductName} ({productInfo.ProductNumber})");
+                _CPH.LogInfo(
+                    $"ProductInfo loaded: {productInfo.ProductName} ({productInfo.ProductNumber})"
+                );
                 return true;
             }
             catch (Exception ex)
@@ -544,6 +605,5 @@ namespace StreamUP
 
             return new Version(0, 0, 0, 0);
         }
-
     }
 }
