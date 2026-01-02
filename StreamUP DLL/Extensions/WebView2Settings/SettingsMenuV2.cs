@@ -22,6 +22,9 @@ namespace StreamUP
         private bool hasLoggedObsCheckError;
         private int preferredObsConnectionIndex = -1;
         private string _currentProductNumber = "UNKNOWN";
+        private string _currentProductName = "Unknown Product";
+        private static ManualResetEvent _menuClosedEvent = new ManualResetEvent(false);
+
 
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(
@@ -39,7 +42,7 @@ namespace StreamUP
         /// </summary>
         /// <param name="productName">Display name of the product</param>
         /// <param name="jsonPulling">Initial product data containing productInfo, settings, etc.</param>
-        public void OpenSettingsMenuV2(string productName, JObject jsonPulling)
+        public void OpenSettingsMenuV2(JObject jsonPulling)
         {
             _initialJson = jsonPulling;
             LoadProductInfo(_initialJson);
@@ -49,6 +52,7 @@ namespace StreamUP
             if (productInfo != null)
             {
                 _currentProductNumber = productInfo["productNumber"]?.ToString() ?? "UNKNOWN";
+                _currentProductName = productInfo["productName"]?.ToString() ?? "Unknown Product";
             }
 
             Thread thread = new Thread(() =>
@@ -58,7 +62,7 @@ namespace StreamUP
                     bool lightTheme = IsLightTheme();
                     var form = new Form
                     {
-                        Text = $"{productName} Settings",
+                        Text = $"{_currentProductName} Settings",
                         StartPosition = FormStartPosition.CenterScreen,
                         ClientSize = new Size(800, 900),
                         MinimumSize = new Size(600, 600),
@@ -122,14 +126,27 @@ namespace StreamUP
                         }
                     };
                     Application.Run(form);
+                    _menuClosedEvent.Set();
                 }
                 catch (Exception ex)
                 {
                     _CPH.LogError("UI thread crash: " + ex.Message);
+                    _menuClosedEvent.Set();
                 }
             });
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
+        }
+
+        /// <summary>
+        /// Wait for the settings menu to close. Used to ensure settings are applied before continuing.
+        /// </summary>
+        /// <param name="timeoutMs">Timeout in milliseconds (default 5 minutes)</param>
+        /// <returns>True if menu closed, false if timeout</returns>
+        public bool WaitForMenuToClose(int timeoutMs = 300000)
+        {
+            _menuClosedEvent.Reset();
+            return _menuClosedEvent.WaitOne(timeoutMs);
         }
 
         private void WebViewOnWebMessageReceived(
