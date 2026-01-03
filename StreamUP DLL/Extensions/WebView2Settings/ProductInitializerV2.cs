@@ -40,8 +40,9 @@ namespace StreamUP
                 // Check if settings file exists
                 if (!File.Exists(filePath))
                 {
-                    errorMessage = $"Settings file not found for product {productNumber}. " +
-                                 $"Please run the settings action for this product and save to create the settings file.";
+                    errorMessage =
+                        $"Settings file not found for product {productNumber}. "
+                        + $"Please run the settings action for this product and save to create the settings file.";
                     LogError(errorMessage);
                     return false;
                 }
@@ -55,7 +56,9 @@ namespace StreamUP
                     return false;
                 }
 
-                LogDebug($"Product {productNumber} initialized successfully with valid settings file");
+                LogDebug(
+                    $"Product {productNumber} initialized successfully with valid settings file"
+                );
                 return true;
             }
             catch (Exception ex)

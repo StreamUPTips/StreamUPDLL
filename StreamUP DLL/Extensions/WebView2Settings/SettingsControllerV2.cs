@@ -35,11 +35,15 @@ namespace StreamUP
                 // Log cache miss or cache disabled
                 if (useCache)
                 {
-                    LogDebug($"[CACHE MISS] Product not in cache, loading from file: {productNumber}");
+                    LogDebug(
+                        $"[CACHE MISS] Product not in cache, loading from file: {productNumber}"
+                    );
                 }
                 else
                 {
-                    LogDebug($"[CACHE DISABLED] Loading from file without caching: {productNumber}");
+                    LogDebug(
+                        $"[CACHE DISABLED] Loading from file without caching: {productNumber}"
+                    );
                 }
 
                 // Get directory

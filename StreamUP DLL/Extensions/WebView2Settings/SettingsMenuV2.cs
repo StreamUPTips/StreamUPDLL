@@ -10,7 +10,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 
-
 namespace StreamUP
 {
     public partial class StreamUpLib
@@ -199,6 +198,7 @@ namespace StreamUP
         /// <summary>
         /// Save settings received from WebView2 to file and cache.
         /// Uses SettingsControllerV2 for all file I/O operations.
+        /// After saving, executes any configured save action or execute method.
         /// </summary>
         private void SaveSettingsV2(JObject message)
         {
@@ -232,6 +232,9 @@ namespace StreamUP
                 if (SaveProductDataV2(productNumber, currentData))
                 {
                     _CPH.LogInfo($"Settings saved successfully for product {productNumber}");
+
+                    // After successful save, execute any configured save action
+                    ExecuteSaveAction(message);
                 }
                 else
                 {
@@ -241,6 +244,79 @@ namespace StreamUP
             catch (Exception ex)
             {
                 _CPH.LogError("Error saving settings: " + ex.Message);
+                _CPH.LogError("Stack trace: " + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// Execute the save action or execute method if configured in productInfo.
+        /// This is called after settings are successfully saved.
+        /// </summary>
+        private void ExecuteSaveAction(JObject message)
+        {
+            try
+            {
+                var productInfo = message["productInfo"] as JObject;
+                if (productInfo == null)
+                {
+                    return;
+                }
+
+                // Check for saveAction (run Streamer.bot action)
+                var saveAction = productInfo["saveAction"] as JObject;
+                if (saveAction != null)
+                {
+                    string actionName = saveAction["actionName"]?.ToString();
+                    if (!string.IsNullOrWhiteSpace(actionName))
+                    {
+                        _CPH.LogInfo($"Executing save action: {actionName}");
+                        try
+                        {
+                            _CPH.RunAction(actionName);
+                            _CPH.LogInfo($"Save action executed successfully: {actionName}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _CPH.LogError(
+                                $"Error executing save action '{actionName}': {ex.Message}"
+                            );
+                        }
+                        return;
+                    }
+                }
+
+                // Check for saveExecuteMethod (execute C# method)
+                var saveExecuteMethod = productInfo["saveExecuteMethod"] as JObject;
+                if (saveExecuteMethod != null)
+                {
+                    string codeFile = saveExecuteMethod["codeFile"]?.ToString();
+                    string methodName = saveExecuteMethod["methodName"]?.ToString();
+
+                    if (
+                        !string.IsNullOrWhiteSpace(codeFile)
+                        && !string.IsNullOrWhiteSpace(methodName)
+                    )
+                    {
+                        _CPH.LogInfo($"Executing save method: {codeFile}.{methodName}");
+                        try
+                        {
+                            _CPH.ExecuteMethod(codeFile, methodName);
+                            _CPH.LogInfo(
+                                $"Save method executed successfully: {codeFile}.{methodName}"
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            _CPH.LogError(
+                                $"Error executing save method '{codeFile}.{methodName}': {ex.Message}"
+                            );
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError("Error in ExecuteSaveAction: " + ex.Message);
                 _CPH.LogError("Stack trace: " + ex.StackTrace);
             }
         }
@@ -357,7 +433,9 @@ namespace StreamUP
                     return;
                 }
 
-                _CPH.LogInfo($"Executing method from Settings Viewer: Code='{executeCode}', Method='{method}'");
+                _CPH.LogInfo(
+                    $"Executing method from Settings Viewer: Code='{executeCode}', Method='{method}'"
+                );
                 _CPH.ExecuteMethod(executeCode, method);
                 _CPH.LogInfo($"Method executed successfully");
             }
