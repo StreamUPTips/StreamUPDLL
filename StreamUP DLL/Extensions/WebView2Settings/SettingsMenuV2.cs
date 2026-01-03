@@ -1,5 +1,4 @@
 using Microsoft.Web.WebView2.Core;
-using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -10,8 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
-using Streamer.bot.Plugin.Interface.Model;
-using Newtonsoft.Json.Serialization;
+
 
 namespace StreamUP
 {
@@ -24,7 +22,6 @@ namespace StreamUP
         private string _currentProductNumber = "UNKNOWN";
         private string _currentProductName = "Unknown Product";
         private static ManualResetEvent _menuClosedEvent = new ManualResetEvent(false);
-
 
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(
