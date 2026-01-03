@@ -179,6 +179,9 @@ namespace StreamUP
                     case "setObsConnectionIndex":
                         UpdatePreferredObsConnection(message);
                         return;
+                    case "executeMethod":
+                        ExecuteMethodFromWebView(message);
+                        return;
                 }
 
                 if (message?["settings"] != null)
@@ -335,6 +338,33 @@ namespace StreamUP
             catch (Exception ex)
             {
                 _CPH.LogError("Error selecting file: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Handle executeMethod action from WebView2. Executes a Streamer.bot method.
+        /// </summary>
+        private void ExecuteMethodFromWebView(JObject message)
+        {
+            try
+            {
+                string executeCode = message["executeCode"]?.ToString();
+                string method = message["method"]?.ToString();
+
+                if (string.IsNullOrWhiteSpace(executeCode) || string.IsNullOrWhiteSpace(method))
+                {
+                    _CPH.LogError("ExecuteMethod: Missing executeCode or method parameter");
+                    return;
+                }
+
+                _CPH.LogInfo($"Executing method from Settings Viewer: Code='{executeCode}', Method='{method}'");
+                _CPH.ExecuteMethod(executeCode, method);
+                _CPH.LogInfo($"Method executed successfully");
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError("Error executing method from WebView: " + ex.Message);
+                _CPH.LogError("Stack trace: " + ex.StackTrace);
             }
         }
 
