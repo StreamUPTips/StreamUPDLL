@@ -61,6 +61,18 @@ namespace StreamUP
                     LogInfo($"Product data saved to file: {productNumber}");
                 }
 
+                // Signal to other actions that settings have changed by setting a Non-Persisted global
+                try
+                {
+                    string globalVarName = $"__StreamUP_SettingsChanged_{productNumber}";
+                    _CPH.SetGlobalVar(globalVarName, true, false);
+                    LogDebug($"Settings change signal set: {globalVarName}");
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Failed to set settings change signal for {productNumber}: {ex.Message}");
+                }
+
                 return true;
             }
             catch (IOException ex)

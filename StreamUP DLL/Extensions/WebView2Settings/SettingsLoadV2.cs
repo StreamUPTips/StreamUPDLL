@@ -24,7 +24,27 @@ namespace StreamUP
                     return null;
                 }
 
-                // Check cache first (if useCache is true)
+                // Check if settings have changed (Non-Persisted global signal)
+                string settingsChangedVar = $"__StreamUP_SettingsChanged_{productNumber}";
+                try
+                {
+                    if (_CPH.GetGlobalVar<bool>(settingsChangedVar, false))
+                    {
+                        // Clear the signal for next time
+                        _CPH.UnsetGlobalVar(settingsChangedVar);
+                        LogDebug(
+                            $"Settings change detected - forcing reload from disk: {productNumber}"
+                        );
+                        // Force cache miss to reload from disk
+                        SettingsCacheV2.ClearCache(productNumber);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogDebug($"Error checking settings change signal: {ex.Message}");
+                }
+
+                // Check cache first (if useCache is true and no settings change detected)
                 if (useCache && SettingsCacheV2.TryGetCachedData(productNumber, out JObject cached))
                 {
                     LogDebug($"Cache hit - Loaded product data from cache: {productNumber}");

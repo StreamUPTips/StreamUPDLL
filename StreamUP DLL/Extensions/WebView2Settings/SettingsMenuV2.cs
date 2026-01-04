@@ -110,6 +110,8 @@ namespace StreamUP
                                 css
                             );
                             webView.CoreWebView2.WebMessageReceived += WebViewOnWebMessageReceived;
+                            webView.CoreWebView2.NavigationStarting += WebViewOnNavigationStarting;
+                            webView.CoreWebView2.NewWindowRequested += WebViewOnNewWindowRequested;
                             webView.Source = new Uri($"https://viewer.streamup.tips/");
                         }
                         catch (Exception ex)
@@ -726,6 +728,99 @@ namespace StreamUP
                 return version;
 
             return new Version(0, 0, 0, 0);
+        }
+
+        /// <summary>
+        /// Handle navigation in WebView2. External links are opened in the default browser instead.
+        /// Only allow navigation to the viewer.streamup.tips domain within the WebView.
+        /// </summary>
+        private void WebViewOnNavigationStarting(
+            object sender,
+            CoreWebView2NavigationStartingEventArgs e
+        )
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(e.Uri))
+                {
+                    return;
+                }
+
+                Uri navigationUri = new Uri(e.Uri);
+
+                // Allow navigation only to viewer.streamup.tips domain
+                if (navigationUri.Host != "viewer.streamup.tips")
+                {
+                    // Cancel navigation and open in default browser instead
+                    e.Cancel = true;
+
+                    try
+                    {
+                        _CPH.LogDebug($"Opening external link in default browser: {e.Uri}");
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = e.Uri,
+                                UseShellExecute = true
+                            }
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        _CPH.LogError($"Failed to open link in default browser: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError($"Error handling WebView navigation: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Handle new window requests (links with target="_blank"). Open external links in default browser.
+        /// </summary>
+        private void WebViewOnNewWindowRequested(
+            object sender,
+            CoreWebView2NewWindowRequestedEventArgs e
+        )
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(e.Uri))
+                {
+                    return;
+                }
+
+                Uri navigationUri = new Uri(e.Uri);
+
+                // Only allow new windows for viewer.streamup.tips domain
+                if (navigationUri.Host != "viewer.streamup.tips")
+                {
+                    // Prevent new window and open in default browser instead
+                    e.Handled = true;
+
+                    try
+                    {
+                        _CPH.LogDebug($"Opening external link in default browser: {e.Uri}");
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = e.Uri,
+                                UseShellExecute = true
+                            }
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        _CPH.LogError($"Failed to open link in default browser: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError($"Error handling new window request: {ex.Message}");
+            }
         }
     }
 }
