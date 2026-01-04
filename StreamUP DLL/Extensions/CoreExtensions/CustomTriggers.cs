@@ -26,7 +26,7 @@ namespace StreamUP
             foreach (var customTrigger in customTriggers)
             {
                 _CPH.RegisterCustomTrigger(customTrigger.Name, customTrigger.Code, customTrigger.TriggerCategory);
-                LogInfo($"[Custom Triggers] {customTrigger.Name}, {customTrigger.Code} = [{customTrigger.TriggerCategory}]");
+                LogInfo($"[Custom Triggers] {customTrigger.Name}, {customTrigger.Code}");
             }
         }
         /*
