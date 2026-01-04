@@ -57,9 +57,10 @@ namespace StreamUP
                 }
 
                 // 5. Ensure obsConnection is set (defaults to 0 if not in settings)
+                int obsConnection = 0;
                 if (settingsObj["ObsConnection"] == null)
                 {
-                    int obsConnection = (int?)productData["obsConnection"] ?? 0;
+                    obsConnection = (int?)productData["obsConnection"] ?? 0;
                     settingsObj["ObsConnection"] = obsConnection;
                 }
 
