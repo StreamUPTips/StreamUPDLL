@@ -72,6 +72,23 @@ namespace StreamUP
                     return false;
                 }
 
+                // 7. Set Canvas Scaling
+                if (GetObsCanvasScaleFactor(obsConnection, out double scaleFactor))
+                {
+                    // Save scale factor to product data
+                    productData["scaleFactor"] = scaleFactor;
+                    if (!SaveProductDataV2(productNumber, productData))
+                    {
+                        LogError("Failed to save scale factor to product data");
+                        return false;
+                    }
+                }
+                else
+                {
+                    LogError("Failed to retrieve canvas scale factor");
+                    return false;
+                }
+
                 LogInfo("Successfully loaded and applied product settings");
                 ShowToastNotification(
                     StreamUpLib.NotificationType.Success,

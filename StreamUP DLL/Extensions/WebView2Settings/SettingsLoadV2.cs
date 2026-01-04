@@ -194,6 +194,34 @@ namespace StreamUP
         }
 
         /// <summary>
+        /// Load canvas scale factor with optional caching.
+        /// </summary>
+        /// <param name="productNumber">Product identifier</param>
+        /// <param name="useCache">Use cache if available (default: true)</param>
+        /// <returns>Canvas scale factor, or 1.0 if not found</returns>
+        public double LoadScaleFactorV2(string productNumber, bool useCache = true)
+        {
+            try
+            {
+                JObject data = LoadProductDataV2(productNumber, useCache);
+                if (data == null)
+                {
+                    LogDebug($"No product data found for {productNumber}");
+                    return 1.0;
+                }
+
+                double scaleFactor = (double?)data["scaleFactor"] ?? 1.0;
+                LogDebug($"Loaded scaleFactor for {productNumber}");
+                return scaleFactor;
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error loading scaleFactor for {productNumber}: {ex.Message}");
+                return 1.0;
+            }
+        }
+
+        /// <summary>
         /// Load a single setting value from file with type conversion (type-safe).
         /// </summary>
         /// <typeparam name="T">Type to convert setting to</typeparam>

@@ -215,5 +215,48 @@ namespace StreamUP
                 return false;
             }
         }
+
+        /// <summary>
+        /// Save canvas scale factor to file and cache.
+        /// </summary>
+        /// <param name="productNumber">Product identifier</param>
+        /// <param name="scaleFactor">Canvas scale factor</param>
+        /// <returns>True if save successful</returns>
+        public bool SaveScaleFactorV2(string productNumber, double scaleFactor)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(productNumber))
+                {
+                    LogError("Product number is null or empty");
+                    return false;
+                }
+
+                // Load data
+                JObject data = LoadProductDataV2(productNumber);
+                if (data == null)
+                {
+                    LogError($"Failed to load data for product {productNumber}");
+                    return false;
+                }
+
+                // Update scaleFactor
+                data["scaleFactor"] = scaleFactor;
+                LogDebug($"Scale factor updated in memory");
+
+                // Save to file
+                bool saved = SaveProductDataV2(productNumber, data);
+                if (saved)
+                {
+                    LogInfo($"Scale factor saved to file and cache");
+                }
+                return saved;
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error saving scale factor: {ex.Message}");
+                return false;
+            }
+        }
     }
 }
