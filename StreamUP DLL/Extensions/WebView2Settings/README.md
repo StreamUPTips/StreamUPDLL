@@ -75,9 +75,63 @@ SUP.LoadAndApplyProductSettingsV2("sup001", (settings) =>
 });
 ```
 
+### 5. Initialize with User Feedback (Recommended)
+```csharp
+public bool Execute()
+{
+    string productNumber = "sup001";
+    string settingsActionName = "sup001_Settings";  // Hardcode your settings action name
+
+    // Step 1: Check initialization - prompts user if needed (once per session)
+    var initResult = SUP.CheckAndPromptProductInitializationV2(productNumber);
+
+    if (initResult == InitializationPromptResult.NotInitializedUserAccepted)
+    {
+        // User clicked Yes - run your settings action
+        CPH.RunAction(settingsActionName);
+        return false;  // Settings will initialize on next run
+    }
+
+    if (initResult == InitializationPromptResult.NotInitializedUserDeclined)
+    {
+        return false;  // User declined or already prompted
+    }
+
+    // Step 2: Validate OBS connection - warns if disconnected (once per session)
+    SUP.ValidateObsConnectionV2(productNumber);
+
+    // Step 3: Continue with normal product logic
+    JObject productData = SUP.LoadProductDataV2(productNumber);
+    // ... rest of code
+}
+```
+
 ---
 
 ## File-by-File Guide
+
+### **ProductInitializerV2.cs**
+Product initialization and validation with user feedback.
+```csharp
+// Validation
+bool IsProductInitializedV2(productNumber)
+bool InitializeProductV2(productNumber, out errorMessage)
+
+// Initialization with User Prompts
+InitializationPromptResult CheckAndPromptProductInitializationV2(productNumber)
+bool ValidateObsConnectionV2(productNumber)
+
+// Result Enum
+public enum InitializationPromptResult
+{
+    AlreadyInitialized,              // Product is already initialized
+    NotInitializedUserAccepted,      // User clicked Yes to run settings
+    NotInitializedUserDeclined       // User clicked No or already prompted
+}
+```
+
+- **CheckAndPromptProductInitializationV2()** - Checks if product is initialized. If not, prompts user to run settings (once per session). Returns `InitializationPromptResult` enum indicating the status and user's choice. Product handles running the settings action.
+- **ValidateObsConnectionV2()** - Validates OBS connection for initialized product. Shows warning if disconnected (once per session). Non-blocking - doesn't prevent product execution.
 
 ### **SettingsLoadV2.cs**
 Load operations - pulling data from files with optional caching.
@@ -156,6 +210,12 @@ bool GetStreamerBotDirectory(out string directory)
 
 ## Method Reference by Category
 
+### Initialization (4 methods) - Check & validate products with user feedback
+- `IsProductInitializedV2()` - Check if product data exists and is valid
+- `InitializeProductV2()` - Initialize product, returns error message
+- `CheckAndPromptProductInitializationV2()` - Check & prompt user if not initialized. Returns `InitializationPromptResult` enum. Product handles settings action. (anti-spam)
+- `ValidateObsConnectionV2()` - Validate OBS connection, warn if disconnected (anti-spam)
+
 ### Load (5 methods) - Pull data from disk
 - `LoadProductDataV2()` - Complete product JSON
 - `LoadProductInfoV2()` - Just productInfo section
@@ -232,21 +292,61 @@ LogDebug()  → Verbose traces (cache hits, memory ops)
 
 ## Common Patterns
 
-### Pattern 1: Load, Modify, Save
+### Pattern 1: Initialize Product with User Feedback (RECOMMENDED)
+```csharp
+public bool Execute()
+{
+    string productNumber = "sup001";
+    string settingsActionName = "sup001_Settings";  // Your hardcoded settings action
+
+    // Step 1: Check initialization - shows prompt once if not initialized
+    var initResult = SUP.CheckAndPromptProductInitializationV2(productNumber);
+
+    // Step 2: Handle result
+    if (initResult == InitializationPromptResult.NotInitializedUserAccepted)
+    {
+        // User clicked Yes - run your settings action
+        CPH.RunAction(settingsActionName);
+        return false;  // Settings will initialize on next run
+    }
+
+    if (initResult == InitializationPromptResult.NotInitializedUserDeclined)
+    {
+        return false;  // User declined or already prompted this session
+    }
+
+    // Step 3: Validate OBS - warns once if disconnected
+    SUP.ValidateObsConnectionV2(productNumber);
+
+    // Step 4: Continue with product logic
+    JObject data = SUP.LoadProductDataV2(productNumber);
+    // ... rest of code
+}
+```
+
+**Features**:
+- Prompts user to run settings if product not initialized
+- Only prompts once per session (anti-spam via static tracker)
+- Product controls when settings action is triggered
+- Hardcode your own settings action name for reliability
+- Warns if OBS not connected (one warning per session)
+- Warnings don't block product execution
+
+### Pattern 2: Load, Modify, Save
 ```csharp
 JObject settings = SUP.LoadSettingsV2("sup001");
 SUP.SetSettingInObjectV2(settings, "key", "value");
 SUP.SaveSettingsV2("sup001", settings);
 ```
 
-### Pattern 2: Safe Backup Before Changes
+### Pattern 3: Safe Backup Before Changes
 ```csharp
 SUP.BackupProductV2("sup001", "C:\\backup\\sup001.json");
 SUP.UpdateSettingV2("sup001", "key", "value");
 // If problem: SUP.RestoreProductV2("C:\\backup\\sup001.json", "sup001");
 ```
 
-### Pattern 3: Discover & Process All
+### Pattern 4: Discover & Process All
 ```csharp
 var products = SUP.GetAllProductsV2();
 var names = SUP.GetAllProductNamesV2();
@@ -257,7 +357,7 @@ foreach (var prod in products)
 }
 ```
 
-### Pattern 4: High-Level Apply
+### Pattern 5: High-Level Apply
 ```csharp
 SUP.LoadAndApplyProductSettingsV2("sup001", (settings) =>
 {
