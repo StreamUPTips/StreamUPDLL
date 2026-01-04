@@ -13,6 +13,7 @@ namespace StreamUP
         private static readonly object _lock = new object();
         private static readonly HashSet<string> _promptedProducts = new HashSet<string>();
         private static readonly HashSet<string> _obsWarnedProducts = new HashSet<string>();
+        private static readonly HashSet<string> _versionWarnedProducts = new HashSet<string>();
 
         /// <summary>
         /// Check if initialization prompt should be shown for a product.
@@ -101,6 +102,37 @@ namespace StreamUP
         }
 
         /// <summary>
+        /// Check if version warning should be shown for a product.
+        /// </summary>
+        /// <param name="productNumber">Product identifier</param>
+        /// <returns>True if should show warning, false if already shown this session</returns>
+        public static bool ShouldShowVersionWarning(string productNumber)
+        {
+            if (string.IsNullOrEmpty(productNumber))
+                return false;
+
+            lock (_lock)
+            {
+                return !_versionWarnedProducts.Contains(productNumber);
+            }
+        }
+
+        /// <summary>
+        /// Mark a product as having shown the version warning this session.
+        /// </summary>
+        /// <param name="productNumber">Product identifier</param>
+        public static void MarkVersionWarningShown(string productNumber)
+        {
+            if (string.IsNullOrEmpty(productNumber))
+                return;
+
+            lock (_lock)
+            {
+                _versionWarnedProducts.Add(productNumber);
+            }
+        }
+
+        /// <summary>
         /// Clear all tracking data. Use only for testing.
         /// </summary>
         internal static void ClearAllTracking()
@@ -109,6 +141,7 @@ namespace StreamUP
             {
                 _promptedProducts.Clear();
                 _obsWarnedProducts.Clear();
+                _versionWarnedProducts.Clear();
             }
         }
     }
