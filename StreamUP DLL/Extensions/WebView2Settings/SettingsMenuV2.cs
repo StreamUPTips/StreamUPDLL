@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
+using System.Linq;
 
 namespace StreamUP
 {
@@ -182,6 +183,9 @@ namespace StreamUP
                         return;
                     case "executeMethod":
                         ExecuteMethodFromWebView(message);
+                        return;
+                    case "requestObsData":
+                        RequestObsInputData(message);
                         return;
                 }
 
@@ -444,6 +448,187 @@ namespace StreamUP
             catch (Exception ex)
             {
                 _CPH.LogError("Error executing method from WebView: " + ex.Message);
+                _CPH.LogError("Stack trace: " + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// Handle requestObsData action from WebView2. Fetches OBS input/source data and sends to JavaScript.
+        /// Filters sources by type (browser, image, media, etc.) based on sourceTypeFilter parameter.
+        /// </summary>
+        private void RequestObsInputData(JObject message)
+        {
+            try
+            {
+                int obsConnection =
+                    (int?)message["obsConnection"]
+                    ?? ResolveObsConnectionIndex(GetObsConnectionStates(out _));
+                if (obsConnection < 0)
+                {
+                    _CPH.LogWarn("No active OBS connection available");
+                    var errorResponse = new
+                    {
+                        action = "obsDataUpdated",
+                        data = new
+                        {
+                            connectionStatus = "disconnected",
+                            allSources = new string[0],
+                            browserSources = new string[0],
+                            imageSources = new string[0],
+                            mediaSources = new string[0],
+                            cameraSources = new string[0],
+                            gameCapturesSources = new string[0],
+                            windowCaptureSources = new string[0],
+                            displayCaptureSources = new string[0]
+                        }
+                    };
+                    string errorJson = JsonConvert.SerializeObject(errorResponse);
+                    webView2Core?.PostWebMessageAsJson(errorJson);
+                    return;
+                }
+
+                // Fetch input list from OBS
+                string inputListResponse = _CPH.ObsSendRaw("GetInputList", "{}", obsConnection);
+                if (string.IsNullOrWhiteSpace(inputListResponse) || inputListResponse == "{}")
+                {
+                    _CPH.LogWarn("Empty response from OBS GetInputList");
+                    var emptyResponse = new
+                    {
+                        action = "obsDataUpdated",
+                        data = new
+                        {
+                            connectionStatus = "disconnected",
+                            allSources = new string[0],
+                            browserSources = new string[0],
+                            imageSources = new string[0],
+                            mediaSources = new string[0],
+                            cameraSources = new string[0],
+                            gameCapturesSources = new string[0],
+                            windowCaptureSources = new string[0],
+                            displayCaptureSources = new string[0]
+                        }
+                    };
+                    string emptyJson = JsonConvert.SerializeObject(emptyResponse);
+                    webView2Core?.PostWebMessageAsJson(emptyJson);
+                    return;
+                }
+
+                JObject inputListObj = JObject.Parse(inputListResponse);
+                var inputs = inputListObj["inputs"]?.ToObject<List<JObject>>();
+
+                if (inputs == null || inputs.Count == 0)
+                {
+                    _CPH.LogWarn("No inputs found in OBS");
+                    var noInputsResponse = new
+                    {
+                        action = "obsDataUpdated",
+                        data = new
+                        {
+                            connectionStatus = "connected",
+                            allSources = new string[0],
+                            browserSources = new string[0],
+                            imageSources = new string[0],
+                            mediaSources = new string[0],
+                            cameraSources = new string[0],
+                            gameCapturesSources = new string[0],
+                            windowCaptureSources = new string[0],
+                            displayCaptureSources = new string[0]
+                        }
+                    };
+                    string noInputsJson = JsonConvert.SerializeObject(noInputsResponse);
+                    webView2Core?.PostWebMessageAsJson(noInputsJson);
+                    return;
+                }
+
+                // Extract all source names
+                var allSources = inputs
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                // Filter by input kind
+                var browserSources = inputs
+                    .Where(i => i["inputKind"]?.ToString() == "browser_source")
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var imageSources = inputs
+                    .Where(i => i["inputKind"]?.ToString() == "image_source")
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var mediaSources = inputs
+                    .Where(
+                        i =>
+                            new[] { "ffmpeg_source", "vlc_source" }.Contains(
+                                i["inputKind"]?.ToString()
+                            )
+                    )
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var cameraSources = inputs
+                    .Where(
+                        i =>
+                            new[] { "dshow_input", "av_capture_input", "v4l2_input" }.Contains(
+                                i["inputKind"]?.ToString()
+                            )
+                    )
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var gameCapturesSources = inputs
+                    .Where(i => i["inputKind"]?.ToString() == "game_capture")
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var windowCaptureSources = inputs
+                    .Where(i => i["inputKind"]?.ToString() == "window_capture")
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                var displayCaptureSources = inputs
+                    .Where(
+                        i =>
+                            new[] { "monitor_capture", "xcomposite_input" }.Contains(
+                                i["inputKind"]?.ToString()
+                            )
+                    )
+                    .Select(i => i["inputName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList();
+
+                // Build response
+                var responseData = new
+                {
+                    action = "obsDataUpdated",
+                    data = new
+                    {
+                        connectionStatus = "connected",
+                        allSources = allSources,
+                        browserSources = browserSources,
+                        imageSources = imageSources,
+                        mediaSources = mediaSources,
+                        cameraSources = cameraSources,
+                        gameCapturesSources = gameCapturesSources,
+                        windowCaptureSources = windowCaptureSources,
+                        displayCaptureSources = displayCaptureSources
+                    }
+                };
+
+                string responseJson = JsonConvert.SerializeObject(responseData);
+                webView2Core?.PostWebMessageAsJson(responseJson);
+                _CPH.LogInfo("Sent OBS input data to WebView");
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError("Error requesting OBS input data: " + ex.Message);
                 _CPH.LogError("Stack trace: " + ex.StackTrace);
             }
         }
