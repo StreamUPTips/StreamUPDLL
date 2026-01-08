@@ -114,6 +114,9 @@ namespace StreamUP
                             webView.CoreWebView2.NavigationStarting += WebViewOnNavigationStarting;
                             webView.CoreWebView2.NewWindowRequested += WebViewOnNewWindowRequested;
                             webView.Source = new Uri($"https://viewer.streamup.tips/");
+
+                            // Save product info and obsConnection to file on menu load
+                            SaveInitialProductDataV2(_initialJson);
                         }
                         catch (Exception ex)
                         {
@@ -831,6 +834,10 @@ namespace StreamUP
                 }
 
                 _CPH.LogInfo($"Preferred OBS connection set to {preferredObsConnectionIndex}");
+
+                // Save the OBS connection to file immediately
+                SaveObsConnectionV2(_currentProductNumber, preferredObsConnectionIndex);
+
                 SendConnectionStatus();
             }
             catch (Exception ex)
@@ -1005,6 +1012,71 @@ namespace StreamUP
             catch (Exception ex)
             {
                 _CPH.LogError($"Error handling new window request: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Save initial product info and OBS connection when settings menu loads.
+        /// This ensures the current state is saved to file before user makes any changes.
+        /// </summary>
+        private void SaveInitialProductDataV2(JObject initialData)
+        {
+            try
+            {
+                if (initialData == null)
+                {
+                    _CPH.LogWarn("Initial data is null, cannot save");
+                    return;
+                }
+
+                var productInfo = initialData["productInfo"] as JObject;
+                if (productInfo == null)
+                {
+                    _CPH.LogWarn("Product info not found in initial data");
+                    return;
+                }
+
+                string productNumber = productInfo["productNumber"]?.ToString();
+                if (string.IsNullOrEmpty(productNumber))
+                {
+                    _CPH.LogWarn("Product number not found in initial data");
+                    return;
+                }
+
+                // Get current data to preserve settings
+                JObject currentData = LoadProductDataV2(productNumber);
+                if (currentData == null)
+                {
+                    currentData = new JObject();
+                }
+
+                // Update with initial product info and OBS connection
+                currentData["productInfo"] = productInfo;
+
+                // Extract obsConnection from initial data (default to 0 if not present)
+                int obsConnection = (int?)initialData["obsConnection"] ?? 0;
+                currentData["obsConnection"] = obsConnection;
+
+                // Preserve existing settings if they exist
+                if (currentData["settings"] == null)
+                {
+                    currentData["settings"] = new JObject();
+                }
+
+                // Save to file
+                if (SaveProductDataV2(productNumber, currentData))
+                {
+                    _CPH.LogInfo($"Initial product data saved on menu load for {productNumber}");
+                }
+                else
+                {
+                    _CPH.LogWarn($"Failed to save initial product data for {productNumber}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError($"Error saving initial product data: {ex.Message}");
+                _CPH.LogError($"Stack trace: {ex.StackTrace}");
             }
         }
     }
