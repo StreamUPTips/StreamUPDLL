@@ -190,6 +190,9 @@ namespace StreamUP
                     case "requestObsData":
                         RequestObsInputData(message);
                         return;
+                    case "requestObsScenes":
+                        RequestObsSceneData(message);
+                        return;
                 }
 
                 if (message?["settings"] != null)
@@ -632,6 +635,110 @@ namespace StreamUP
             catch (Exception ex)
             {
                 _CPH.LogError("Error requesting OBS input data: " + ex.Message);
+                _CPH.LogError("Stack trace: " + ex.StackTrace);
+            }
+        }
+
+        /// <summary>
+        /// Handle requestObsScenes action from WebView2. Fetches OBS scene list and sends to JavaScript.
+        /// Filters out groups to return only actual scenes.
+        /// </summary>
+        private void RequestObsSceneData(JObject message)
+        {
+            try
+            {
+                _CPH.LogInfo("RequestObsSceneData called");
+                int obsConnection =
+                    (int?)message["obsConnection"]
+                    ?? ResolveObsConnectionIndex(GetObsConnectionStates(out _));
+
+                _CPH.LogInfo($"Resolved OBS connection: {obsConnection}");
+
+                if (obsConnection < 0)
+                {
+                    _CPH.LogWarn("No active OBS connection available");
+                    var errorResponse = new
+                    {
+                        action = "obsScenesUpdated",
+                        data = new
+                        {
+                            connectionStatus = "disconnected",
+                            scenes = new string[0]
+                        }
+                    };
+                    string errorJson = JsonConvert.SerializeObject(errorResponse);
+                    webView2Core?.PostWebMessageAsJson(errorJson);
+                    return;
+                }
+
+                // Use existing GetObsSceneList method
+                if (!GetObsSceneList(obsConnection, out JObject sceneList))
+                {
+                    _CPH.LogWarn("Failed to retrieve scene list from OBS");
+                    var emptyResponse = new
+                    {
+                        action = "obsScenesUpdated",
+                        data = new
+                        {
+                            connectionStatus = "connected",
+                            scenes = new string[0]
+                        }
+                    };
+                    string emptyJson = JsonConvert.SerializeObject(emptyResponse);
+                    webView2Core?.PostWebMessageAsJson(emptyJson);
+                    return;
+                }
+
+                var scenes = sceneList["scenes"]?.ToObject<List<JObject>>();
+                if (scenes == null || scenes.Count == 0)
+                {
+                    _CPH.LogInfo("No scenes found in OBS");
+                    var noScenesResponse = new
+                    {
+                        action = "obsScenesUpdated",
+                        data = new
+                        {
+                            connectionStatus = "connected",
+                            scenes = new string[0]
+                        }
+                    };
+                    string noScenesJson = JsonConvert.SerializeObject(noScenesResponse);
+                    webView2Core?.PostWebMessageAsJson(noScenesJson);
+                    return;
+                }
+
+                // Filter out groups (isGroup: true) - user wants scenes only
+                var nonGroupScenes = scenes
+                    .Where(s =>
+                    {
+                        bool? isGroup = (bool?)s["isGroup"];
+                        return !isGroup.HasValue || !isGroup.Value;
+                    })
+                    .Select(s => s["sceneName"]?.ToString())
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .OrderBy(n => n) // Sort alphabetically
+                    .ToList();
+
+                // Build and send response
+                _CPH.LogInfo($"Sending {nonGroupScenes.Count} scenes to WebView: {string.Join(", ", nonGroupScenes)}");
+                var responseData = new
+                {
+                    action = "obsScenesUpdated",
+                    data = new
+                    {
+                        connectionStatus = "connected",
+                        scenes = nonGroupScenes
+                    }
+                };
+
+                string responseJson = JsonConvert.SerializeObject(responseData);
+                _CPH.LogInfo($"Response JSON: {responseJson}");
+                webView2Core?.PostWebMessageAsJson(responseJson);
+                _CPH.LogInfo($"Message posted to WebView");
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError("Error requesting OBS scene data: " + ex.Message);
                 _CPH.LogError("Stack trace: " + ex.StackTrace);
             }
         }
