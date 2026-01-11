@@ -94,7 +94,11 @@
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
     <Compile Include="Extensions\AndiExtensions\*.cs" />
     <Compile Include="Extensions\WebView2Settings\*.cs" />
-
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\StreamUp-icon.png">
+      <LogicalName>StreamUP.Resources.StreamUp-icon.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
