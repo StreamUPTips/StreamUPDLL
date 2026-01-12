@@ -230,9 +230,9 @@ namespace StreamUP
                     {
                         isConnected = _CPH.ObsIsConnected(i);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Connection doesn't exist or error checking
+                        LogDebug($"Could not check OBS connection {i}: {ex.Message}");
                     }
 
                     connections.Add(new JObject

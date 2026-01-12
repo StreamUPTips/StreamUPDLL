@@ -14,7 +14,6 @@ namespace StreamUP
 
         // WM_NCHITTEST return values
         private const int HTCLIENT = 1;
-        private const int HTCAPTION = 2;
         private const int HTLEFT = 10;
         private const int HTRIGHT = 11;
         private const int HTTOP = 12;
@@ -25,7 +24,6 @@ namespace StreamUP
         private const int HTBOTTOMRIGHT = 17;
 
         private const int WM_NCHITTEST = 0x84;
-        private const int WM_NCLBUTTONDOWN = 0xA1;
 
         protected override void WndProc(ref Message m)
         {

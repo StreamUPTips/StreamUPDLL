@@ -17,7 +17,6 @@ namespace StreamUP
         // Static window instance - only one settings window allowed at a time
         private static Form _settingsWindow;
         private static WebView2 _webView;
-        private static bool _webViewInitialized = false;
 
         // Current session state
         private static bool _hasUnsavedChanges = false;
@@ -106,8 +105,8 @@ namespace StreamUP
                 targetHeight = Math.Min(Math.Max((int)(screenSize.Height * 0.8), 600), 1000);
             }
 
-            // Create the form - using Form with borderless style
-            _settingsWindow = new Form
+            // Create the form - using BorderlessForm for resize support
+            _settingsWindow = new BorderlessForm
             {
                 Text = "StreamUP Settings",
                 Width = targetWidth,
@@ -204,7 +203,6 @@ namespace StreamUP
                 // Set up message handler for communication from viewer
                 _webView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
 
-                _webViewInitialized = true;
                 LogInfo("WebView2 initialized successfully");
             }
             catch (Exception ex)
@@ -329,7 +327,6 @@ namespace StreamUP
             }
 
             // Clean up
-            _webViewInitialized = false;
             _hasUnsavedChanges = false;
             _currentConfig = null;
             _currentSavedSettings = null;
