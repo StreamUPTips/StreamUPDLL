@@ -33,8 +33,8 @@ namespace StreamUP
         private static FormWindowState _lastWindowState = FormWindowState.Normal;
 
         // Viewer URL - always use production
-        //private const string VIEWER_URL = "https://viewer.streamup.tips/";
-        private const string VIEWER_URL = "http://localhost:8080/";
+        private const string VIEWER_URL = "https://viewer.streamup.tips/";
+        //private const string VIEWER_URL = "http://localhost:8080/";
 
         /// <summary>
         /// Creates and shows the WebView2 settings window
