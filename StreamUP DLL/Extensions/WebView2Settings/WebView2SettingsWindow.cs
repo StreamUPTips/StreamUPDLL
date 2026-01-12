@@ -33,7 +33,8 @@ namespace StreamUP
         private static FormWindowState _lastWindowState = FormWindowState.Normal;
 
         // Viewer URL - always use production
-        private const string VIEWER_URL = "https://viewer.streamup.tips/";
+        //private const string VIEWER_URL = "https://viewer.streamup.tips/";
+        private const string VIEWER_URL = "http://localhost:8080/";
 
         /// <summary>
         /// Creates and shows the WebView2 settings window
@@ -46,12 +47,15 @@ namespace StreamUP
             if (_settingsWindow != null && !_settingsWindow.IsDisposed)
             {
                 LogInfo("Settings window already open, bringing to front");
-                _settingsWindow.Invoke((MethodInvoker)delegate
-                {
-                    _settingsWindow.WindowState = FormWindowState.Normal;
-                    _settingsWindow.Activate();
-                    _settingsWindow.BringToFront();
-                });
+                _settingsWindow.Invoke(
+                    (MethodInvoker)
+                        delegate
+                        {
+                            _settingsWindow.WindowState = FormWindowState.Normal;
+                            _settingsWindow.Activate();
+                            _settingsWindow.BringToFront();
+                        }
+                );
                 return Task.CompletedTask;
             }
 
@@ -86,7 +90,8 @@ namespace StreamUP
         {
             // Calculate smart window size based on screen dimensions
             var screenSize = Screen.PrimaryScreen.WorkingArea;
-            int targetWidth, targetHeight;
+            int targetWidth,
+                targetHeight;
 
             if (_lastWindowSize.HasValue)
             {
@@ -120,9 +125,12 @@ namespace StreamUP
             {
                 var loc = _lastWindowLocation.Value;
                 // Make sure window is visible on screen
-                if (loc.X >= 0 && loc.Y >= 0 &&
-                    loc.X < screenSize.Width - 100 &&
-                    loc.Y < screenSize.Height - 100)
+                if (
+                    loc.X >= 0
+                    && loc.Y >= 0
+                    && loc.X < screenSize.Width - 100
+                    && loc.Y < screenSize.Height - 100
+                )
                 {
                     _settingsWindow.Location = loc;
                 }
@@ -143,10 +151,7 @@ namespace StreamUP
             _settingsWindow.Resize += OnSettingsWindowResize;
 
             // Create WebView2 control
-            _webView = new WebView2
-            {
-                Dock = DockStyle.Fill
-            };
+            _webView = new WebView2 { Dock = DockStyle.Fill };
             _settingsWindow.Controls.Add(_webView);
 
             // Initialize WebView2 and navigate when form is shown
@@ -185,9 +190,7 @@ namespace StreamUP
 
                 var cachePath = Path.Combine(dataPath, "WebView2Cache");
 
-                var env = await CoreWebView2Environment.CreateAsync(
-                    userDataFolder: cachePath
-                );
+                var env = await CoreWebView2Environment.CreateAsync(userDataFolder: cachePath);
 
                 await _webView.EnsureCoreWebView2Async(env);
 
@@ -230,7 +233,9 @@ namespace StreamUP
                 }
                 else
                 {
-                    navigationCompleted.TrySetException(new Exception($"Navigation failed: {e.WebErrorStatus}"));
+                    navigationCompleted.TrySetException(
+                        new Exception($"Navigation failed: {e.WebErrorStatus}")
+                    );
                 }
             }
 
@@ -243,13 +248,16 @@ namespace StreamUP
             if (!success)
             {
                 LogError("Navigation to viewer failed");
-                throw new Exception("Failed to load settings viewer. Please check your internet connection.");
+                throw new Exception(
+                    "Failed to load settings viewer. Please check your internet connection."
+                );
             }
 
             // Build product data (includes OBS instance number from saved settings)
             var productData = new JObject
             {
-                ["obsInstanceNumber"] = _currentSavedSettings?["productData"]?["obsInstanceNumber"] ?? 0
+                ["obsInstanceNumber"] =
+                    _currentSavedSettings?["productData"]?["obsInstanceNumber"] ?? 0
             };
 
             // Inject all data into the viewer
@@ -258,7 +266,8 @@ namespace StreamUP
             var productDataJson = productData.ToString(Formatting.None);
             var liveDataJson = _currentLiveData?.ToString(Formatting.None) ?? "{}";
 
-            var initScript = $@"
+            var initScript =
+                $@"
                 window.STREAMUP_MODE = 'production';
                 window.STREAMUP_CONFIG = {configJson};
                 window.STREAMUP_SAVED_SETTINGS = {savedSettingsJson};
@@ -336,10 +345,20 @@ namespace StreamUP
         #region Window Styling and Controls
 
         [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        private static extern int DwmSetWindowAttribute(
+            IntPtr hwnd,
+            int attr,
+            ref int attrValue,
+            int attrSize
+        );
 
         [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+        private static extern IntPtr SendMessage(
+            IntPtr hWnd,
+            int msg,
+            IntPtr wParam,
+            IntPtr lParam
+        );
 
         [DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
@@ -355,11 +374,19 @@ namespace StreamUP
         {
             if (_settingsWindow != null && !_settingsWindow.IsDisposed)
             {
-                _settingsWindow.Invoke((MethodInvoker)delegate
-                {
-                    ReleaseCapture();
-                    SendMessage(_settingsWindow.Handle, WM_NCLBUTTONDOWN, (IntPtr)HT_CAPTION, IntPtr.Zero);
-                });
+                _settingsWindow.Invoke(
+                    (MethodInvoker)
+                        delegate
+                        {
+                            ReleaseCapture();
+                            SendMessage(
+                                _settingsWindow.Handle,
+                                WM_NCLBUTTONDOWN,
+                                (IntPtr)HT_CAPTION,
+                                IntPtr.Zero
+                            );
+                        }
+                );
             }
         }
 
@@ -370,10 +397,13 @@ namespace StreamUP
         {
             if (_settingsWindow != null && !_settingsWindow.IsDisposed)
             {
-                _settingsWindow.Invoke((MethodInvoker)delegate
-                {
-                    _settingsWindow.WindowState = FormWindowState.Minimized;
-                });
+                _settingsWindow.Invoke(
+                    (MethodInvoker)
+                        delegate
+                        {
+                            _settingsWindow.WindowState = FormWindowState.Minimized;
+                        }
+                );
             }
         }
 
@@ -384,17 +414,20 @@ namespace StreamUP
         {
             if (_settingsWindow != null && !_settingsWindow.IsDisposed)
             {
-                _settingsWindow.Invoke((MethodInvoker)delegate
-                {
-                    if (_settingsWindow.WindowState == FormWindowState.Maximized)
-                    {
-                        _settingsWindow.WindowState = FormWindowState.Normal;
-                    }
-                    else
-                    {
-                        _settingsWindow.WindowState = FormWindowState.Maximized;
-                    }
-                });
+                _settingsWindow.Invoke(
+                    (MethodInvoker)
+                        delegate
+                        {
+                            if (_settingsWindow.WindowState == FormWindowState.Maximized)
+                            {
+                                _settingsWindow.WindowState = FormWindowState.Normal;
+                            }
+                            else
+                            {
+                                _settingsWindow.WindowState = FormWindowState.Maximized;
+                            }
+                        }
+                );
             }
         }
 
@@ -406,7 +439,9 @@ namespace StreamUP
             if (_settingsWindow == null || _settingsWindow.IsDisposed)
                 return "normal";
 
-            return _settingsWindow.WindowState == FormWindowState.Maximized ? "maximized" : "normal";
+            return _settingsWindow.WindowState == FormWindowState.Maximized
+                ? "maximized"
+                : "normal";
         }
 
         // Window corner preference for Windows 11
@@ -421,7 +456,12 @@ namespace StreamUP
             try
             {
                 int preference = DWMWCP_ROUND;
-                DwmSetWindowAttribute(handle, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+                DwmSetWindowAttribute(
+                    handle,
+                    DWMWA_WINDOW_CORNER_PREFERENCE,
+                    ref preference,
+                    sizeof(int)
+                );
                 LogDebug("Rounded corners applied");
             }
             catch (Exception ex)
@@ -439,7 +479,11 @@ namespace StreamUP
             {
                 // First, try to load from embedded resources (most reliable)
                 var assembly = typeof(StreamUpLib).Assembly;
-                using (var stream = assembly.GetManifestResourceStream("StreamUP.Resources.StreamUp-icon.png"))
+                using (
+                    var stream = assembly.GetManifestResourceStream(
+                        "StreamUP.Resources.StreamUp-icon.png"
+                    )
+                )
                 {
                     if (stream != null)
                     {
@@ -455,9 +499,18 @@ namespace StreamUP
                 // Fallback: Try file paths
                 var possiblePaths = new[]
                 {
-                    Path.Combine(Path.GetDirectoryName(assembly.Location), "Resources", "StreamUp-icon.png"),
+                    Path.Combine(
+                        Path.GetDirectoryName(assembly.Location),
+                        "Resources",
+                        "StreamUp-icon.png"
+                    ),
                     Path.Combine(Path.GetDirectoryName(assembly.Location), "StreamUp-icon.png"),
-                    Path.Combine(GetStreamerBotFolder(), "StreamUP", "Resources", "StreamUp-icon.png"),
+                    Path.Combine(
+                        GetStreamerBotFolder(),
+                        "StreamUP",
+                        "Resources",
+                        "StreamUp-icon.png"
+                    ),
                 };
 
                 foreach (var iconPath in possiblePaths)

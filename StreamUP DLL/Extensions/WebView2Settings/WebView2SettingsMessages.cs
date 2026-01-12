@@ -75,6 +75,14 @@ namespace StreamUP
                         StartWindowDrag();
                         break;
 
+                    case "runAction":
+                        HandleRunActionMessage(message);
+                        break;
+
+                    case "executeMethod":
+                        HandleExecuteMethodMessage(message);
+                        break;
+
                     default:
                         LogDebug($"Unknown message action: {action}");
                         break;
@@ -312,6 +320,83 @@ namespace StreamUP
                 default:
                     LogInfo($"[Viewer] {logMessage}");
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Handle run action request from viewer
+        /// </summary>
+        private void HandleRunActionMessage(JObject message)
+        {
+            var callbackId = message["callbackId"]?.ToString();
+            var actionId = message["actionId"]?.ToString();
+            var actionName = message["actionName"]?.ToString();
+
+            LogInfo($"Run action requested - ID: {actionId}, Name: {actionName}");
+
+            try
+            {
+                bool success = false;
+
+                // Prefer ID if available, otherwise use name
+                if (!string.IsNullOrEmpty(actionId))
+                {
+                    // Run by ID
+                    success = _CPH.RunActionById(actionId, true);
+                    LogInfo($"RunActionById({actionId}) = {success}");
+                }
+                else if (!string.IsNullOrEmpty(actionName))
+                {
+                    // Run by name
+                    success = _CPH.RunAction(actionName, true);
+                    LogInfo($"RunAction({actionName}) = {success}");
+                }
+                else
+                {
+                    LogError("No action ID or name provided");
+                    SendToViewer(new { action = "runActionResult", callbackId, success = false, error = "No action ID or name provided" });
+                    return;
+                }
+
+                SendToViewer(new { action = "runActionResult", callbackId, success });
+            }
+            catch (Exception ex)
+            {
+                LogError($"Run action failed: {ex.Message}");
+                SendToViewer(new { action = "runActionResult", callbackId, success = false, error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Handle execute method request from viewer
+        /// </summary>
+        private void HandleExecuteMethodMessage(JObject message)
+        {
+            var callbackId = message["callbackId"]?.ToString();
+            var codeId = message["codeId"]?.ToString();
+            var methodName = message["methodName"]?.ToString() ?? "Execute";
+
+            LogInfo($"Execute method requested - CodeId: {codeId}, Method: {methodName}");
+
+            try
+            {
+                if (string.IsNullOrEmpty(codeId))
+                {
+                    LogError("No execute code ID provided");
+                    SendToViewer(new { action = "executeMethodResult", callbackId, success = false, error = "No execute code ID provided" });
+                    return;
+                }
+
+                // Execute the method in the named Execute Code sub-action
+                bool success = _CPH.ExecuteMethod(codeId, methodName);
+                LogInfo($"ExecuteMethod({codeId}, {methodName}) = {success}");
+
+                SendToViewer(new { action = "executeMethodResult", callbackId, success });
+            }
+            catch (Exception ex)
+            {
+                LogError($"Execute method failed: {ex.Message}");
+                SendToViewer(new { action = "executeMethodResult", callbackId, success = false, error = ex.Message });
             }
         }
 
