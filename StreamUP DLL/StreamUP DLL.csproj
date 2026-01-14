@@ -93,11 +93,11 @@
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
     <Compile Include="Extensions\AndiExtensions\*.cs" />
-    <Compile Include="Extensions\WebView2Settings\*.cs" />
-    <Compile Include="Extensions\ProductSystemV2\*.cs" />
-    <Compile Include="Extensions\ProductSystemV2\Initialization\*.cs" />
-    <Compile Include="Extensions\ProductSystemV2\Validation\*.cs" />
-    <Compile Include="Extensions\ProductSystemV2\UI\*.cs" />
+    <Compile Include="Core\Settings\*.cs" />
+    <Compile Include="Core\ProductSystem\*.cs" />
+    <Compile Include="Core\ProductSystem\Initialization\*.cs" />
+    <Compile Include="Core\ProductSystem\Validation\*.cs" />
+    <Compile Include="Core\ProductSystem\UI\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\StreamUp-icon.png">
