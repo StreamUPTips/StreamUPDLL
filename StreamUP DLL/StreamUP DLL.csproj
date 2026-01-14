@@ -94,6 +94,7 @@
     <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
     <Compile Include="Extensions\AndiExtensions\*.cs" />
     <Compile Include="Extensions\WebView2Settings\*.cs" />
+    <Compile Include="Extensions\ProductSystemV2\*.cs" />
     <Compile Include="Extensions\ProductSystemV2\Initialization\*.cs" />
     <Compile Include="Extensions\ProductSystemV2\Validation\*.cs" />
     <Compile Include="Extensions\ProductSystemV2\UI\*.cs" />

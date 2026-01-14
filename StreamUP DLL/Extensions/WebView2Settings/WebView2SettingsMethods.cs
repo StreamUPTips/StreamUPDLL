@@ -7,7 +7,8 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         /// <summary>
-        /// Opens the WebView2 settings menu for a product
+        /// Opens the WebView2 settings menu for a product.
+        /// This method also auto-registers the product config for use by IsProductReady() in Main actions.
         /// </summary>
         /// <param name="settingsConfig">JObject containing the settings menu configuration (from product)</param>
         /// <returns>True if settings window opened successfully</returns>
@@ -50,6 +51,14 @@ namespace StreamUP
                 // Extract product info
                 _currentProductNumber = settingsConfig["productNumber"]?.ToString() ?? _ProductIdentifier;
                 _currentConfig = settingsConfig;
+
+                // AUTO-REGISTER: Store the product config for future use by IsProductReady()
+                // This enables the simplified workflow where Main actions don't need the JSON
+                ProductConfigRegistry.RegisterProduct(_currentProductNumber, settingsConfig);
+                LogDebug($"Auto-registered product config for: {_currentProductNumber}");
+
+                // INVALIDATE: Clear validation cache since user might change settings
+                ProductValidationCache.InvalidateCache(_currentProductNumber);
 
                 // Update window title with product name
                 var productName = settingsConfig["productName"]?.ToString() ?? "Settings";
