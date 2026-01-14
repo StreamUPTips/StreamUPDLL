@@ -72,6 +72,21 @@ namespace StreamUP
         public bool ObsSetSceneItemEnabled(string sceneName, int sceneItemId, bool visible, int connection = 0)
             => ObsSendRequestNoResponse("SetSceneItemEnabled", new { sceneName, sceneItemId, sceneItemEnabled = visible }, connection);
 
+        /// <summary>
+        /// Toggles the visibility of a source in a scene.
+        /// </summary>
+        /// <param name="sceneName">Name of the scene</param>
+        /// <param name="sourceName">Name of the source</param>
+        /// <param name="connection">OBS connection index (0-4)</param>
+        /// <returns>New visibility state (true if now visible), or null if failed</returns>
+        public bool? ObsToggleSourceVisibility(string sceneName, string sourceName, int connection = 0)
+        {
+            bool currentState = ObsIsSourceVisible(sceneName, sourceName, connection);
+            if (ObsSetSourceVisibility(sceneName, sourceName, !currentState, connection))
+                return !currentState;
+            return null;
+        }
+
         #endregion
 
         #region Transform
@@ -90,6 +105,16 @@ namespace StreamUP
             var response = ObsSendRequest("GetSceneItemTransform", new { sceneName, sceneItemId }, connection);
             return response?["sceneItemTransform"] as JObject;
         }
+
+        /// <summary>
+        /// Gets the transform data for a scene item (alias for ObsGetSourceTransform).
+        /// </summary>
+        /// <param name="sceneName">Name of the scene</param>
+        /// <param name="sourceName">Name of the source</param>
+        /// <param name="connection">OBS connection index (0-4)</param>
+        /// <returns>Transform data as JObject, or null if not found</returns>
+        public JObject ObsGetSceneItemTransform(string sceneName, string sourceName, int connection = 0)
+            => ObsGetSourceTransform(sceneName, sourceName, connection);
 
         /// <summary>
         /// Sets the transform data for a source in a scene.

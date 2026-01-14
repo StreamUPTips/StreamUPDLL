@@ -98,6 +98,7 @@
     <Compile Include="Core\ProductSystem\Validation\*.cs" />
     <Compile Include="Core\ProductSystem\UI\*.cs" />
     <Compile Include="Core\Obs\*.cs" />
+    <!-- Note: Core\Obs\Tests\ contains example code for Streamer.bot, not compiled -->
     <!-- Legacy extensions (backwards compatibility only) -->
     <Compile Include="_LegacyExtensions\**\*.cs" />
   </ItemGroup>

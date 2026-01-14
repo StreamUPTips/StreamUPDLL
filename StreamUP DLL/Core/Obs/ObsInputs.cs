@@ -132,6 +132,15 @@ namespace StreamUP
         }
 
         /// <summary>
+        /// Gets the mute state of an input (alias for ObsIsInputMuted).
+        /// </summary>
+        /// <param name="inputName">Name of the input</param>
+        /// <param name="connection">OBS connection index (0-4)</param>
+        /// <returns>True if muted, false if unmuted or not found</returns>
+        public bool ObsGetInputMute(string inputName, int connection = 0)
+            => ObsIsInputMuted(inputName, connection);
+
+        /// <summary>
         /// Sets the mute state of an input.
         /// </summary>
         /// <param name="inputName">Name of the input</param>

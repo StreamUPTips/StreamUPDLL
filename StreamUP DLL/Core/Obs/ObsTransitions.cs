@@ -54,6 +54,14 @@ namespace StreamUP
         }
 
         /// <summary>
+        /// Gets the name of the current transition (alias for ObsGetCurrentSceneTransitionName).
+        /// </summary>
+        /// <param name="connection">OBS connection index (0-4)</param>
+        /// <returns>Transition name, or null if failed</returns>
+        public string ObsGetCurrentTransitionName(int connection = 0)
+            => ObsGetCurrentSceneTransitionName(connection);
+
+        /// <summary>
         /// Sets the current scene transition.
         /// </summary>
         /// <param name="transitionName">Name of the transition to use</param>
@@ -72,6 +80,14 @@ namespace StreamUP
             var response = ObsGetCurrentSceneTransition(connection);
             return response?["transitionDuration"]?.Value<int>();
         }
+
+        /// <summary>
+        /// Gets the duration of the current transition (alias for ObsGetCurrentSceneTransitionDuration).
+        /// </summary>
+        /// <param name="connection">OBS connection index (0-4)</param>
+        /// <returns>Duration in milliseconds, or null if failed or transition has fixed duration</returns>
+        public int? ObsGetCurrentTransitionDuration(int connection = 0)
+            => ObsGetCurrentSceneTransitionDuration(connection);
 
         /// <summary>
         /// Sets the duration of the current scene transition.
