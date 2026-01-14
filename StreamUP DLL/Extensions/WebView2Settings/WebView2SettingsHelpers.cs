@@ -392,7 +392,13 @@ namespace StreamUP
                     return new T();
                 }
 
-                return settingsObj.ToObject<T>() ?? new T();
+                // Use Replace for object creation to prevent array merging with defaults
+                var serializer = new JsonSerializer
+                {
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+                return settingsObj.ToObject<T>(serializer) ?? new T();
             }
             catch (Exception ex)
             {
