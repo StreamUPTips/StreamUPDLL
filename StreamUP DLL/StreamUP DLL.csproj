@@ -98,6 +98,8 @@
     <Compile Include="Core\ProductSystem\Initialization\*.cs" />
     <Compile Include="Core\ProductSystem\Validation\*.cs" />
     <Compile Include="Core\ProductSystem\UI\*.cs" />
+    <!-- Legacy extensions (backwards compatibility only) -->
+    <Compile Include="_LegacyExtensions\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\StreamUp-icon.png">
