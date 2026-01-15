@@ -82,7 +82,8 @@ public class CPHInline
         {
             passed++;
             var msg = $"✓ PASS: {test}";
-            if (!string.IsNullOrEmpty(detail)) msg += $" ({detail})";
+            if (!string.IsNullOrEmpty(detail))
+                msg += $" ({detail})";
             Log(msg);
         }
 
@@ -133,27 +134,41 @@ public class CPHInline
                     var wsVer = version["obsWebSocketVersion"]?.ToString();
                     Pass("ObsGetVersion", $"OBS {obsVer}, WS {wsVer}");
                 }
-                else Fail("ObsGetVersion", "Returned null");
+                else
+                    Fail("ObsGetVersion", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetVersion", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetVersion", ex.Message);
+            }
 
             // GetObsVersion
             try
             {
                 var obsVer = SUP.ObsGetObsVersion();
-                if (!string.IsNullOrEmpty(obsVer)) Pass("ObsGetObsVersion", obsVer);
-                else Fail("ObsGetObsVersion", "Returned null/empty");
+                if (!string.IsNullOrEmpty(obsVer))
+                    Pass("ObsGetObsVersion", obsVer);
+                else
+                    Fail("ObsGetObsVersion", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetObsVersion", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetObsVersion", ex.Message);
+            }
 
             // GetWebSocketVersion
             try
             {
                 var wsVer = SUP.ObsGetWebSocketVersion();
-                if (!string.IsNullOrEmpty(wsVer)) Pass("ObsGetWebSocketVersion", wsVer);
-                else Fail("ObsGetWebSocketVersion", "Returned null/empty");
+                if (!string.IsNullOrEmpty(wsVer))
+                    Pass("ObsGetWebSocketVersion", wsVer);
+                else
+                    Fail("ObsGetWebSocketVersion", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetWebSocketVersion", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetWebSocketVersion", ex.Message);
+            }
 
             // GetStats
             try
@@ -164,45 +179,69 @@ public class CPHInline
                     var fps = stats["activeFps"]?.Value<double>();
                     Pass("ObsGetStats", $"FPS: {fps:F1}");
                 }
-                else Fail("ObsGetStats", "Returned null");
+                else
+                    Fail("ObsGetStats", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetStats", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetStats", ex.Message);
+            }
 
             // GetCpuUsage
             try
             {
                 var cpu = SUP.ObsGetCpuUsage();
-                if (cpu.HasValue) Pass("ObsGetCpuUsage", $"{cpu:F1}%");
-                else Fail("ObsGetCpuUsage", "Returned null");
+                if (cpu.HasValue)
+                    Pass("ObsGetCpuUsage", $"{cpu:F1}%");
+                else
+                    Fail("ObsGetCpuUsage", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetCpuUsage", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCpuUsage", ex.Message);
+            }
 
             // GetMemoryUsage
             try
             {
                 var mem = SUP.ObsGetMemoryUsage();
-                if (mem.HasValue) Pass("ObsGetMemoryUsage", $"{mem:F1} MB");
-                else Fail("ObsGetMemoryUsage", "Returned null");
+                if (mem.HasValue)
+                    Pass("ObsGetMemoryUsage", $"{mem:F1} MB");
+                else
+                    Fail("ObsGetMemoryUsage", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetMemoryUsage", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetMemoryUsage", ex.Message);
+            }
 
             // GetActiveFps
             try
             {
                 var fps = SUP.ObsGetActiveFps();
-                if (fps.HasValue) Pass("ObsGetActiveFps", $"{fps:F1}");
-                else Fail("ObsGetActiveFps", "Returned null");
+                if (fps.HasValue)
+                    Pass("ObsGetActiveFps", $"{fps:F1}");
+                else
+                    Fail("ObsGetActiveFps", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetActiveFps", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetActiveFps", ex.Message);
+            }
 
             // GetHotkeyList
             try
             {
                 var hotkeys = SUP.ObsGetHotkeyList();
-                if (hotkeys != null) Pass("ObsGetHotkeyList", $"{hotkeys.Count} hotkeys");
-                else Fail("ObsGetHotkeyList", "Returned null");
+                if (hotkeys != null)
+                    Pass("ObsGetHotkeyList", $"{hotkeys.Count} hotkeys");
+                else
+                    Fail("ObsGetHotkeyList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetHotkeyList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetHotkeyList", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // SCENE MANAGEMENT
@@ -215,51 +254,79 @@ public class CPHInline
                 originalScene = SUP.ObsGetCurrentScene();
                 Pass("ObsGetCurrentScene", originalScene ?? "(none)");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentScene", ex.Message);
+            }
 
             // GetSceneList
             try
             {
                 var scenes = SUP.ObsGetSceneList();
-                if (scenes != null) Pass("ObsGetSceneList", $"{scenes.Count} scenes");
-                else Fail("ObsGetSceneList", "Returned null");
+                if (scenes != null)
+                    Pass("ObsGetSceneList", $"{scenes.Count} scenes");
+                else
+                    Fail("ObsGetSceneList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSceneList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneList", ex.Message);
+            }
 
             // CreateScene
             try
             {
                 var uuid = SUP.ObsCreateScene(TEST_SCENE);
-                if (!string.IsNullOrEmpty(uuid)) Pass("ObsCreateScene", $"UUID: {uuid.Substring(0, 8)}...");
-                else Fail("ObsCreateScene", "Returned null/empty UUID");
+                if (!string.IsNullOrEmpty(uuid))
+                    Pass("ObsCreateScene", $"UUID: {uuid.Substring(0, 8)}...");
+                else
+                    Fail("ObsCreateScene", "Returned null/empty UUID");
             }
-            catch (Exception ex) { Fail("ObsCreateScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateScene", ex.Message);
+            }
 
             // CreateScene (second scene)
             try
             {
                 var uuid = SUP.ObsCreateScene(TEST_SCENE_2);
-                if (!string.IsNullOrEmpty(uuid)) Pass("ObsCreateScene (2nd)", $"UUID: {uuid.Substring(0, 8)}...");
-                else Fail("ObsCreateScene (2nd)", "Returned null/empty UUID");
+                if (!string.IsNullOrEmpty(uuid))
+                    Pass("ObsCreateScene (2nd)", $"UUID: {uuid.Substring(0, 8)}...");
+                else
+                    Fail("ObsCreateScene (2nd)", "Returned null/empty UUID");
             }
-            catch (Exception ex) { Fail("ObsCreateScene (2nd)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateScene (2nd)", ex.Message);
+            }
 
             // SetCurrentScene
             try
             {
-                if (SUP.ObsSetCurrentScene(TEST_SCENE)) Pass("ObsSetCurrentScene", TEST_SCENE);
-                else Fail("ObsSetCurrentScene", "Returned false");
+                if (SUP.ObsSetCurrentScene(TEST_SCENE))
+                    Pass("ObsSetCurrentScene", TEST_SCENE);
+                else
+                    Fail("ObsSetCurrentScene", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetCurrentScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetCurrentScene", ex.Message);
+            }
 
             // GetCurrentScene (verify switch)
             try
             {
                 var current = SUP.ObsGetCurrentScene();
-                if (current == TEST_SCENE) Pass("ObsGetCurrentScene (verify)", "Scene switched correctly");
-                else Fail("ObsGetCurrentScene (verify)", $"Expected {TEST_SCENE}, got {current}");
+                if (current == TEST_SCENE)
+                    Pass("ObsGetCurrentScene (verify)", "Scene switched correctly");
+                else
+                    Fail("ObsGetCurrentScene (verify)", $"Expected {TEST_SCENE}, got {current}");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentScene (verify)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentScene (verify)", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // INPUT/SOURCE CREATION
@@ -270,49 +337,96 @@ public class CPHInline
             try
             {
                 var inputs = SUP.ObsGetInputList();
-                if (inputs != null) Pass("ObsGetInputList", $"{inputs.Count} inputs");
-                else Fail("ObsGetInputList", "Returned null");
+                if (inputs != null)
+                    Pass("ObsGetInputList", $"{inputs.Count} inputs");
+                else
+                    Fail("ObsGetInputList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetInputList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetInputList", ex.Message);
+            }
 
             // GetInputKindList
             try
             {
                 var kinds = SUP.ObsGetInputKindList();
-                if (kinds != null) Pass("ObsGetInputKindList", $"{kinds.Count} input kinds");
-                else Fail("ObsGetInputKindList", "Returned null");
+                if (kinds != null)
+                    Pass("ObsGetInputKindList", $"{kinds.Count} input kinds");
+                else
+                    Fail("ObsGetInputKindList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetInputKindList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetInputKindList", ex.Message);
+            }
 
             // CreateInput - Text Source
             try
             {
-                var result = SUP.ObsCreateInput(TEST_SCENE, TEST_TEXT_SOURCE, "text_gdiplus_v3",
-                    new { text = "Hello from test!" });
-                if (result != null) Pass("ObsCreateInput (Text)", $"ID: {result["sceneItemId"]}");
-                else Fail("ObsCreateInput (Text)", "Returned null");
+                var result = SUP.ObsCreateInput(
+                    TEST_SCENE,
+                    TEST_TEXT_SOURCE,
+                    "text_gdiplus_v3",
+                    new { text = "Hello from test!" }
+                );
+                if (result != null)
+                    Pass("ObsCreateInput (Text)", $"ID: {result["sceneItemId"]}");
+                else
+                    Fail("ObsCreateInput (Text)", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsCreateInput (Text)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateInput (Text)", ex.Message);
+            }
 
             // CreateInput - Color Source
             try
             {
-                var result = SUP.ObsCreateInput(TEST_SCENE, TEST_COLOR_SOURCE, "color_source_v3",
-                    new { color = 0xFF0000FF, width = 200, height = 200 });
-                if (result != null) Pass("ObsCreateInput (Color)", $"ID: {result["sceneItemId"]}");
-                else Fail("ObsCreateInput (Color)", "Returned null");
+                var result = SUP.ObsCreateInput(
+                    TEST_SCENE,
+                    TEST_COLOR_SOURCE,
+                    "color_source_v3",
+                    new
+                    {
+                        color = 0xFF0000FF,
+                        width = 200,
+                        height = 200
+                    }
+                );
+                if (result != null)
+                    Pass("ObsCreateInput (Color)", $"ID: {result["sceneItemId"]}");
+                else
+                    Fail("ObsCreateInput (Color)", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsCreateInput (Color)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateInput (Color)", ex.Message);
+            }
 
             // CreateInput - Browser Source
             try
             {
-                var result = SUP.ObsCreateInput(TEST_SCENE, TEST_BROWSER_SOURCE, "browser_source",
-                    new { url = "https://example.com", width = 800, height = 600 });
-                if (result != null) Pass("ObsCreateInput (Browser)", $"ID: {result["sceneItemId"]}");
-                else Fail("ObsCreateInput (Browser)", "Returned null");
+                var result = SUP.ObsCreateInput(
+                    TEST_SCENE,
+                    TEST_BROWSER_SOURCE,
+                    "browser_source",
+                    new
+                    {
+                        url = "https://example.com",
+                        width = 800,
+                        height = 600
+                    }
+                );
+                if (result != null)
+                    Pass("ObsCreateInput (Browser)", $"ID: {result["sceneItemId"]}");
+                else
+                    Fail("ObsCreateInput (Browser)", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsCreateInput (Browser)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateInput (Browser)", ex.Message);
+            }
 
             // Small delay to ensure sources are created
             System.Threading.Thread.Sleep(500);
@@ -326,55 +440,81 @@ public class CPHInline
             try
             {
                 var settings = SUP.ObsGetInputSettings(TEST_TEXT_SOURCE);
-                if (settings != null) Pass("ObsGetInputSettings", $"Got settings for {TEST_TEXT_SOURCE}");
-                else Fail("ObsGetInputSettings", "Returned null");
+                if (settings != null)
+                    Pass("ObsGetInputSettings", $"Got settings for {TEST_TEXT_SOURCE}");
+                else
+                    Fail("ObsGetInputSettings", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetInputSettings", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetInputSettings", ex.Message);
+            }
 
             // SetInputSettings
             try
             {
                 if (SUP.ObsSetInputSettings(TEST_TEXT_SOURCE, new { text = "Updated text!" }))
                     Pass("ObsSetInputSettings", "Text updated");
-                else Fail("ObsSetInputSettings", "Returned false");
+                else
+                    Fail("ObsSetInputSettings", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetInputSettings", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetInputSettings", ex.Message);
+            }
 
             // SetText (convenience method)
             try
             {
                 if (SUP.ObsSetText(TEST_TEXT_SOURCE, "Text via SetText!"))
                     Pass("ObsSetText", "Text set successfully");
-                else Fail("ObsSetText", "Returned false");
+                else
+                    Fail("ObsSetText", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetText", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetText", ex.Message);
+            }
 
             // GetText
             try
             {
                 var text = SUP.ObsGetText(TEST_TEXT_SOURCE);
-                if (text == "Text via SetText!") Pass("ObsGetText", text);
-                else Fail("ObsGetText", $"Expected 'Text via SetText!', got '{text}'");
+                if (text == "Text via SetText!")
+                    Pass("ObsGetText", text);
+                else
+                    Fail("ObsGetText", $"Expected 'Text via SetText!', got '{text}'");
             }
-            catch (Exception ex) { Fail("ObsGetText", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetText", ex.Message);
+            }
 
             // SetBrowserUrl
             try
             {
                 if (SUP.ObsSetBrowserUrl(TEST_BROWSER_SOURCE, "https://google.com"))
                     Pass("ObsSetBrowserUrl", "URL updated");
-                else Fail("ObsSetBrowserUrl", "Returned false");
+                else
+                    Fail("ObsSetBrowserUrl", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetBrowserUrl", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetBrowserUrl", ex.Message);
+            }
 
             // RefreshBrowser
             try
             {
                 if (SUP.ObsRefreshBrowser(TEST_BROWSER_SOURCE))
                     Pass("ObsRefreshBrowser", "Browser refreshed");
-                else Fail("ObsRefreshBrowser", "Returned false");
+                else
+                    Fail("ObsRefreshBrowser", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsRefreshBrowser", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsRefreshBrowser", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // SCENE ITEMS (VISIBILITY, TRANSFORM)
@@ -385,64 +525,100 @@ public class CPHInline
             try
             {
                 var id = SUP.ObsGetSceneItemId(TEST_SCENE, TEST_TEXT_SOURCE);
-                if (id > 0) Pass("ObsGetSceneItemId", $"ID: {id}");
-                else Fail("ObsGetSceneItemId", $"Invalid ID: {id}");
+                if (id > 0)
+                    Pass("ObsGetSceneItemId", $"ID: {id}");
+                else
+                    Fail("ObsGetSceneItemId", $"Invalid ID: {id}");
             }
-            catch (Exception ex) { Fail("ObsGetSceneItemId", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneItemId", ex.Message);
+            }
 
             // GetSceneItemList
             try
             {
                 var items = SUP.ObsGetSceneItemList(TEST_SCENE);
-                if (items != null) Pass("ObsGetSceneItemList", $"{items.Count} items");
-                else Fail("ObsGetSceneItemList", "Returned null");
+                if (items != null)
+                    Pass("ObsGetSceneItemList", $"{items.Count} items");
+                else
+                    Fail("ObsGetSceneItemList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSceneItemList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneItemList", ex.Message);
+            }
 
             // HideSource
             try
             {
                 if (SUP.ObsHideSource(TEST_SCENE, TEST_TEXT_SOURCE))
                     Pass("ObsHideSource", "Source hidden");
-                else Fail("ObsHideSource", "Returned false");
+                else
+                    Fail("ObsHideSource", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsHideSource", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsHideSource", ex.Message);
+            }
 
             // IsSourceVisible (should be false)
             try
             {
                 var visible = SUP.ObsIsSourceVisible(TEST_SCENE, TEST_TEXT_SOURCE);
-                if (!visible) Pass("ObsIsSourceVisible (hidden)", "Correctly reports hidden");
-                else Fail("ObsIsSourceVisible (hidden)", "Should be hidden");
+                if (!visible)
+                    Pass("ObsIsSourceVisible (hidden)", "Correctly reports hidden");
+                else
+                    Fail("ObsIsSourceVisible (hidden)", "Should be hidden");
             }
-            catch (Exception ex) { Fail("ObsIsSourceVisible (hidden)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsSourceVisible (hidden)", ex.Message);
+            }
 
             // ShowSource
             try
             {
                 if (SUP.ObsShowSource(TEST_SCENE, TEST_TEXT_SOURCE))
                     Pass("ObsShowSource", "Source shown");
-                else Fail("ObsShowSource", "Returned false");
+                else
+                    Fail("ObsShowSource", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsShowSource", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsShowSource", ex.Message);
+            }
 
             // IsSourceVisible (should be true)
             try
             {
                 var visible = SUP.ObsIsSourceVisible(TEST_SCENE, TEST_TEXT_SOURCE);
-                if (visible) Pass("ObsIsSourceVisible (shown)", "Correctly reports visible");
-                else Fail("ObsIsSourceVisible (shown)", "Should be visible");
+                if (visible)
+                    Pass("ObsIsSourceVisible (shown)", "Correctly reports visible");
+                else
+                    Fail("ObsIsSourceVisible (shown)", "Should be visible");
             }
-            catch (Exception ex) { Fail("ObsIsSourceVisible (shown)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsSourceVisible (shown)", ex.Message);
+            }
 
             // ToggleSourceVisibility
             try
             {
                 var newState = SUP.ObsToggleSourceVisibility(TEST_SCENE, TEST_TEXT_SOURCE);
-                if (newState.HasValue) Pass("ObsToggleSourceVisibility", $"New state: {(newState.Value ? "visible" : "hidden")}");
-                else Fail("ObsToggleSourceVisibility", "Returned null");
+                if (newState.HasValue)
+                    Pass(
+                        "ObsToggleSourceVisibility",
+                        $"New state: {(newState.Value ? "visible" : "hidden")}"
+                    );
+                else
+                    Fail("ObsToggleSourceVisibility", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsToggleSourceVisibility", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsToggleSourceVisibility", ex.Message);
+            }
 
             // Restore visibility
             SUP.ObsShowSource(TEST_SCENE, TEST_TEXT_SOURCE);
@@ -452,36 +628,52 @@ public class CPHInline
             {
                 if (SUP.ObsSetSourcePosition(TEST_SCENE, TEST_TEXT_SOURCE, 100, 100))
                     Pass("ObsSetSourcePosition", "Position set to 100,100");
-                else Fail("ObsSetSourcePosition", "Returned false");
+                else
+                    Fail("ObsSetSourcePosition", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourcePosition", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourcePosition", ex.Message);
+            }
 
             // SetSourceScale
             try
             {
                 if (SUP.ObsSetSourceScale(TEST_SCENE, TEST_TEXT_SOURCE, 1.5, 1.5))
                     Pass("ObsSetSourceScale", "Scale set to 1.5x");
-                else Fail("ObsSetSourceScale", "Returned false");
+                else
+                    Fail("ObsSetSourceScale", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceScale", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceScale", ex.Message);
+            }
 
             // SetSourceRotation
             try
             {
                 if (SUP.ObsSetSourceRotation(TEST_SCENE, TEST_TEXT_SOURCE, 45))
                     Pass("ObsSetSourceRotation", "Rotation set to 45°");
-                else Fail("ObsSetSourceRotation", "Returned false");
+                else
+                    Fail("ObsSetSourceRotation", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceRotation", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceRotation", ex.Message);
+            }
 
             // SetSourceCrop
             try
             {
                 if (SUP.ObsSetSourceCrop(TEST_SCENE, TEST_COLOR_SOURCE, 10, 10, 10, 10))
                     Pass("ObsSetSourceCrop", "Crop set to 10px all sides");
-                else Fail("ObsSetSourceCrop", "Returned false");
+                else
+                    Fail("ObsSetSourceCrop", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceCrop", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceCrop", ex.Message);
+            }
 
             // GetSceneItemTransform
             try
@@ -492,27 +684,40 @@ public class CPHInline
                     var posX = transform["positionX"]?.Value<double>();
                     Pass("ObsGetSceneItemTransform", $"Position X: {posX}");
                 }
-                else Fail("ObsGetSceneItemTransform", "Returned null");
+                else
+                    Fail("ObsGetSceneItemTransform", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSceneItemTransform", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneItemTransform", ex.Message);
+            }
 
             // SetSourceLocked
             try
             {
                 if (SUP.ObsSetSourceLocked(TEST_SCENE, TEST_TEXT_SOURCE, true))
                     Pass("ObsSetSourceLocked", "Source locked");
-                else Fail("ObsSetSourceLocked", "Returned false");
+                else
+                    Fail("ObsSetSourceLocked", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceLocked", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceLocked", ex.Message);
+            }
 
             // IsSourceLocked
             try
             {
                 var locked = SUP.ObsIsSourceLocked(TEST_SCENE, TEST_TEXT_SOURCE);
-                if (locked) Pass("ObsIsSourceLocked", "Correctly reports locked");
-                else Fail("ObsIsSourceLocked", "Should be locked");
+                if (locked)
+                    Pass("ObsIsSourceLocked", "Correctly reports locked");
+                else
+                    Fail("ObsIsSourceLocked", "Should be locked");
             }
-            catch (Exception ex) { Fail("ObsIsSourceLocked", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsSourceLocked", ex.Message);
+            }
 
             // Unlock source
             SUP.ObsSetSourceLocked(TEST_SCENE, TEST_TEXT_SOURCE, false);
@@ -531,16 +736,24 @@ public class CPHInline
                 var muted = SUP.ObsGetInputMute(TEST_TEXT_SOURCE);
                 Pass("ObsGetInputMute", $"Muted: {muted}");
             }
-            catch (Exception ex) { Skip("ObsGetInputMute", "Source may not have audio"); }
+            catch (Exception ex)
+            {
+                Skip("ObsGetInputMute", "Source may not have audio");
+            }
 
             // GetInputVolume
             try
             {
                 var volume = SUP.ObsGetInputVolume(TEST_TEXT_SOURCE);
-                if (volume != null) Pass("ObsGetInputVolume", $"dB: {volume["inputVolumeDb"]}");
-                else Skip("ObsGetInputVolume", "Source may not have audio");
+                if (volume != null)
+                    Pass("ObsGetInputVolume", $"dB: {volume["inputVolumeDb"]}");
+                else
+                    Skip("ObsGetInputVolume", "Source may not have audio");
             }
-            catch (Exception ex) { Skip("ObsGetInputVolume", "Source may not have audio"); }
+            catch (Exception ex)
+            {
+                Skip("ObsGetInputVolume", "Source may not have audio");
+            }
 
             // ═══════════════════════════════════════════════════════
             // FILTERS
@@ -550,12 +763,22 @@ public class CPHInline
             // CreateSourceFilter
             try
             {
-                if (SUP.ObsCreateSourceFilter(TEST_COLOR_SOURCE, TEST_FILTER, "color_filter_v2",
-                    new { brightness = 0.1, contrast = 0.1 }))
+                if (
+                    SUP.ObsCreateSourceFilter(
+                        TEST_COLOR_SOURCE,
+                        TEST_FILTER,
+                        "color_filter_v2",
+                        new { brightness = 0.1, contrast = 0.1 }
+                    )
+                )
                     Pass("ObsCreateSourceFilter", "Filter created");
-                else Fail("ObsCreateSourceFilter", "Returned false");
+                else
+                    Fail("ObsCreateSourceFilter", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsCreateSourceFilter", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsCreateSourceFilter", ex.Message);
+            }
 
             System.Threading.Thread.Sleep(200);
 
@@ -563,74 +786,118 @@ public class CPHInline
             try
             {
                 var filters = SUP.ObsGetSourceFilterList(TEST_COLOR_SOURCE);
-                if (filters != null) Pass("ObsGetSourceFilterList", $"{filters.Count} filters");
-                else Fail("ObsGetSourceFilterList", "Returned null");
+                if (filters != null)
+                    Pass("ObsGetSourceFilterList", $"{filters.Count} filters");
+                else
+                    Fail("ObsGetSourceFilterList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSourceFilterList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSourceFilterList", ex.Message);
+            }
 
             // GetSourceFilter
             try
             {
                 var filter = SUP.ObsGetSourceFilter(TEST_COLOR_SOURCE, TEST_FILTER);
-                if (filter != null) Pass("ObsGetSourceFilter", "Got filter details");
-                else Fail("ObsGetSourceFilter", "Returned null");
+                if (filter != null)
+                    Pass("ObsGetSourceFilter", "Got filter details");
+                else
+                    Fail("ObsGetSourceFilter", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSourceFilter", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSourceFilter", ex.Message);
+            }
 
             // SetSourceFilterEnabled (disable)
             try
             {
                 if (SUP.ObsSetSourceFilterEnabled(TEST_COLOR_SOURCE, TEST_FILTER, false))
                     Pass("ObsSetSourceFilterEnabled (disable)", "Filter disabled");
-                else Fail("ObsSetSourceFilterEnabled (disable)", "Returned false");
+                else
+                    Fail("ObsSetSourceFilterEnabled (disable)", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceFilterEnabled (disable)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceFilterEnabled (disable)", ex.Message);
+            }
 
             // IsSourceFilterEnabled
             try
             {
                 var enabled = SUP.ObsIsSourceFilterEnabled(TEST_COLOR_SOURCE, TEST_FILTER);
-                if (!enabled) Pass("ObsIsSourceFilterEnabled", "Correctly reports disabled");
-                else Fail("ObsIsSourceFilterEnabled", "Should be disabled");
+                if (!enabled)
+                    Pass("ObsIsSourceFilterEnabled", "Correctly reports disabled");
+                else
+                    Fail("ObsIsSourceFilterEnabled", "Should be disabled");
             }
-            catch (Exception ex) { Fail("ObsIsSourceFilterEnabled", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsSourceFilterEnabled", ex.Message);
+            }
 
             // SetSourceFilterEnabled (enable)
             try
             {
                 if (SUP.ObsSetSourceFilterEnabled(TEST_COLOR_SOURCE, TEST_FILTER, true))
                     Pass("ObsSetSourceFilterEnabled (enable)", "Filter enabled");
-                else Fail("ObsSetSourceFilterEnabled (enable)", "Returned false");
+                else
+                    Fail("ObsSetSourceFilterEnabled (enable)", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceFilterEnabled (enable)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceFilterEnabled (enable)", ex.Message);
+            }
 
             // ToggleSourceFilter
             try
             {
                 var newState = SUP.ObsToggleSourceFilter(TEST_COLOR_SOURCE, TEST_FILTER);
-                if (newState.HasValue) Pass("ObsToggleSourceFilter", $"New state: {(newState.Value ? "enabled" : "disabled")}");
-                else Fail("ObsToggleSourceFilter", "Returned null");
+                if (newState.HasValue)
+                    Pass(
+                        "ObsToggleSourceFilter",
+                        $"New state: {(newState.Value ? "enabled" : "disabled")}"
+                    );
+                else
+                    Fail("ObsToggleSourceFilter", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsToggleSourceFilter", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsToggleSourceFilter", ex.Message);
+            }
 
             // SetSourceFilterSettings
             try
             {
-                if (SUP.ObsSetSourceFilterSettings(TEST_COLOR_SOURCE, TEST_FILTER,
-                    new { brightness = 0.2 }))
+                if (
+                    SUP.ObsSetSourceFilterSettings(
+                        TEST_COLOR_SOURCE,
+                        TEST_FILTER,
+                        new { brightness = 0.2 }
+                    )
+                )
                     Pass("ObsSetSourceFilterSettings", "Settings updated");
-                else Fail("ObsSetSourceFilterSettings", "Returned false");
+                else
+                    Fail("ObsSetSourceFilterSettings", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceFilterSettings", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceFilterSettings", ex.Message);
+            }
 
             // SetSourceFilterIndex
             try
             {
                 if (SUP.ObsSetSourceFilterIndex(TEST_COLOR_SOURCE, TEST_FILTER, 0))
                     Pass("ObsSetSourceFilterIndex", "Index set to 0");
-                else Fail("ObsSetSourceFilterIndex", "Returned false");
+                else
+                    Fail("ObsSetSourceFilterIndex", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetSourceFilterIndex", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetSourceFilterIndex", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // TRANSITIONS
@@ -641,19 +908,29 @@ public class CPHInline
             try
             {
                 var kinds = SUP.ObsGetTransitionKindList();
-                if (kinds != null) Pass("ObsGetTransitionKindList", $"{kinds.Count} transition types");
-                else Fail("ObsGetTransitionKindList", "Returned null");
+                if (kinds != null)
+                    Pass("ObsGetTransitionKindList", $"{kinds.Count} transition types");
+                else
+                    Fail("ObsGetTransitionKindList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetTransitionKindList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetTransitionKindList", ex.Message);
+            }
 
             // GetSceneTransitionList
             try
             {
                 var transitions = SUP.ObsGetSceneTransitionList();
-                if (transitions != null) Pass("ObsGetSceneTransitionList", $"{transitions.Count} transitions");
-                else Fail("ObsGetSceneTransitionList", "Returned null");
+                if (transitions != null)
+                    Pass("ObsGetSceneTransitionList", $"{transitions.Count} transitions");
+                else
+                    Fail("ObsGetSceneTransitionList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSceneTransitionList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneTransitionList", ex.Message);
+            }
 
             // GetCurrentSceneTransition
             try
@@ -664,28 +941,42 @@ public class CPHInline
                     var name = transition["transitionName"]?.ToString();
                     Pass("ObsGetCurrentSceneTransition", name);
                 }
-                else Fail("ObsGetCurrentSceneTransition", "Returned null");
+                else
+                    Fail("ObsGetCurrentSceneTransition", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentSceneTransition", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentSceneTransition", ex.Message);
+            }
 
             // GetCurrentTransitionName
             try
             {
                 var name = SUP.ObsGetCurrentTransitionName();
-                if (!string.IsNullOrEmpty(name)) Pass("ObsGetCurrentTransitionName", name);
-                else Fail("ObsGetCurrentTransitionName", "Returned null/empty");
+                if (!string.IsNullOrEmpty(name))
+                    Pass("ObsGetCurrentTransitionName", name);
+                else
+                    Fail("ObsGetCurrentTransitionName", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentTransitionName", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentTransitionName", ex.Message);
+            }
 
             // GetCurrentTransitionDuration
             // Note: Some transitions (like "Scene As Transition") don't have a configurable duration
             try
             {
                 var duration = SUP.ObsGetCurrentTransitionDuration();
-                if (duration.HasValue) Pass("ObsGetCurrentTransitionDuration", $"{duration}ms");
-                else Pass("ObsGetCurrentTransitionDuration", "N/A (transition has no duration)");
+                if (duration.HasValue)
+                    Pass("ObsGetCurrentTransitionDuration", $"{duration}ms");
+                else
+                    Pass("ObsGetCurrentTransitionDuration", "N/A (transition has no duration)");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentTransitionDuration", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentTransitionDuration", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // OUTPUTS (Stream/Record Status - NO STARTING!)
@@ -701,9 +992,13 @@ public class CPHInline
                     var active = status["outputActive"]?.Value<bool>();
                     Pass("ObsGetStreamStatus", $"Streaming: {active}");
                 }
-                else Fail("ObsGetStreamStatus", "Returned null");
+                else
+                    Fail("ObsGetStreamStatus", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetStreamStatus", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetStreamStatus", ex.Message);
+            }
 
             // IsStreaming
             try
@@ -711,7 +1006,10 @@ public class CPHInline
                 var streaming = SUP.ObsIsStreaming();
                 Pass("ObsIsStreaming", $"{streaming}");
             }
-            catch (Exception ex) { Fail("ObsIsStreaming", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsStreaming", ex.Message);
+            }
 
             // GetRecordStatus
             try
@@ -722,9 +1020,13 @@ public class CPHInline
                     var active = status["outputActive"]?.Value<bool>();
                     Pass("ObsGetRecordStatus", $"Recording: {active}");
                 }
-                else Fail("ObsGetRecordStatus", "Returned null");
+                else
+                    Fail("ObsGetRecordStatus", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetRecordStatus", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetRecordStatus", ex.Message);
+            }
 
             // IsRecording
             try
@@ -732,7 +1034,10 @@ public class CPHInline
                 var recording = SUP.ObsIsRecording();
                 Pass("ObsIsRecording", $"{recording}");
             }
-            catch (Exception ex) { Fail("ObsIsRecording", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsRecording", ex.Message);
+            }
 
             // IsRecordingPaused
             try
@@ -740,7 +1045,10 @@ public class CPHInline
                 var paused = SUP.ObsIsRecordingPaused();
                 Pass("ObsIsRecordingPaused", $"{paused}");
             }
-            catch (Exception ex) { Fail("ObsIsRecordingPaused", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsRecordingPaused", ex.Message);
+            }
 
             // IsReplayBufferActive
             try
@@ -748,7 +1056,10 @@ public class CPHInline
                 var active = SUP.ObsIsReplayBufferActive();
                 Pass("ObsIsReplayBufferActive", $"{active}");
             }
-            catch (Exception ex) { Fail("ObsIsReplayBufferActive", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsReplayBufferActive", ex.Message);
+            }
 
             // IsVirtualCamActive
             try
@@ -756,16 +1067,24 @@ public class CPHInline
                 var active = SUP.ObsIsVirtualCamActive();
                 Pass("ObsIsVirtualCamActive", $"{active}");
             }
-            catch (Exception ex) { Fail("ObsIsVirtualCamActive", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsVirtualCamActive", ex.Message);
+            }
 
             // GetOutputList
             try
             {
                 var outputs = SUP.ObsGetOutputList();
-                if (outputs != null) Pass("ObsGetOutputList", $"{outputs.Count} outputs");
-                else Fail("ObsGetOutputList", "Returned null");
+                if (outputs != null)
+                    Pass("ObsGetOutputList", $"{outputs.Count} outputs");
+                else
+                    Fail("ObsGetOutputList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetOutputList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetOutputList", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // CONFIG
@@ -781,18 +1100,27 @@ public class CPHInline
                     var current = collections["currentSceneCollectionName"]?.ToString();
                     Pass("ObsGetSceneCollectionList", $"Current: {current}");
                 }
-                else Fail("ObsGetSceneCollectionList", "Returned null");
+                else
+                    Fail("ObsGetSceneCollectionList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSceneCollectionList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSceneCollectionList", ex.Message);
+            }
 
             // GetCurrentSceneCollection
             try
             {
                 var name = SUP.ObsGetCurrentSceneCollection();
-                if (!string.IsNullOrEmpty(name)) Pass("ObsGetCurrentSceneCollection", name);
-                else Fail("ObsGetCurrentSceneCollection", "Returned null/empty");
+                if (!string.IsNullOrEmpty(name))
+                    Pass("ObsGetCurrentSceneCollection", name);
+                else
+                    Fail("ObsGetCurrentSceneCollection", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentSceneCollection", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentSceneCollection", ex.Message);
+            }
 
             // GetProfileList
             try
@@ -803,18 +1131,27 @@ public class CPHInline
                     var current = profiles["currentProfileName"]?.ToString();
                     Pass("ObsGetProfileList", $"Current: {current}");
                 }
-                else Fail("ObsGetProfileList", "Returned null");
+                else
+                    Fail("ObsGetProfileList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetProfileList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetProfileList", ex.Message);
+            }
 
             // GetCurrentProfile
             try
             {
                 var name = SUP.ObsGetCurrentProfile();
-                if (!string.IsNullOrEmpty(name)) Pass("ObsGetCurrentProfile", name);
-                else Fail("ObsGetCurrentProfile", "Returned null/empty");
+                if (!string.IsNullOrEmpty(name))
+                    Pass("ObsGetCurrentProfile", name);
+                else
+                    Fail("ObsGetCurrentProfile", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentProfile", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentProfile", ex.Message);
+            }
 
             // GetVideoSettings
             try
@@ -826,18 +1163,27 @@ public class CPHInline
                     var height = settings["baseHeight"]?.Value<int>();
                     Pass("ObsGetVideoSettings", $"{width}x{height}");
                 }
-                else Fail("ObsGetVideoSettings", "Returned null");
+                else
+                    Fail("ObsGetVideoSettings", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetVideoSettings", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetVideoSettings", ex.Message);
+            }
 
             // GetRecordDirectory
             try
             {
                 var dir = SUP.ObsGetRecordDirectory();
-                if (!string.IsNullOrEmpty(dir)) Pass("ObsGetRecordDirectory", dir);
-                else Fail("ObsGetRecordDirectory", "Returned null/empty");
+                if (!string.IsNullOrEmpty(dir))
+                    Pass("ObsGetRecordDirectory", dir);
+                else
+                    Fail("ObsGetRecordDirectory", "Returned null/empty");
             }
-            catch (Exception ex) { Fail("ObsGetRecordDirectory", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetRecordDirectory", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // UI
@@ -848,10 +1194,15 @@ public class CPHInline
             try
             {
                 var monitors = SUP.ObsGetMonitorList();
-                if (monitors != null) Pass("ObsGetMonitorList", $"{monitors.Count} monitors");
-                else Fail("ObsGetMonitorList", "Returned null");
+                if (monitors != null)
+                    Pass("ObsGetMonitorList", $"{monitors.Count} monitors");
+                else
+                    Fail("ObsGetMonitorList", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetMonitorList", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetMonitorList", ex.Message);
+            }
 
             // Store original studio mode
             try
@@ -859,16 +1210,23 @@ public class CPHInline
                 originalStudioMode = SUP.ObsIsStudioModeEnabled();
                 Pass("ObsIsStudioModeEnabled", $"{originalStudioMode}");
             }
-            catch (Exception ex) { Fail("ObsIsStudioModeEnabled", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsStudioModeEnabled", ex.Message);
+            }
 
             // Enable studio mode
             try
             {
                 if (SUP.ObsEnableStudioMode())
                     Pass("ObsEnableStudioMode", "Studio mode enabled");
-                else Fail("ObsEnableStudioMode", "Returned false");
+                else
+                    Fail("ObsEnableStudioMode", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsEnableStudioMode", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsEnableStudioMode", ex.Message);
+            }
 
             System.Threading.Thread.Sleep(300);
 
@@ -877,36 +1235,53 @@ public class CPHInline
             {
                 if (SUP.ObsIsStudioModeEnabled())
                     Pass("ObsIsStudioModeEnabled (verify)", "Correctly reports enabled");
-                else Fail("ObsIsStudioModeEnabled (verify)", "Should be enabled");
+                else
+                    Fail("ObsIsStudioModeEnabled (verify)", "Should be enabled");
             }
-            catch (Exception ex) { Fail("ObsIsStudioModeEnabled (verify)", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsStudioModeEnabled (verify)", ex.Message);
+            }
 
             // Set preview scene
             try
             {
                 if (SUP.ObsSetCurrentPreviewScene(TEST_SCENE_2))
                     Pass("ObsSetCurrentPreviewScene", TEST_SCENE_2);
-                else Fail("ObsSetCurrentPreviewScene", "Returned false");
+                else
+                    Fail("ObsSetCurrentPreviewScene", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsSetCurrentPreviewScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsSetCurrentPreviewScene", ex.Message);
+            }
 
             // Get preview scene
             try
             {
                 var preview = SUP.ObsGetCurrentPreviewScene();
-                if (preview == TEST_SCENE_2) Pass("ObsGetCurrentPreviewScene", preview);
-                else Fail("ObsGetCurrentPreviewScene", $"Expected {TEST_SCENE_2}, got {preview}");
+                if (preview == TEST_SCENE_2)
+                    Pass("ObsGetCurrentPreviewScene", preview);
+                else
+                    Fail("ObsGetCurrentPreviewScene", $"Expected {TEST_SCENE_2}, got {preview}");
             }
-            catch (Exception ex) { Fail("ObsGetCurrentPreviewScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetCurrentPreviewScene", ex.Message);
+            }
 
             // Disable studio mode
             try
             {
                 if (SUP.ObsDisableStudioMode())
                     Pass("ObsDisableStudioMode", "Studio mode disabled");
-                else Fail("ObsDisableStudioMode", "Returned false");
+                else
+                    Fail("ObsDisableStudioMode", "Returned false");
             }
-            catch (Exception ex) { Fail("ObsDisableStudioMode", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsDisableStudioMode", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // SOURCES (General)
@@ -917,10 +1292,15 @@ public class CPHInline
             try
             {
                 var active = SUP.ObsGetSourceActive(TEST_TEXT_SOURCE);
-                if (active != null) Pass("ObsGetSourceActive", $"Active: {active["videoActive"]}");
-                else Fail("ObsGetSourceActive", "Returned null");
+                if (active != null)
+                    Pass("ObsGetSourceActive", $"Active: {active["videoActive"]}");
+                else
+                    Fail("ObsGetSourceActive", "Returned null");
             }
-            catch (Exception ex) { Fail("ObsGetSourceActive", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsGetSourceActive", ex.Message);
+            }
 
             // IsSourceActive
             try
@@ -928,7 +1308,10 @@ public class CPHInline
                 var active = SUP.ObsIsSourceActive(TEST_TEXT_SOURCE);
                 Pass("ObsIsSourceActive", $"{active}");
             }
-            catch (Exception ex) { Fail("ObsIsSourceActive", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("ObsIsSourceActive", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // CLEANUP
@@ -943,7 +1326,10 @@ public class CPHInline
                     SUP.ObsSetCurrentScene(originalScene);
                     Pass("Restore original scene", originalScene);
                 }
-                catch (Exception ex) { Fail("Restore original scene", ex.Message); }
+                catch (Exception ex)
+                {
+                    Fail("Restore original scene", ex.Message);
+                }
             }
 
             // Restore studio mode
@@ -952,7 +1338,10 @@ public class CPHInline
                 SUP.ObsSetStudioModeEnabled(originalStudioMode);
                 Pass("Restore studio mode", $"{originalStudioMode}");
             }
-            catch (Exception ex) { Fail("Restore studio mode", ex.Message); }
+            catch (Exception ex)
+            {
+                Fail("Restore studio mode", ex.Message);
+            }
 
             System.Threading.Thread.Sleep(500);
 
@@ -961,9 +1350,13 @@ public class CPHInline
             {
                 if (SUP.ObsRemoveSourceFilter(TEST_COLOR_SOURCE, TEST_FILTER))
                     Pass("ObsRemoveSourceFilter", "Filter removed");
-                else Skip("ObsRemoveSourceFilter", "Filter may already be gone");
+                else
+                    Skip("ObsRemoveSourceFilter", "Filter may already be gone");
             }
-            catch (Exception ex) { Skip("ObsRemoveSourceFilter", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveSourceFilter", ex.Message);
+            }
 
             // Remove inputs
             try
@@ -971,21 +1364,30 @@ public class CPHInline
                 SUP.ObsRemoveInput(TEST_TEXT_SOURCE);
                 Pass("ObsRemoveInput (Text)", "Removed");
             }
-            catch (Exception ex) { Skip("ObsRemoveInput (Text)", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveInput (Text)", ex.Message);
+            }
 
             try
             {
                 SUP.ObsRemoveInput(TEST_BROWSER_SOURCE);
                 Pass("ObsRemoveInput (Browser)", "Removed");
             }
-            catch (Exception ex) { Skip("ObsRemoveInput (Browser)", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveInput (Browser)", ex.Message);
+            }
 
             try
             {
                 SUP.ObsRemoveInput(TEST_COLOR_SOURCE);
                 Pass("ObsRemoveInput (Color)", "Removed");
             }
-            catch (Exception ex) { Skip("ObsRemoveInput (Color)", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveInput (Color)", ex.Message);
+            }
 
             System.Threading.Thread.Sleep(300);
 
@@ -994,17 +1396,25 @@ public class CPHInline
             {
                 if (SUP.ObsRemoveScene(TEST_SCENE))
                     Pass("ObsRemoveScene", TEST_SCENE);
-                else Skip("ObsRemoveScene", "Scene may already be gone");
+                else
+                    Skip("ObsRemoveScene", "Scene may already be gone");
             }
-            catch (Exception ex) { Skip("ObsRemoveScene", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveScene", ex.Message);
+            }
 
             try
             {
                 if (SUP.ObsRemoveScene(TEST_SCENE_2))
                     Pass("ObsRemoveScene (2)", TEST_SCENE_2);
-                else Skip("ObsRemoveScene (2)", "Scene may already be gone");
+                else
+                    Skip("ObsRemoveScene (2)", "Scene may already be gone");
             }
-            catch (Exception ex) { Skip("ObsRemoveScene (2)", ex.Message); }
+            catch (Exception ex)
+            {
+                Skip("ObsRemoveScene (2)", ex.Message);
+            }
 
             // ═══════════════════════════════════════════════════════
             // SUMMARY

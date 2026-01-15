@@ -27,8 +27,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with currentSceneTransitionName, currentSceneTransitionKind, and transitions array, or null if failed</returns>
-        public JObject ObsGetSceneTransitionList(int connection = 0)
-            => ObsSendRequest("GetSceneTransitionList", null, connection);
+        public JObject ObsGetSceneTransitionList(int connection = 0) =>
+            ObsSendRequest("GetSceneTransitionList", null, connection);
 
         #endregion
 
@@ -39,8 +39,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with transition details, or null if failed</returns>
-        public JObject ObsGetCurrentSceneTransition(int connection = 0)
-            => ObsSendRequest("GetCurrentSceneTransition", null, connection);
+        public JObject ObsGetCurrentSceneTransition(int connection = 0) =>
+            ObsSendRequest("GetCurrentSceneTransition", null, connection);
 
         /// <summary>
         /// Gets the name of the current scene transition.
@@ -58,8 +58,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Transition name, or null if failed</returns>
-        public string ObsGetCurrentTransitionName(int connection = 0)
-            => ObsGetCurrentSceneTransitionName(connection);
+        public string ObsGetCurrentTransitionName(int connection = 0) =>
+            ObsGetCurrentSceneTransitionName(connection);
 
         /// <summary>
         /// Sets the current scene transition.
@@ -67,8 +67,12 @@ namespace StreamUP
         /// <param name="transitionName">Name of the transition to use</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentSceneTransition(string transitionName, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentSceneTransition", new { transitionName }, connection);
+        public bool ObsSetCurrentSceneTransition(string transitionName, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetCurrentSceneTransition",
+                new { transitionName },
+                connection
+            );
 
         /// <summary>
         /// Gets the duration of the current scene transition.
@@ -86,8 +90,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Duration in milliseconds, or null if failed or transition has fixed duration</returns>
-        public int? ObsGetCurrentTransitionDuration(int connection = 0)
-            => ObsGetCurrentSceneTransitionDuration(connection);
+        public int? ObsGetCurrentTransitionDuration(int connection = 0) =>
+            ObsGetCurrentSceneTransitionDuration(connection);
 
         /// <summary>
         /// Sets the duration of the current scene transition.
@@ -95,8 +99,12 @@ namespace StreamUP
         /// <param name="duration">Duration in milliseconds (50-20000)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentSceneTransitionDuration(int duration, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentSceneTransitionDuration", new { transitionDuration = duration }, connection);
+        public bool ObsSetCurrentSceneTransitionDuration(int duration, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetCurrentSceneTransitionDuration",
+                new { transitionDuration = duration },
+                connection
+            );
 
         /// <summary>
         /// Sets the settings of the current scene transition.
@@ -105,8 +113,16 @@ namespace StreamUP
         /// <param name="overlay">True to merge with existing settings, false to replace</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentSceneTransitionSettings(object transitionSettings, bool overlay = true, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentSceneTransitionSettings", new { transitionSettings, overlay }, connection);
+        public bool ObsSetCurrentSceneTransitionSettings(
+            object transitionSettings,
+            bool overlay = true,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetCurrentSceneTransitionSettings",
+                new { transitionSettings, overlay },
+                connection
+            );
 
         #endregion
 
@@ -129,8 +145,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsTriggerStudioModeTransition(int connection = 0)
-            => ObsSendRequestNoResponse("TriggerStudioModeTransition", null, connection);
+        public bool ObsTriggerStudioModeTransition(int connection = 0) =>
+            ObsSendRequestNoResponse("TriggerStudioModeTransition", null, connection);
 
         /// <summary>
         /// Sets the position of the TBar (studio mode only).
@@ -139,8 +155,8 @@ namespace StreamUP
         /// <param name="release">True to release the TBar after setting position</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetTBarPosition(double position, bool release = true, int connection = 0)
-            => ObsSendRequestNoResponse("SetTBarPosition", new { position, release }, connection);
+        public bool ObsSetTBarPosition(double position, bool release = true, int connection = 0) =>
+            ObsSendRequestNoResponse("SetTBarPosition", new { position, release }, connection);
 
         #endregion
     }

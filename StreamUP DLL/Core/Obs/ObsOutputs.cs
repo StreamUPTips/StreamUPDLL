@@ -16,8 +16,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with outputActive, outputReconnecting, outputTimecode, outputDuration, outputCongestion, outputBytes, outputSkippedFrames, outputTotalFrames, or null if failed</returns>
-        public JObject ObsGetStreamStatus(int connection = 0)
-            => ObsSendRequest("GetStreamStatus", null, connection);
+        public JObject ObsGetStreamStatus(int connection = 0) =>
+            ObsSendRequest("GetStreamStatus", null, connection);
 
         /// <summary>
         /// Checks if OBS is currently streaming.
@@ -46,16 +46,16 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStartStream(int connection = 0)
-            => ObsSendRequestNoResponse("StartStream", null, connection);
+        public bool ObsStartStream(int connection = 0) =>
+            ObsSendRequestNoResponse("StartStream", null, connection);
 
         /// <summary>
         /// Stops the stream output.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStopStream(int connection = 0)
-            => ObsSendRequestNoResponse("StopStream", null, connection);
+        public bool ObsStopStream(int connection = 0) =>
+            ObsSendRequestNoResponse("StopStream", null, connection);
 
         /// <summary>
         /// Sends a caption to the stream output.
@@ -63,8 +63,12 @@ namespace StreamUP
         /// <param name="caption">Caption text to send</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSendStreamCaption(string caption, int connection = 0)
-            => ObsSendRequestNoResponse("SendStreamCaption", new { captionText = caption }, connection);
+        public bool ObsSendStreamCaption(string caption, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SendStreamCaption",
+                new { captionText = caption },
+                connection
+            );
 
         #endregion
 
@@ -75,8 +79,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with outputActive, outputPaused, outputTimecode, outputDuration, outputBytes, or null if failed</returns>
-        public JObject ObsGetRecordStatus(int connection = 0)
-            => ObsSendRequest("GetRecordStatus", null, connection);
+        public JObject ObsGetRecordStatus(int connection = 0) =>
+            ObsSendRequest("GetRecordStatus", null, connection);
 
         /// <summary>
         /// Checks if OBS is currently recording.
@@ -116,8 +120,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStartRecord(int connection = 0)
-            => ObsSendRequestNoResponse("StartRecord", null, connection);
+        public bool ObsStartRecord(int connection = 0) =>
+            ObsSendRequestNoResponse("StartRecord", null, connection);
 
         /// <summary>
         /// Stops the record output.
@@ -135,32 +139,32 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsToggleRecordPause(int connection = 0)
-            => ObsSendRequestNoResponse("ToggleRecordPause", null, connection);
+        public bool ObsToggleRecordPause(int connection = 0) =>
+            ObsSendRequestNoResponse("ToggleRecordPause", null, connection);
 
         /// <summary>
         /// Pauses the record output.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsPauseRecord(int connection = 0)
-            => ObsSendRequestNoResponse("PauseRecord", null, connection);
+        public bool ObsPauseRecord(int connection = 0) =>
+            ObsSendRequestNoResponse("PauseRecord", null, connection);
 
         /// <summary>
         /// Resumes the record output.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsResumeRecord(int connection = 0)
-            => ObsSendRequestNoResponse("ResumeRecord", null, connection);
+        public bool ObsResumeRecord(int connection = 0) =>
+            ObsSendRequestNoResponse("ResumeRecord", null, connection);
 
         /// <summary>
         /// Splits the current recording file.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSplitRecordFile(int connection = 0)
-            => ObsSendRequestNoResponse("SplitRecordFile", null, connection);
+        public bool ObsSplitRecordFile(int connection = 0) =>
+            ObsSendRequestNoResponse("SplitRecordFile", null, connection);
 
         /// <summary>
         /// Creates a chapter marker in the recording.
@@ -168,8 +172,12 @@ namespace StreamUP
         /// <param name="chapterName">Optional name for the chapter</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsCreateRecordChapter(string chapterName = null, int connection = 0)
-            => ObsSendRequestNoResponse("CreateRecordChapter", chapterName != null ? new { chapterName } : null, connection);
+        public bool ObsCreateRecordChapter(string chapterName = null, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "CreateRecordChapter",
+                chapterName != null ? new { chapterName } : null,
+                connection
+            );
 
         #endregion
 
@@ -202,24 +210,24 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStartReplayBuffer(int connection = 0)
-            => ObsSendRequestNoResponse("StartReplayBuffer", null, connection);
+        public bool ObsStartReplayBuffer(int connection = 0) =>
+            ObsSendRequestNoResponse("StartReplayBuffer", null, connection);
 
         /// <summary>
         /// Stops the replay buffer.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStopReplayBuffer(int connection = 0)
-            => ObsSendRequestNoResponse("StopReplayBuffer", null, connection);
+        public bool ObsStopReplayBuffer(int connection = 0) =>
+            ObsSendRequestNoResponse("StopReplayBuffer", null, connection);
 
         /// <summary>
         /// Saves the replay buffer to a file.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSaveReplayBuffer(int connection = 0)
-            => ObsSendRequestNoResponse("SaveReplayBuffer", null, connection);
+        public bool ObsSaveReplayBuffer(int connection = 0) =>
+            ObsSendRequestNoResponse("SaveReplayBuffer", null, connection);
 
         /// <summary>
         /// Gets the path of the last saved replay buffer file.
@@ -263,16 +271,16 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStartVirtualCam(int connection = 0)
-            => ObsSendRequestNoResponse("StartVirtualCam", null, connection);
+        public bool ObsStartVirtualCam(int connection = 0) =>
+            ObsSendRequestNoResponse("StartVirtualCam", null, connection);
 
         /// <summary>
         /// Stops the virtual camera.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStopVirtualCam(int connection = 0)
-            => ObsSendRequestNoResponse("StopVirtualCam", null, connection);
+        public bool ObsStopVirtualCam(int connection = 0) =>
+            ObsSendRequestNoResponse("StopVirtualCam", null, connection);
 
         #endregion
 
@@ -295,8 +303,8 @@ namespace StreamUP
         /// <param name="outputName">Name of the output</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Output status object, or null if failed</returns>
-        public JObject ObsGetOutputStatus(string outputName, int connection = 0)
-            => ObsSendRequest("GetOutputStatus", new { outputName }, connection);
+        public JObject ObsGetOutputStatus(string outputName, int connection = 0) =>
+            ObsSendRequest("GetOutputStatus", new { outputName }, connection);
 
         /// <summary>
         /// Toggles a specific output.
@@ -316,8 +324,8 @@ namespace StreamUP
         /// <param name="outputName">Name of the output</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStartOutput(string outputName, int connection = 0)
-            => ObsSendRequestNoResponse("StartOutput", new { outputName }, connection);
+        public bool ObsStartOutput(string outputName, int connection = 0) =>
+            ObsSendRequestNoResponse("StartOutput", new { outputName }, connection);
 
         /// <summary>
         /// Stops a specific output.
@@ -325,8 +333,8 @@ namespace StreamUP
         /// <param name="outputName">Name of the output</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStopOutput(string outputName, int connection = 0)
-            => ObsSendRequestNoResponse("StopOutput", new { outputName }, connection);
+        public bool ObsStopOutput(string outputName, int connection = 0) =>
+            ObsSendRequestNoResponse("StopOutput", new { outputName }, connection);
 
         /// <summary>
         /// Gets the settings of a specific output.
@@ -347,8 +355,16 @@ namespace StreamUP
         /// <param name="outputSettings">Settings object to apply</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetOutputSettings(string outputName, object outputSettings, int connection = 0)
-            => ObsSendRequestNoResponse("SetOutputSettings", new { outputName, outputSettings }, connection);
+        public bool ObsSetOutputSettings(
+            string outputName,
+            object outputSettings,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetOutputSettings",
+                new { outputName, outputSettings },
+                connection
+            );
 
         #endregion
     }

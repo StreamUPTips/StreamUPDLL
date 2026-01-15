@@ -40,8 +40,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with desktop1, desktop2, mic1-4 properties, or null if failed</returns>
-        public JObject ObsGetSpecialInputs(int connection = 0)
-            => ObsSendRequest("GetSpecialInputs", null, connection);
+        public JObject ObsGetSpecialInputs(int connection = 0) =>
+            ObsSendRequest("GetSpecialInputs", null, connection);
 
         #endregion
 
@@ -57,8 +57,26 @@ namespace StreamUP
         /// <param name="enabled">Whether the input should be visible initially</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with inputUuid and sceneItemId, or null if failed</returns>
-        public JObject ObsCreateInput(string sceneName, string inputName, string inputKind, object inputSettings = null, bool enabled = true, int connection = 0)
-            => ObsSendRequest("CreateInput", new { sceneName, inputName, inputKind, inputSettings, sceneItemEnabled = enabled }, connection);
+        public JObject ObsCreateInput(
+            string sceneName,
+            string inputName,
+            string inputKind,
+            object inputSettings = null,
+            bool enabled = true,
+            int connection = 0
+        ) =>
+            ObsSendRequest(
+                "CreateInput",
+                new
+                {
+                    sceneName,
+                    inputName,
+                    inputKind,
+                    inputSettings,
+                    sceneItemEnabled = enabled
+                },
+                connection
+            );
 
         /// <summary>
         /// Removes an input from OBS entirely (removes all scene items using this input).
@@ -66,8 +84,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input to remove</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRemoveInput(string inputName, int connection = 0)
-            => ObsSendRequestNoResponse("RemoveInput", new { inputName }, connection);
+        public bool ObsRemoveInput(string inputName, int connection = 0) =>
+            ObsSendRequestNoResponse("RemoveInput", new { inputName }, connection);
 
         /// <summary>
         /// Renames an input.
@@ -76,8 +94,8 @@ namespace StreamUP
         /// <param name="newInputName">New name for the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRenameInput(string inputName, string newInputName, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputName", new { inputName, newInputName }, connection);
+        public bool ObsRenameInput(string inputName, string newInputName, int connection = 0) =>
+            ObsSendRequestNoResponse("SetInputName", new { inputName, newInputName }, connection);
 
         #endregion
 
@@ -89,8 +107,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with inputSettings and inputKind, or null if failed</returns>
-        public JObject ObsGetInputSettings(string inputName, int connection = 0)
-            => ObsSendRequest("GetInputSettings", new { inputName }, connection);
+        public JObject ObsGetInputSettings(string inputName, int connection = 0) =>
+            ObsSendRequest("GetInputSettings", new { inputName }, connection);
 
         /// <summary>
         /// Sets the settings of an input.
@@ -100,8 +118,22 @@ namespace StreamUP
         /// <param name="overlay">True to merge with existing settings, false to replace</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputSettings(string inputName, object inputSettings, bool overlay = true, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputSettings", new { inputName, inputSettings, overlay }, connection);
+        public bool ObsSetInputSettings(
+            string inputName,
+            object inputSettings,
+            bool overlay = true,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetInputSettings",
+                new
+                {
+                    inputName,
+                    inputSettings,
+                    overlay
+                },
+                connection
+            );
 
         /// <summary>
         /// Gets the default settings for an input kind.
@@ -137,8 +169,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if muted, false if unmuted or not found</returns>
-        public bool ObsGetInputMute(string inputName, int connection = 0)
-            => ObsIsInputMuted(inputName, connection);
+        public bool ObsGetInputMute(string inputName, int connection = 0) =>
+            ObsIsInputMuted(inputName, connection);
 
         /// <summary>
         /// Sets the mute state of an input.
@@ -147,8 +179,12 @@ namespace StreamUP
         /// <param name="muted">True to mute, false to unmute</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputMute(string inputName, bool muted, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputMute", new { inputName, inputMuted = muted }, connection);
+        public bool ObsSetInputMute(string inputName, bool muted, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetInputMute",
+                new { inputName, inputMuted = muted },
+                connection
+            );
 
         /// <summary>
         /// Mutes an input.
@@ -156,8 +192,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsMuteInput(string inputName, int connection = 0)
-            => ObsSetInputMute(inputName, true, connection);
+        public bool ObsMuteInput(string inputName, int connection = 0) =>
+            ObsSetInputMute(inputName, true, connection);
 
         /// <summary>
         /// Unmutes an input.
@@ -165,8 +201,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsUnmuteInput(string inputName, int connection = 0)
-            => ObsSetInputMute(inputName, false, connection);
+        public bool ObsUnmuteInput(string inputName, int connection = 0) =>
+            ObsSetInputMute(inputName, false, connection);
 
         /// <summary>
         /// Toggles the mute state of an input.
@@ -190,8 +226,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with inputVolumeMul and inputVolumeDb, or null if failed</returns>
-        public JObject ObsGetInputVolume(string inputName, int connection = 0)
-            => ObsSendRequest("GetInputVolume", new { inputName }, connection);
+        public JObject ObsGetInputVolume(string inputName, int connection = 0) =>
+            ObsSendRequest("GetInputVolume", new { inputName }, connection);
 
         /// <summary>
         /// Gets the volume of an input in decibels.
@@ -212,8 +248,12 @@ namespace StreamUP
         /// <param name="volumeDb">Volume in dB (-100 to 26)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputVolumeDb(string inputName, double volumeDb, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputVolume", new { inputName, inputVolumeDb = volumeDb }, connection);
+        public bool ObsSetInputVolumeDb(string inputName, double volumeDb, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetInputVolume",
+                new { inputName, inputVolumeDb = volumeDb },
+                connection
+            );
 
         /// <summary>
         /// Sets the volume of an input as a multiplier.
@@ -222,8 +262,12 @@ namespace StreamUP
         /// <param name="volumeMul">Volume multiplier (0 to 20, where 1 = 100%)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputVolumeMul(string inputName, double volumeMul, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputVolume", new { inputName, inputVolumeMul = volumeMul }, connection);
+        public bool ObsSetInputVolumeMul(string inputName, double volumeMul, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetInputVolume",
+                new { inputName, inputVolumeMul = volumeMul },
+                connection
+            );
 
         #endregion
 
@@ -248,8 +292,12 @@ namespace StreamUP
         /// <param name="balance">Balance value (0.0 = full left, 0.5 = center, 1.0 = full right)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputAudioBalance(string inputName, double balance, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputAudioBalance", new { inputName, inputAudioBalance = balance }, connection);
+        public bool ObsSetInputAudioBalance(string inputName, double balance, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetInputAudioBalance",
+                new { inputName, inputAudioBalance = balance },
+                connection
+            );
 
         /// <summary>
         /// Gets the audio sync offset of an input in milliseconds.
@@ -270,8 +318,16 @@ namespace StreamUP
         /// <param name="syncOffset">Sync offset in milliseconds</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputAudioSyncOffset(string inputName, int syncOffset, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputAudioSyncOffset", new { inputName, inputAudioSyncOffset = syncOffset }, connection);
+        public bool ObsSetInputAudioSyncOffset(
+            string inputName,
+            int syncOffset,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetInputAudioSyncOffset",
+                new { inputName, inputAudioSyncOffset = syncOffset },
+                connection
+            );
 
         /// <summary>
         /// Gets the audio monitor type of an input.
@@ -281,7 +337,11 @@ namespace StreamUP
         /// <returns>Monitor type string, or null if failed</returns>
         public string ObsGetInputAudioMonitorType(string inputName, int connection = 0)
         {
-            var response = ObsSendRequest("GetInputAudioMonitorType", new { inputName }, connection);
+            var response = ObsSendRequest(
+                "GetInputAudioMonitorType",
+                new { inputName },
+                connection
+            );
             return response?["monitorType"]?.Value<string>();
         }
 
@@ -293,8 +353,16 @@ namespace StreamUP
         /// <param name="monitorType">Monitor type constant</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputAudioMonitorType(string inputName, string monitorType, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputAudioMonitorType", new { inputName, monitorType }, connection);
+        public bool ObsSetInputAudioMonitorType(
+            string inputName,
+            string monitorType,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetInputAudioMonitorType",
+                new { inputName, monitorType },
+                connection
+            );
 
         /// <summary>
         /// Gets the audio tracks configuration of an input.
@@ -315,8 +383,16 @@ namespace StreamUP
         /// <param name="audioTracks">Track configuration object</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetInputAudioTracks(string inputName, object audioTracks, int connection = 0)
-            => ObsSendRequestNoResponse("SetInputAudioTracks", new { inputName, inputAudioTracks = audioTracks }, connection);
+        public bool ObsSetInputAudioTracks(
+            string inputName,
+            object audioTracks,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetInputAudioTracks",
+                new { inputName, inputAudioTracks = audioTracks },
+                connection
+            );
 
         #endregion
 
@@ -329,8 +405,8 @@ namespace StreamUP
         /// <param name="text">Text to display</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetText(string sourceName, string text, int connection = 0)
-            => ObsSetInputSettings(sourceName, new { text }, true, connection);
+        public bool ObsSetText(string sourceName, string text, int connection = 0) =>
+            ObsSetInputSettings(sourceName, new { text }, true, connection);
 
         /// <summary>
         /// Gets the text of a text source.
@@ -355,8 +431,8 @@ namespace StreamUP
         /// <param name="url">URL to load</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetBrowserUrl(string sourceName, string url, int connection = 0)
-            => ObsSetInputSettings(sourceName, new { url }, true, connection);
+        public bool ObsSetBrowserUrl(string sourceName, string url, int connection = 0) =>
+            ObsSetInputSettings(sourceName, new { url }, true, connection);
 
         /// <summary>
         /// Refreshes a browser source.
@@ -364,8 +440,12 @@ namespace StreamUP
         /// <param name="sourceName">Name of the browser source</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRefreshBrowser(string sourceName, int connection = 0)
-            => ObsSendRequestNoResponse("PressInputPropertiesButton", new { inputName = sourceName, propertyName = "refreshnocache" }, connection);
+        public bool ObsRefreshBrowser(string sourceName, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "PressInputPropertiesButton",
+                new { inputName = sourceName, propertyName = "refreshnocache" },
+                connection
+            );
 
         #endregion
 
@@ -378,8 +458,8 @@ namespace StreamUP
         /// <param name="filePath">Path to the image file</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetImageFile(string sourceName, string filePath, int connection = 0)
-            => ObsSetInputSettings(sourceName, new { file = filePath }, true, connection);
+        public bool ObsSetImageFile(string sourceName, string filePath, int connection = 0) =>
+            ObsSetInputSettings(sourceName, new { file = filePath }, true, connection);
 
         #endregion
 
@@ -392,8 +472,8 @@ namespace StreamUP
         /// <param name="filePath">Path to the media file</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetMediaFile(string sourceName, string filePath, int connection = 0)
-            => ObsSetInputSettings(sourceName, new { local_file = filePath }, true, connection);
+        public bool ObsSetMediaFile(string sourceName, string filePath, int connection = 0) =>
+            ObsSetInputSettings(sourceName, new { local_file = filePath }, true, connection);
 
         #endregion
     }

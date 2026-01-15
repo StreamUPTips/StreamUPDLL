@@ -17,11 +17,19 @@ namespace StreamUP
         /// <param name="requestData">Optional request data object</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Response as JObject, or null if failed</returns>
-        public JObject ObsSendRequest(string requestType, object requestData = null, int connection = 0)
+        public JObject ObsSendRequest(
+            string requestType,
+            object requestData = null,
+            int connection = 0
+        )
         {
-            string data = requestData != null ? JObject.FromObject(requestData).ToString(Formatting.None) : "{}";
+            string data =
+                requestData != null
+                    ? JObject.FromObject(requestData).ToString(Formatting.None)
+                    : "{}";
             string result = _CPH.ObsSendRaw(requestType, data, connection);
-            if (string.IsNullOrEmpty(result)) return null;
+            if (string.IsNullOrEmpty(result))
+                return null;
             try
             {
                 return JObject.Parse(result);
@@ -39,9 +47,16 @@ namespace StreamUP
         /// <param name="requestData">Optional request data object</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if the request was sent successfully</returns>
-        public bool ObsSendRequestNoResponse(string requestType, object requestData = null, int connection = 0)
+        public bool ObsSendRequestNoResponse(
+            string requestType,
+            object requestData = null,
+            int connection = 0
+        )
         {
-            string data = requestData != null ? JObject.FromObject(requestData).ToString(Formatting.None) : "{}";
+            string data =
+                requestData != null
+                    ? JObject.FromObject(requestData).ToString(Formatting.None)
+                    : "{}";
             string result = _CPH.ObsSendRaw(requestType, data, connection);
             return !string.IsNullOrEmpty(result);
         }
@@ -54,9 +69,15 @@ namespace StreamUP
         /// <param name="executionType">0=SerialRealtime, 1=SerialFrame, 2=Parallel</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if batch was accepted</returns>
-        public bool ObsSendBatch(List<ObsBatchRequest> requests, bool haltOnFailure = false, int executionType = 0, int connection = 0)
+        public bool ObsSendBatch(
+            List<ObsBatchRequest> requests,
+            bool haltOnFailure = false,
+            int executionType = 0,
+            int connection = 0
+        )
         {
-            if (requests == null || requests.Count == 0) return false;
+            if (requests == null || requests.Count == 0)
+                return false;
 
             var batchArray = new JArray();
             foreach (var req in requests)
@@ -81,8 +102,13 @@ namespace StreamUP
         /// <returns>Scene item ID, or -1 if not found</returns>
         public int ObsGetSceneItemId(string sceneName, string sourceName, int connection = 0)
         {
-            var response = ObsSendRequest("GetSceneItemId", new { sceneName, sourceName }, connection);
-            if (response == null) return -1;
+            var response = ObsSendRequest(
+                "GetSceneItemId",
+                new { sceneName, sourceName },
+                connection
+            );
+            if (response == null)
+                return -1;
             return response["sceneItemId"]?.Value<int>() ?? -1;
         }
     }

@@ -45,7 +45,8 @@ namespace StreamUP
         public string ObsGetCurrentScene(int connection = 0)
         {
             var response = ObsSendRequest("GetCurrentProgramScene", null, connection);
-            return response?["sceneName"]?.Value<string>() ?? response?["currentProgramSceneName"]?.Value<string>();
+            return response?["sceneName"]?.Value<string>()
+                ?? response?["currentProgramSceneName"]?.Value<string>();
         }
 
         /// <summary>
@@ -54,8 +55,8 @@ namespace StreamUP
         /// <param name="sceneName">Name of the scene to switch to</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentScene(string sceneName, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentProgramScene", new { sceneName }, connection);
+        public bool ObsSetCurrentScene(string sceneName, int connection = 0) =>
+            ObsSendRequestNoResponse("SetCurrentProgramScene", new { sceneName }, connection);
 
         /// <summary>
         /// Gets the name of the current preview scene (studio mode only).
@@ -65,7 +66,8 @@ namespace StreamUP
         public string ObsGetCurrentPreviewScene(int connection = 0)
         {
             var response = ObsSendRequest("GetCurrentPreviewScene", null, connection);
-            return response?["sceneName"]?.Value<string>() ?? response?["currentPreviewSceneName"]?.Value<string>();
+            return response?["sceneName"]?.Value<string>()
+                ?? response?["currentPreviewSceneName"]?.Value<string>();
         }
 
         /// <summary>
@@ -74,8 +76,8 @@ namespace StreamUP
         /// <param name="sceneName">Name of the scene to preview</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentPreviewScene(string sceneName, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentPreviewScene", new { sceneName }, connection);
+        public bool ObsSetCurrentPreviewScene(string sceneName, int connection = 0) =>
+            ObsSendRequestNoResponse("SetCurrentPreviewScene", new { sceneName }, connection);
 
         #endregion
 
@@ -99,8 +101,8 @@ namespace StreamUP
         /// <param name="sceneName">Name of the scene to remove</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRemoveScene(string sceneName, int connection = 0)
-            => ObsSendRequestNoResponse("RemoveScene", new { sceneName }, connection);
+        public bool ObsRemoveScene(string sceneName, int connection = 0) =>
+            ObsSendRequestNoResponse("RemoveScene", new { sceneName }, connection);
 
         /// <summary>
         /// Renames a scene in OBS.
@@ -109,8 +111,8 @@ namespace StreamUP
         /// <param name="newSceneName">New name for the scene</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRenameScene(string sceneName, string newSceneName, int connection = 0)
-            => ObsSendRequestNoResponse("SetSceneName", new { sceneName, newSceneName }, connection);
+        public bool ObsRenameScene(string sceneName, string newSceneName, int connection = 0) =>
+            ObsSendRequestNoResponse("SetSceneName", new { sceneName, newSceneName }, connection);
 
         #endregion
 
@@ -122,8 +124,8 @@ namespace StreamUP
         /// <param name="sceneName">Name of the scene</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Response with transitionName and transitionDuration, or null if none set</returns>
-        public JObject ObsGetSceneTransitionOverride(string sceneName, int connection = 0)
-            => ObsSendRequest("GetSceneSceneTransitionOverride", new { sceneName }, connection);
+        public JObject ObsGetSceneTransitionOverride(string sceneName, int connection = 0) =>
+            ObsSendRequest("GetSceneSceneTransitionOverride", new { sceneName }, connection);
 
         /// <summary>
         /// Sets or clears the transition override for a scene.
@@ -133,8 +135,22 @@ namespace StreamUP
         /// <param name="transitionDuration">Duration in ms (null to use default)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetSceneTransitionOverride(string sceneName, string transitionName, int? transitionDuration = null, int connection = 0)
-            => ObsSendRequestNoResponse("SetSceneSceneTransitionOverride", new { sceneName, transitionName, transitionDuration }, connection);
+        public bool ObsSetSceneTransitionOverride(
+            string sceneName,
+            string transitionName,
+            int? transitionDuration = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetSceneSceneTransitionOverride",
+                new
+                {
+                    sceneName,
+                    transitionName,
+                    transitionDuration
+                },
+                connection
+            );
 
         /// <summary>
         /// Clears the transition override for a scene.
@@ -142,8 +158,8 @@ namespace StreamUP
         /// <param name="sceneName">Name of the scene</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsClearSceneTransitionOverride(string sceneName, int connection = 0)
-            => ObsSetSceneTransitionOverride(sceneName, null, null, connection);
+        public bool ObsClearSceneTransitionOverride(string sceneName, int connection = 0) =>
+            ObsSetSceneTransitionOverride(sceneName, null, null, connection);
 
         #endregion
     }

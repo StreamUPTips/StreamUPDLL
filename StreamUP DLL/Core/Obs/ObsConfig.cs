@@ -16,8 +16,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with currentSceneCollectionName and sceneCollections array, or null if failed</returns>
-        public JObject ObsGetSceneCollectionList(int connection = 0)
-            => ObsSendRequest("GetSceneCollectionList", null, connection);
+        public JObject ObsGetSceneCollectionList(int connection = 0) =>
+            ObsSendRequest("GetSceneCollectionList", null, connection);
 
         /// <summary>
         /// Gets the name of the current scene collection.
@@ -37,8 +37,12 @@ namespace StreamUP
         /// <param name="sceneCollectionName">Name of the scene collection to switch to</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentSceneCollection(string sceneCollectionName, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentSceneCollection", new { sceneCollectionName }, connection);
+        public bool ObsSetCurrentSceneCollection(string sceneCollectionName, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetCurrentSceneCollection",
+                new { sceneCollectionName },
+                connection
+            );
 
         /// <summary>
         /// Creates a new scene collection, switching to it in the process.
@@ -47,8 +51,12 @@ namespace StreamUP
         /// <param name="sceneCollectionName">Name for the new scene collection</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsCreateSceneCollection(string sceneCollectionName, int connection = 0)
-            => ObsSendRequestNoResponse("CreateSceneCollection", new { sceneCollectionName }, connection);
+        public bool ObsCreateSceneCollection(string sceneCollectionName, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "CreateSceneCollection",
+                new { sceneCollectionName },
+                connection
+            );
 
         #endregion
 
@@ -59,8 +67,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with currentProfileName and profiles array, or null if failed</returns>
-        public JObject ObsGetProfileList(int connection = 0)
-            => ObsSendRequest("GetProfileList", null, connection);
+        public JObject ObsGetProfileList(int connection = 0) =>
+            ObsSendRequest("GetProfileList", null, connection);
 
         /// <summary>
         /// Gets the name of the current profile.
@@ -79,8 +87,8 @@ namespace StreamUP
         /// <param name="profileName">Name of the profile to switch to</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetCurrentProfile(string profileName, int connection = 0)
-            => ObsSendRequestNoResponse("SetCurrentProfile", new { profileName }, connection);
+        public bool ObsSetCurrentProfile(string profileName, int connection = 0) =>
+            ObsSendRequestNoResponse("SetCurrentProfile", new { profileName }, connection);
 
         /// <summary>
         /// Creates a new profile, switching to it in the process.
@@ -88,8 +96,8 @@ namespace StreamUP
         /// <param name="profileName">Name for the new profile</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsCreateProfile(string profileName, int connection = 0)
-            => ObsSendRequestNoResponse("CreateProfile", new { profileName }, connection);
+        public bool ObsCreateProfile(string profileName, int connection = 0) =>
+            ObsSendRequestNoResponse("CreateProfile", new { profileName }, connection);
 
         /// <summary>
         /// Removes a profile.
@@ -97,8 +105,8 @@ namespace StreamUP
         /// <param name="profileName">Name of the profile to remove</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRemoveProfile(string profileName, int connection = 0)
-            => ObsSendRequestNoResponse("RemoveProfile", new { profileName }, connection);
+        public bool ObsRemoveProfile(string profileName, int connection = 0) =>
+            ObsSendRequestNoResponse("RemoveProfile", new { profileName }, connection);
 
         /// <summary>
         /// Gets a parameter from the current profile's configuration.
@@ -107,8 +115,16 @@ namespace StreamUP
         /// <param name="parameterName">Name of the parameter</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with parameterValue and defaultParameterValue, or null if failed</returns>
-        public JObject ObsGetProfileParameter(string parameterCategory, string parameterName, int connection = 0)
-            => ObsSendRequest("GetProfileParameter", new { parameterCategory, parameterName }, connection);
+        public JObject ObsGetProfileParameter(
+            string parameterCategory,
+            string parameterName,
+            int connection = 0
+        ) =>
+            ObsSendRequest(
+                "GetProfileParameter",
+                new { parameterCategory, parameterName },
+                connection
+            );
 
         /// <summary>
         /// Sets a parameter in the current profile's configuration.
@@ -118,8 +134,22 @@ namespace StreamUP
         /// <param name="parameterValue">Value to set</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetProfileParameter(string parameterCategory, string parameterName, string parameterValue, int connection = 0)
-            => ObsSendRequestNoResponse("SetProfileParameter", new { parameterCategory, parameterName, parameterValue }, connection);
+        public bool ObsSetProfileParameter(
+            string parameterCategory,
+            string parameterName,
+            string parameterValue,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetProfileParameter",
+                new
+                {
+                    parameterCategory,
+                    parameterName,
+                    parameterValue
+                },
+                connection
+            );
 
         #endregion
 
@@ -130,8 +160,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with fpsNumerator, fpsDenominator, baseWidth, baseHeight, outputWidth, outputHeight, or null if failed</returns>
-        public JObject ObsGetVideoSettings(int connection = 0)
-            => ObsSendRequest("GetVideoSettings", null, connection);
+        public JObject ObsGetVideoSettings(int connection = 0) =>
+            ObsSendRequest("GetVideoSettings", null, connection);
 
         /// <summary>
         /// Sets video settings.
@@ -145,8 +175,28 @@ namespace StreamUP
         /// <param name="outputHeight">Output (scaled) height</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetVideoSettings(int? fpsNumerator = null, int? fpsDenominator = null, int? baseWidth = null, int? baseHeight = null, int? outputWidth = null, int? outputHeight = null, int connection = 0)
-            => ObsSendRequestNoResponse("SetVideoSettings", new { fpsNumerator, fpsDenominator, baseWidth, baseHeight, outputWidth, outputHeight }, connection);
+        public bool ObsSetVideoSettings(
+            int? fpsNumerator = null,
+            int? fpsDenominator = null,
+            int? baseWidth = null,
+            int? baseHeight = null,
+            int? outputWidth = null,
+            int? outputHeight = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetVideoSettings",
+                new
+                {
+                    fpsNumerator,
+                    fpsDenominator,
+                    baseWidth,
+                    baseHeight,
+                    outputWidth,
+                    outputHeight
+                },
+                connection
+            );
 
         #endregion
 
@@ -157,8 +207,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with streamServiceType and streamServiceSettings, or null if failed</returns>
-        public JObject ObsGetStreamServiceSettings(int connection = 0)
-            => ObsSendRequest("GetStreamServiceSettings", null, connection);
+        public JObject ObsGetStreamServiceSettings(int connection = 0) =>
+            ObsSendRequest("GetStreamServiceSettings", null, connection);
 
         /// <summary>
         /// Sets the stream service settings.
@@ -167,8 +217,16 @@ namespace StreamUP
         /// <param name="streamServiceSettings">Service settings object</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetStreamServiceSettings(string streamServiceType, object streamServiceSettings, int connection = 0)
-            => ObsSendRequestNoResponse("SetStreamServiceSettings", new { streamServiceType, streamServiceSettings }, connection);
+        public bool ObsSetStreamServiceSettings(
+            string streamServiceType,
+            object streamServiceSettings,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetStreamServiceSettings",
+                new { streamServiceType, streamServiceSettings },
+                connection
+            );
 
         #endregion
 
@@ -191,8 +249,8 @@ namespace StreamUP
         /// <param name="recordDirectory">Path to the recording directory</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetRecordDirectory(string recordDirectory, int connection = 0)
-            => ObsSendRequestNoResponse("SetRecordDirectory", new { recordDirectory }, connection);
+        public bool ObsSetRecordDirectory(string recordDirectory, int connection = 0) =>
+            ObsSendRequestNoResponse("SetRecordDirectory", new { recordDirectory }, connection);
 
         #endregion
 
@@ -219,8 +277,22 @@ namespace StreamUP
         /// <param name="slotValue">Value to store</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetPersistentData(string realm, string slotName, object slotValue, int connection = 0)
-            => ObsSendRequestNoResponse("SetPersistentData", new { realm, slotName, slotValue }, connection);
+        public bool ObsSetPersistentData(
+            string realm,
+            string slotName,
+            object slotValue,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SetPersistentData",
+                new
+                {
+                    realm,
+                    slotName,
+                    slotValue
+                },
+                connection
+            );
 
         /// <summary>
         /// Gets a global persistent data value.
@@ -228,8 +300,8 @@ namespace StreamUP
         /// <param name="slotName">Name of the data slot</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>The stored value, or null if not found</returns>
-        public JToken ObsGetGlobalData(string slotName, int connection = 0)
-            => ObsGetPersistentData("OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName, connection);
+        public JToken ObsGetGlobalData(string slotName, int connection = 0) =>
+            ObsGetPersistentData("OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName, connection);
 
         /// <summary>
         /// Sets a global persistent data value.
@@ -238,8 +310,13 @@ namespace StreamUP
         /// <param name="slotValue">Value to store</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetGlobalData(string slotName, object slotValue, int connection = 0)
-            => ObsSetPersistentData("OBS_WEBSOCKET_DATA_REALM_GLOBAL", slotName, slotValue, connection);
+        public bool ObsSetGlobalData(string slotName, object slotValue, int connection = 0) =>
+            ObsSetPersistentData(
+                "OBS_WEBSOCKET_DATA_REALM_GLOBAL",
+                slotName,
+                slotValue,
+                connection
+            );
 
         /// <summary>
         /// Gets a profile-specific persistent data value.
@@ -247,8 +324,8 @@ namespace StreamUP
         /// <param name="slotName">Name of the data slot</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>The stored value, or null if not found</returns>
-        public JToken ObsGetProfileData(string slotName, int connection = 0)
-            => ObsGetPersistentData("OBS_WEBSOCKET_DATA_REALM_PROFILE", slotName, connection);
+        public JToken ObsGetProfileData(string slotName, int connection = 0) =>
+            ObsGetPersistentData("OBS_WEBSOCKET_DATA_REALM_PROFILE", slotName, connection);
 
         /// <summary>
         /// Sets a profile-specific persistent data value.
@@ -257,8 +334,13 @@ namespace StreamUP
         /// <param name="slotValue">Value to store</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetProfileData(string slotName, object slotValue, int connection = 0)
-            => ObsSetPersistentData("OBS_WEBSOCKET_DATA_REALM_PROFILE", slotName, slotValue, connection);
+        public bool ObsSetProfileData(string slotName, object slotValue, int connection = 0) =>
+            ObsSetPersistentData(
+                "OBS_WEBSOCKET_DATA_REALM_PROFILE",
+                slotName,
+                slotValue,
+                connection
+            );
 
         #endregion
     }

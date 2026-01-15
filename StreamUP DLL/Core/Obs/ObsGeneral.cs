@@ -16,8 +16,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with obsVersion, obsWebSocketVersion, rpcVersion, platform, etc., or null if failed</returns>
-        public JObject ObsGetVersion(int connection = 0)
-            => ObsSendRequest("GetVersion", null, connection);
+        public JObject ObsGetVersion(int connection = 0) =>
+            ObsSendRequest("GetVersion", null, connection);
 
         /// <summary>
         /// Gets the OBS Studio version string.
@@ -50,8 +50,8 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with cpuUsage, memoryUsage, activeFps, averageFrameRenderTime, renderSkippedFrames, etc., or null if failed</returns>
-        public JObject ObsGetStats(int connection = 0)
-            => ObsSendRequest("GetStats", null, connection);
+        public JObject ObsGetStats(int connection = 0) =>
+            ObsSendRequest("GetStats", null, connection);
 
         /// <summary>
         /// Gets the current CPU usage percentage.
@@ -108,8 +108,16 @@ namespace StreamUP
         /// <param name="contextName">Optional context name</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsTriggerHotkeyByName(string hotkeyName, string contextName = null, int connection = 0)
-            => ObsSendRequestNoResponse("TriggerHotkeyByName", new { hotkeyName, contextName }, connection);
+        public bool ObsTriggerHotkeyByName(
+            string hotkeyName,
+            string contextName = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "TriggerHotkeyByName",
+                new { hotkeyName, contextName },
+                connection
+            );
 
         /// <summary>
         /// Triggers a hotkey by key sequence.
@@ -121,10 +129,27 @@ namespace StreamUP
         /// <param name="command">Hold Command (Mac)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsTriggerHotkeyByKeySequence(string keyId, bool shift = false, bool control = false, bool alt = false, bool command = false, int connection = 0)
+        public bool ObsTriggerHotkeyByKeySequence(
+            string keyId,
+            bool shift = false,
+            bool control = false,
+            bool alt = false,
+            bool command = false,
+            int connection = 0
+        )
         {
-            var keyModifiers = new { shift, control, alt, command };
-            return ObsSendRequestNoResponse("TriggerHotkeyByKeySequence", new { keyId, keyModifiers }, connection);
+            var keyModifiers = new
+            {
+                shift,
+                control,
+                alt,
+                command
+            };
+            return ObsSendRequestNoResponse(
+                "TriggerHotkeyByKeySequence",
+                new { keyId, keyModifiers },
+                connection
+            );
         }
 
         #endregion
@@ -137,8 +162,8 @@ namespace StreamUP
         /// <param name="eventData">Event data object to broadcast</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsBroadcastCustomEvent(object eventData, int connection = 0)
-            => ObsSendRequestNoResponse("BroadcastCustomEvent", new { eventData }, connection);
+        public bool ObsBroadcastCustomEvent(object eventData, int connection = 0) =>
+            ObsSendRequestNoResponse("BroadcastCustomEvent", new { eventData }, connection);
 
         #endregion
 
@@ -152,8 +177,22 @@ namespace StreamUP
         /// <param name="requestData">Optional request data</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Response object with vendorName, requestType, responseData, or null if failed</returns>
-        public JObject ObsCallVendorRequest(string vendorName, string requestType, object requestData = null, int connection = 0)
-            => ObsSendRequest("CallVendorRequest", new { vendorName, requestType, requestData }, connection);
+        public JObject ObsCallVendorRequest(
+            string vendorName,
+            string requestType,
+            object requestData = null,
+            int connection = 0
+        ) =>
+            ObsSendRequest(
+                "CallVendorRequest",
+                new
+                {
+                    vendorName,
+                    requestType,
+                    requestData
+                },
+                connection
+            );
 
         #endregion
 
@@ -165,8 +204,8 @@ namespace StreamUP
         /// <param name="sourceName">Name of the source</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with videoActive and videoShowing, or null if failed</returns>
-        public JObject ObsGetSourceActive(string sourceName, int connection = 0)
-            => ObsSendRequest("GetSourceActive", new { sourceName }, connection);
+        public JObject ObsGetSourceActive(string sourceName, int connection = 0) =>
+            ObsSendRequest("GetSourceActive", new { sourceName }, connection);
 
         /// <summary>
         /// Checks if a source is currently visible in the program output.
@@ -190,9 +229,27 @@ namespace StreamUP
         /// <param name="imageCompressionQuality">Optional compression quality (1-100)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Base64-encoded image data, or null if failed</returns>
-        public string ObsGetSourceScreenshot(string sourceName, string imageFormat = "png", int? imageWidth = null, int? imageHeight = null, int? imageCompressionQuality = null, int connection = 0)
+        public string ObsGetSourceScreenshot(
+            string sourceName,
+            string imageFormat = "png",
+            int? imageWidth = null,
+            int? imageHeight = null,
+            int? imageCompressionQuality = null,
+            int connection = 0
+        )
         {
-            var response = ObsSendRequest("GetSourceScreenshot", new { sourceName, imageFormat, imageWidth, imageHeight, imageCompressionQuality }, connection);
+            var response = ObsSendRequest(
+                "GetSourceScreenshot",
+                new
+                {
+                    sourceName,
+                    imageFormat,
+                    imageWidth,
+                    imageHeight,
+                    imageCompressionQuality
+                },
+                connection
+            );
             return response?["imageData"]?.Value<string>();
         }
 
@@ -207,8 +264,28 @@ namespace StreamUP
         /// <param name="imageCompressionQuality">Optional compression quality (1-100)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSaveSourceScreenshot(string sourceName, string imageFilePath, string imageFormat = "png", int? imageWidth = null, int? imageHeight = null, int? imageCompressionQuality = null, int connection = 0)
-            => ObsSendRequestNoResponse("SaveSourceScreenshot", new { sourceName, imageFormat, imageFilePath, imageWidth, imageHeight, imageCompressionQuality }, connection);
+        public bool ObsSaveSourceScreenshot(
+            string sourceName,
+            string imageFilePath,
+            string imageFormat = "png",
+            int? imageWidth = null,
+            int? imageHeight = null,
+            int? imageCompressionQuality = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "SaveSourceScreenshot",
+                new
+                {
+                    sourceName,
+                    imageFormat,
+                    imageFilePath,
+                    imageWidth,
+                    imageHeight,
+                    imageCompressionQuality
+                },
+                connection
+            );
 
         #endregion
     }

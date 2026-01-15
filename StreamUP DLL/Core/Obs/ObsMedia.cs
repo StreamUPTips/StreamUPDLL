@@ -17,13 +17,13 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Object with mediaState, mediaDuration, mediaCursor, or null if failed</returns>
-        public JObject ObsGetMediaInputStatus(string inputName, int connection = 0)
-            => ObsSendRequest("GetMediaInputStatus", new { inputName }, connection);
+        public JObject ObsGetMediaInputStatus(string inputName, int connection = 0) =>
+            ObsSendRequest("GetMediaInputStatus", new { inputName }, connection);
 
         /// <summary>
         /// Gets the current playback state of a media input.
         /// States: OBS_MEDIA_STATE_NONE, OBS_MEDIA_STATE_PLAYING, OBS_MEDIA_STATE_OPENING,
-        /// OBS_MEDIA_STATE_BUFFERING, OBS_MEDIA_STATE_PAUSED, OBS_MEDIA_STATE_STOPPED,
+        /// /// OBS_MEDIA_STATE_BUFFERING, OBS_MEDIA_STATE_PAUSED, OBS_MEDIA_STATE_STOPPED,
         /// OBS_MEDIA_STATE_ENDED, OBS_MEDIA_STATE_ERROR
         /// </summary>
         /// <param name="inputName">Name of the media input</param>
@@ -70,8 +70,12 @@ namespace StreamUP
         /// <param name="mediaCursor">Cursor position in milliseconds</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetMediaCursor(string inputName, long mediaCursor, int connection = 0)
-            => ObsSendRequestNoResponse("SetMediaInputCursor", new { inputName, mediaCursor }, connection);
+        public bool ObsSetMediaCursor(string inputName, long mediaCursor, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetMediaInputCursor",
+                new { inputName, mediaCursor },
+                connection
+            );
 
         /// <summary>
         /// Offsets the cursor position of a media input.
@@ -80,8 +84,16 @@ namespace StreamUP
         /// <param name="mediaCursorOffset">Offset in milliseconds (positive = forward, negative = backward)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOffsetMediaCursor(string inputName, long mediaCursorOffset, int connection = 0)
-            => ObsSendRequestNoResponse("OffsetMediaInputCursor", new { inputName, mediaCursorOffset }, connection);
+        public bool ObsOffsetMediaCursor(
+            string inputName,
+            long mediaCursorOffset,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "OffsetMediaInputCursor",
+                new { inputName, mediaCursorOffset },
+                connection
+            );
 
         /// <summary>
         /// Seeks forward in a media input.
@@ -90,8 +102,8 @@ namespace StreamUP
         /// <param name="milliseconds">Milliseconds to seek forward</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSeekMediaForward(string inputName, long milliseconds, int connection = 0)
-            => ObsOffsetMediaCursor(inputName, milliseconds, connection);
+        public bool ObsSeekMediaForward(string inputName, long milliseconds, int connection = 0) =>
+            ObsOffsetMediaCursor(inputName, milliseconds, connection);
 
         /// <summary>
         /// Seeks backward in a media input.
@@ -100,8 +112,8 @@ namespace StreamUP
         /// <param name="milliseconds">Milliseconds to seek backward</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSeekMediaBackward(string inputName, long milliseconds, int connection = 0)
-            => ObsOffsetMediaCursor(inputName, -milliseconds, connection);
+        public bool ObsSeekMediaBackward(string inputName, long milliseconds, int connection = 0) =>
+            ObsOffsetMediaCursor(inputName, -milliseconds, connection);
 
         #endregion
 
@@ -118,8 +130,16 @@ namespace StreamUP
         /// <param name="mediaAction">Media action constant</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsTriggerMediaInputAction(string inputName, string mediaAction, int connection = 0)
-            => ObsSendRequestNoResponse("TriggerMediaInputAction", new { inputName, mediaAction }, connection);
+        public bool ObsTriggerMediaInputAction(
+            string inputName,
+            string mediaAction,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "TriggerMediaInputAction",
+                new { inputName, mediaAction },
+                connection
+            );
 
         /// <summary>
         /// Plays a media input.
@@ -127,8 +147,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsPlayMedia(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PLAY", connection);
+        public bool ObsPlayMedia(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PLAY",
+                connection
+            );
 
         /// <summary>
         /// Pauses a media input.
@@ -136,8 +160,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsPauseMedia(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PAUSE", connection);
+        public bool ObsPauseMedia(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PAUSE",
+                connection
+            );
 
         /// <summary>
         /// Stops a media input.
@@ -145,8 +173,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsStopMedia(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_STOP", connection);
+        public bool ObsStopMedia(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_STOP",
+                connection
+            );
 
         /// <summary>
         /// Restarts a media input from the beginning.
@@ -154,8 +186,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsRestartMedia(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART", connection);
+        public bool ObsRestartMedia(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART",
+                connection
+            );
 
         /// <summary>
         /// Goes to the next item in a media playlist.
@@ -163,8 +199,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsNextMediaItem(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_NEXT", connection);
+        public bool ObsNextMediaItem(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_NEXT",
+                connection
+            );
 
         /// <summary>
         /// Goes to the previous item in a media playlist.
@@ -172,8 +212,12 @@ namespace StreamUP
         /// <param name="inputName">Name of the media input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsPreviousMediaItem(string inputName, int connection = 0)
-            => ObsTriggerMediaInputAction(inputName, "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PREVIOUS", connection);
+        public bool ObsPreviousMediaItem(string inputName, int connection = 0) =>
+            ObsTriggerMediaInputAction(
+                inputName,
+                "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_PREVIOUS",
+                connection
+            );
 
         #endregion
     }

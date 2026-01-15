@@ -28,24 +28,28 @@ namespace StreamUP
         /// <param name="enabled">True to enable, false to disable</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsSetStudioModeEnabled(bool enabled, int connection = 0)
-            => ObsSendRequestNoResponse("SetStudioModeEnabled", new { studioModeEnabled = enabled }, connection);
+        public bool ObsSetStudioModeEnabled(bool enabled, int connection = 0) =>
+            ObsSendRequestNoResponse(
+                "SetStudioModeEnabled",
+                new { studioModeEnabled = enabled },
+                connection
+            );
 
         /// <summary>
         /// Enables studio mode.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsEnableStudioMode(int connection = 0)
-            => ObsSetStudioModeEnabled(true, connection);
+        public bool ObsEnableStudioMode(int connection = 0) =>
+            ObsSetStudioModeEnabled(true, connection);
 
         /// <summary>
         /// Disables studio mode.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsDisableStudioMode(int connection = 0)
-            => ObsSetStudioModeEnabled(false, connection);
+        public bool ObsDisableStudioMode(int connection = 0) =>
+            ObsSetStudioModeEnabled(false, connection);
 
         /// <summary>
         /// Toggles studio mode.
@@ -70,8 +74,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenInputPropertiesDialog(string inputName, int connection = 0)
-            => ObsSendRequestNoResponse("OpenInputPropertiesDialog", new { inputName }, connection);
+        public bool ObsOpenInputPropertiesDialog(string inputName, int connection = 0) =>
+            ObsSendRequestNoResponse("OpenInputPropertiesDialog", new { inputName }, connection);
 
         /// <summary>
         /// Opens the filters dialog for an input.
@@ -79,8 +83,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenInputFiltersDialog(string inputName, int connection = 0)
-            => ObsSendRequestNoResponse("OpenInputFiltersDialog", new { inputName }, connection);
+        public bool ObsOpenInputFiltersDialog(string inputName, int connection = 0) =>
+            ObsSendRequestNoResponse("OpenInputFiltersDialog", new { inputName }, connection);
 
         /// <summary>
         /// Opens the interact dialog for an input (e.g., browser source).
@@ -88,8 +92,8 @@ namespace StreamUP
         /// <param name="inputName">Name of the input</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenInputInteractDialog(string inputName, int connection = 0)
-            => ObsSendRequestNoResponse("OpenInputInteractDialog", new { inputName }, connection);
+        public bool ObsOpenInputInteractDialog(string inputName, int connection = 0) =>
+            ObsSendRequestNoResponse("OpenInputInteractDialog", new { inputName }, connection);
 
         #endregion
 
@@ -120,8 +124,22 @@ namespace StreamUP
         /// <param name="projectorGeometry">Optional Qt geometry string for windowed mode</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenVideoMixProjector(string videoMixType, int monitorIndex = -1, string projectorGeometry = null, int connection = 0)
-            => ObsSendRequestNoResponse("OpenVideoMixProjector", new { videoMixType, monitorIndex, projectorGeometry }, connection);
+        public bool ObsOpenVideoMixProjector(
+            string videoMixType,
+            int monitorIndex = -1,
+            string projectorGeometry = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "OpenVideoMixProjector",
+                new
+                {
+                    videoMixType,
+                    monitorIndex,
+                    projectorGeometry
+                },
+                connection
+            );
 
         /// <summary>
         /// Opens a preview projector window.
@@ -130,8 +148,17 @@ namespace StreamUP
         /// <param name="projectorGeometry">Optional Qt geometry string for windowed mode</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenPreviewProjector(int monitorIndex = -1, string projectorGeometry = null, int connection = 0)
-            => ObsOpenVideoMixProjector("OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW", monitorIndex, projectorGeometry, connection);
+        public bool ObsOpenPreviewProjector(
+            int monitorIndex = -1,
+            string projectorGeometry = null,
+            int connection = 0
+        ) =>
+            ObsOpenVideoMixProjector(
+                "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PREVIEW",
+                monitorIndex,
+                projectorGeometry,
+                connection
+            );
 
         /// <summary>
         /// Opens a program projector window.
@@ -140,8 +167,17 @@ namespace StreamUP
         /// <param name="projectorGeometry">Optional Qt geometry string for windowed mode</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenProgramProjector(int monitorIndex = -1, string projectorGeometry = null, int connection = 0)
-            => ObsOpenVideoMixProjector("OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM", monitorIndex, projectorGeometry, connection);
+        public bool ObsOpenProgramProjector(
+            int monitorIndex = -1,
+            string projectorGeometry = null,
+            int connection = 0
+        ) =>
+            ObsOpenVideoMixProjector(
+                "OBS_WEBSOCKET_VIDEO_MIX_TYPE_PROGRAM",
+                monitorIndex,
+                projectorGeometry,
+                connection
+            );
 
         /// <summary>
         /// Opens a multiview projector window.
@@ -150,8 +186,17 @@ namespace StreamUP
         /// <param name="projectorGeometry">Optional Qt geometry string for windowed mode</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenMultiviewProjector(int monitorIndex = -1, string projectorGeometry = null, int connection = 0)
-            => ObsOpenVideoMixProjector("OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW", monitorIndex, projectorGeometry, connection);
+        public bool ObsOpenMultiviewProjector(
+            int monitorIndex = -1,
+            string projectorGeometry = null,
+            int connection = 0
+        ) =>
+            ObsOpenVideoMixProjector(
+                "OBS_WEBSOCKET_VIDEO_MIX_TYPE_MULTIVIEW",
+                monitorIndex,
+                projectorGeometry,
+                connection
+            );
 
         /// <summary>
         /// Opens a source projector window.
@@ -161,8 +206,22 @@ namespace StreamUP
         /// <param name="projectorGeometry">Optional Qt geometry string for windowed mode</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>True if successful</returns>
-        public bool ObsOpenSourceProjector(string sourceName, int monitorIndex = -1, string projectorGeometry = null, int connection = 0)
-            => ObsSendRequestNoResponse("OpenSourceProjector", new { sourceName, monitorIndex, projectorGeometry }, connection);
+        public bool ObsOpenSourceProjector(
+            string sourceName,
+            int monitorIndex = -1,
+            string projectorGeometry = null,
+            int connection = 0
+        ) =>
+            ObsSendRequestNoResponse(
+                "OpenSourceProjector",
+                new
+                {
+                    sourceName,
+                    monitorIndex,
+                    projectorGeometry
+                },
+                connection
+            );
 
         #endregion
     }
