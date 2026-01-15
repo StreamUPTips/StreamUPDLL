@@ -83,6 +83,10 @@ namespace StreamUP
                         HandleExecuteMethodMessage(message);
                         break;
 
+                    case "openExternalUrl":
+                        HandleOpenExternalUrlMessage(message);
+                        break;
+
                     default:
                         LogDebug($"Unknown message action: {action}");
                         break;
@@ -397,6 +401,36 @@ namespace StreamUP
             {
                 LogError($"Execute method failed: {ex.Message}");
                 SendToViewer(new { action = "executeMethodResult", callbackId, success = false, error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Handle open external URL request from viewer - opens URL in user's default browser
+        /// </summary>
+        private void HandleOpenExternalUrlMessage(JObject message)
+        {
+            var url = message["url"]?.ToString();
+
+            if (string.IsNullOrEmpty(url))
+            {
+                LogDebug("No URL provided for external open");
+                return;
+            }
+
+            LogDebug($"Opening external URL: {url}");
+
+            try
+            {
+                // Open URL in user's default browser
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                LogError($"Failed to open external URL: {ex.Message}");
             }
         }
 
