@@ -71,36 +71,21 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <!--Compile Include="*.cs" /-->
+    <!-- Root-level files -->
     <Compile Include="StreamUP.cs" />
-    <Compile Include="_Obsolete\*.cs" />
-    <Compile Include="_ForTDToSort\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\*.cs" />
-    <Compile Include="Extensions\CoreExtensions\*.cs" />
-    <Compile Include="Extensions\EventTriggerExtensions\*.cs" />
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
-    <Compile Include="Extensions\ObsExtensions\*.cs" />
-    <Compile Include="Extensions\SettingsExtensions\*.cs" />
-    <Compile Include="Extensions\UIExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\CurrencyExtensions\*.cs" />
-    <Compile Include="Extensions\TwitchExtensions\*.cs" />
-    <Compile Include="Extensions\YouTubeExtensions\*.cs" />
-    <Compile Include="Extensions\ValidationExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\TheRunExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
-    <Compile Include="Extensions\AndiExtensions\*.cs" />
-    <Compile Include="Core\Settings\*.cs" />
-    <Compile Include="Core\ProductSystem\*.cs" />
-    <Compile Include="Core\ProductSystem\Initialization\*.cs" />
-    <Compile Include="Core\ProductSystem\Validation\*.cs" />
-    <Compile Include="Core\ProductSystem\UI\*.cs" />
-    <Compile Include="Core\Obs\*.cs" />
-    <!-- Note: Core\Obs\Tests\ contains example code for Streamer.bot, not compiled -->
-    <!-- Legacy extensions (backwards compatibility only) -->
+
+    <!-- Main source folders (recursive) -->
+    <Compile Include="Core\**\*.cs" />
+    <Compile Include="Extensions\**\*.cs" />
+
+    <!-- Legacy/deprecated (recursive) -->
+    <Compile Include="_Obsolete\**\*.cs" />
     <Compile Include="_LegacyExtensions\**\*.cs" />
+
+    <!-- Exclude test/example code -->
+    <Compile Remove="**\Tests\**\*.cs" />
+    <Compile Remove="**\TestProducts\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\StreamUp-icon.png">

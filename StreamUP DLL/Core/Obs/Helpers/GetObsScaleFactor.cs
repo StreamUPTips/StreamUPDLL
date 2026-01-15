@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace StreamUP
 {
     public partial class StreamUpLib
@@ -13,9 +15,9 @@ namespace StreamUP
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Scale factor (e.g., 1.0 for 1920px, 2.0 for 3840px, 0.667 for 1280px), or 1.0 if unable to retrieve</returns>
-        public double GetObsScaleFactor(int connection = 0)
+        public double ObsGetScaleFactor(int connection = 0)
         {
-            return GetObsScaleFactor(1920, connection);
+            return ObsGetScaleFactor(1920, connection);
         }
 
         /// <summary>
@@ -24,7 +26,7 @@ namespace StreamUP
         /// <param name="referenceWidth">The reference width to calculate scale against (default: 1920)</param>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <returns>Scale factor, or 1.0 if unable to retrieve video settings</returns>
-        public double GetObsScaleFactor(int referenceWidth, int connection = 0)
+        public double ObsGetScaleFactor(int referenceWidth, int connection = 0)
         {
             // Get video settings from OBS
             var videoSettings = ObsGetVideoSettings(connection);
@@ -53,13 +55,13 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Gets the OBS canvas dimensions.
+        /// Gets the OBS canvas (base) resolution.
         /// </summary>
         /// <param name="connection">OBS connection index (0-4)</param>
         /// <param name="baseWidth">Output: Canvas width in pixels</param>
         /// <param name="baseHeight">Output: Canvas height in pixels</param>
         /// <returns>True if successful, false if unable to retrieve</returns>
-        public bool GetObsCanvasSize(int connection, out int baseWidth, out int baseHeight)
+        public bool ObsGetCanvasSize(int connection, out int baseWidth, out int baseHeight)
         {
             baseWidth = 0;
             baseHeight = 0;
@@ -95,7 +97,7 @@ namespace StreamUP
         /// <param name="outputWidth">Output: Scaled output width in pixels</param>
         /// <param name="outputHeight">Output: Scaled output height in pixels</param>
         /// <returns>True if successful, false if unable to retrieve</returns>
-        public bool GetObsOutputSize(int connection, out int outputWidth, out int outputHeight)
+        public bool ObsGetOutputSize(int connection, out int outputWidth, out int outputHeight)
         {
             outputWidth = 0;
             outputHeight = 0;

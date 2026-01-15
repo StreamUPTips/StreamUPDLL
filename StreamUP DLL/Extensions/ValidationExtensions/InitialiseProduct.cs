@@ -6,19 +6,21 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        public bool InitialiseProduct(string actionName, string productNumber, ProductType productType)
+        public bool InitialiseProduct(
+            string actionName,
+            string productNumber,
+            ProductType productType
+        )
         {
-
             //#Add it here?
             _CPH.TryGetArg("settingResetArgument", out bool onReset);
-            if(onReset)
+            if (onReset)
             {
                 LogError("User just reset, stopping process");
                 return false;
-
             }
             // Check if already initialised
-            if (IsProductInitialised(productNumber)) 
+            if (IsProductInitialised(productNumber))
             {
                 LogInfo("Product is already initialised. Skipping initialising step.");
                 return true;
@@ -26,12 +28,12 @@ namespace StreamUP
             LogInfo("Product is not initialised. Starting initialising.");
 
             // Load productInfo
-            if (!LoadProductInfo(actionName, productNumber, out var productInfo)) 
+            if (!LoadProductInfo(actionName, productNumber, out var productInfo))
             {
                 LogError("Unable to load productInfo");
                 return false;
             }
-            
+
             // Verify user has correct Library version
             if (!CheckStreamUpLibraryVersion(productInfo.RequiredLibraryVersion))
             {
@@ -40,7 +42,13 @@ namespace StreamUP
             }
 
             // Load productSettings
-            if (!LoadProductSettings(productNumber, productInfo, out Dictionary<string, object> productSettings))
+            if (
+                !LoadProductSettings(
+                    productNumber,
+                    productInfo,
+                    out Dictionary<string, object> productSettings
+                )
+            )
             {
                 LogError("Unable to load productSettings");
                 return false;
@@ -62,32 +70,53 @@ namespace StreamUP
             return true;
         }
 
-        private bool LoadObsProduct(ProductInfo productInfo, Dictionary<string, object> productSettings)
+        private bool LoadObsProduct(
+            ProductInfo productInfo,
+            Dictionary<string, object> productSettings
+        )
         {
             if (!CheckObsConnectionSet(productSettings, out int obsConnection))
             {
                 string errorMessage = "Unable to retrieve OBS connection number from settings.";
-                MessageBox.Show(errorMessage, "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    errorMessage,
+                    "StreamUP Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 return false;
             }
 
             if (!TryGetObsConnection(obsConnection))
             {
                 string errorMessage = "Unable to connect to OBS";
-                string actionMessage = $"Check under the 'Stream Apps' tab in StreamerBot and make sure OBS is connected under connection number '{obsConnection}'";
-                MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string actionMessage =
+                    $"Check under the 'Stream Apps' tab in StreamerBot and make sure OBS is connected under connection number '{obsConnection}'";
+                MessageBox.Show(
+                    $"{errorMessage}\n\n{actionMessage}",
+                    "StreamUP Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 return false;
             }
 
             if (!CheckObsWebsocketVersion(obsConnection))
             {
-                string errorMessage = $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.";
-                string actionMessage = "Make sure OBS is connected via Websocket 5.0.0+ in the 'Stream Apps' tab in StreamerBot.";
-                MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string errorMessage =
+                    $"There is no OBS Websocket v5.0.0 or above connection on connection number '{obsConnection}'.";
+                string actionMessage =
+                    "Make sure OBS is connected via Websocket 5.0.0+ in the 'Stream Apps' tab in StreamerBot.";
+                MessageBox.Show(
+                    $"{errorMessage}\n\n{actionMessage}",
+                    "StreamUP Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 return false;
             }
 
-            GetObsCanvasSize(obsConnection, out int baseWidth, out int baseHeight);
+            ObsGetCanvasSize(obsConnection, out int baseWidth, out int baseHeight);
 
             if (!CheckCanvasResolution(baseWidth, baseHeight))
             {
@@ -96,7 +125,10 @@ namespace StreamUP
 
             SetScaleFactor(baseWidth, productSettings, productInfo.ProductNumber);
 
-            bool ignorePluginsOutOfDate = _CPH.GetGlobalVar<bool>("sup000_IgnoreObsPluginsOutOfDate", false);
+            bool ignorePluginsOutOfDate = _CPH.GetGlobalVar<bool>(
+                "sup000_IgnoreObsPluginsOutOfDate",
+                false
+            );
             if (!ignorePluginsOutOfDate)
             {
                 if (!CheckObsPlugins(productInfo, obsConnection))
@@ -109,19 +141,32 @@ namespace StreamUP
             if (!CheckProductSceneExists(productInfo, obsConnection))
             {
                 string errorMessage = $"The scene '{productInfo.SceneName}' was not found in OBS.";
-                string actionMessage = "Please install the products '.StreamUP' file into OBS via the StreamUP OBS plugin";
+                string actionMessage =
+                    "Please install the products '.StreamUP' file into OBS via the StreamUP OBS plugin";
 
-                MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    $"{errorMessage}\n\n{actionMessage}",
+                    "StreamUP Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 LogError($"Product scene [{productInfo.SceneName}] has not been found in OBS");
                 return false;
             }
 
             if (!CheckProductSceneVersion(productInfo, obsConnection))
             {
-                string errorMessage = $"The scene '{productInfo.SceneName}' in OBS is an older version.";
-                string actionMessage = "Please install the products '.StreamUP' file into OBS via the StreamUP OBS plugin";
+                string errorMessage =
+                    $"The scene '{productInfo.SceneName}' in OBS is an older version.";
+                string actionMessage =
+                    "Please install the products '.StreamUP' file into OBS via the StreamUP OBS plugin";
 
-                MessageBox.Show($"{errorMessage}\n\n{actionMessage}", "StreamUP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    $"{errorMessage}\n\n{actionMessage}",
+                    "StreamUP Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 LogError($"Product scene [{productInfo.SceneName}] is out of date in OBS");
                 return false;
             }
@@ -142,7 +187,5 @@ namespace StreamUP
             LogInfo($"Setting product [{productNumber}] as initialised in StreamerBot global vars");
             _CPH.SetGlobalVar($"{productNumber}_ProductInitialised", value, false);
         }
-
     }
-
 }

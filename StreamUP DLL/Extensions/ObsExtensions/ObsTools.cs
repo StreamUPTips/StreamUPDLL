@@ -24,7 +24,7 @@ namespace StreamUP
             }
 
             // Get obs output filepath
-            if (!GetObsOutputFilePath(obsConnection, out string obsOutputFilePath))
+            if (!ObsGetOutputFilePath(obsConnection, out string obsOutputFilePath))
             {
                 LogError("Unable to retrieve OBS output filepath");
                 ShowToastNotification(NotificationType.Error, "Screenshot Failed", "Unable to retrieve OBS output filepath");
