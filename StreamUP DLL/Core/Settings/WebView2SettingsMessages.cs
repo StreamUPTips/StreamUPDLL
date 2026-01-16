@@ -439,37 +439,88 @@ namespace StreamUP
         #region Save Action Trigger
 
         /// <summary>
-        /// Trigger the configured save action in Streamer.bot
+        /// Trigger the configured save action or execute method in Streamer.bot
+        /// Supports both "settingsAction" (action name) and "onSaveExecuteMethod" (codeId + methodName)
         /// </summary>
         private void TriggerSaveAction()
         {
+            // First, check for settingsAction (simple action name)
             var settingsAction = _currentConfig?["settingsAction"]?.ToString();
 
-            if (string.IsNullOrEmpty(settingsAction))
+            if (!string.IsNullOrEmpty(settingsAction))
             {
-                LogDebug("No settings action configured");
+                TriggerAction(settingsAction);
                 return;
             }
 
+            // Second, check for onSaveExecuteMethod (codeId + methodName)
+            var executeMethod = _currentConfig?["onSaveExecuteMethod"];
+            if (executeMethod != null)
+            {
+                var codeId = executeMethod["codeId"]?.ToString();
+                var methodName = executeMethod["methodName"]?.ToString() ?? "Execute";
+
+                if (!string.IsNullOrEmpty(codeId))
+                {
+                    TriggerExecuteMethod(codeId, methodName);
+                    return;
+                }
+            }
+
+            LogDebug("No settings action configured");
+        }
+
+        /// <summary>
+        /// Trigger an action by name
+        /// </summary>
+        private void TriggerAction(string actionName)
+        {
             try
             {
-                LogInfo($"Triggering settings action: {settingsAction}");
+                LogInfo($"Triggering settings action: {actionName}");
 
                 // Check if action exists
-                if (!_CPH.ActionExists(settingsAction))
+                if (!_CPH.ActionExists(actionName))
                 {
-                    LogError($"Settings action not found: {settingsAction}");
+                    LogError($"Settings action not found: {actionName}");
                     return;
                 }
 
                 // Run the action
-                _CPH.RunAction(settingsAction, false);
+                _CPH.RunAction(actionName, false);
 
                 LogInfo("Settings action triggered successfully");
             }
             catch (Exception ex)
             {
                 LogError($"Failed to trigger settings action: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Trigger an execute method by codeId and methodName
+        /// </summary>
+        private void TriggerExecuteMethod(string codeId, string methodName)
+        {
+            try
+            {
+                LogInfo($"Triggering execute method: {codeId}::{methodName}");
+
+                // Execute the method
+                bool success = _CPH.ExecuteMethod(codeId, methodName);
+
+                if (success)
+                {
+                    LogInfo("Execute method triggered successfully");
+                }
+                else
+                {
+                    LogError($"Execute method failed: {codeId}::{methodName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Failed to trigger execute method: {ex.Message}");
             }
         }
 
