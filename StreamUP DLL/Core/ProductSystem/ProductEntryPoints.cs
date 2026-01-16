@@ -290,6 +290,15 @@ namespace StreamUP
             // Invalidate validation cache since user might change settings
             ProductValidationCache.InvalidateCache(productNumber);
 
+            // Check for product updates (non-blocking, runs in background)
+            string productGuid = config["productGuid"]?.ToString();
+            string productVersion = config["productVersion"]?.ToString();
+            string productName = config["productName"]?.ToString() ?? productNumber;
+            if (!string.IsNullOrEmpty(productGuid))
+            {
+                CheckProductUpdate(productGuid, productVersion, productName, productNumber);
+            }
+
             // Open the settings menu
             return OpenSettingsMenu(config);
         }

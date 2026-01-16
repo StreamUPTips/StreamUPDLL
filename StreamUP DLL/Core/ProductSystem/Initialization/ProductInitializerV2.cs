@@ -79,6 +79,14 @@ namespace StreamUP
             // Clear any previous prompts for this product (they resolved their issues)
             PromptManager.ClearPrompts(productNumber);
 
+            // Check for product updates (non-blocking, runs in background)
+            string productGuid = settingsConfig["productGuid"]?.ToString();
+            string productVersion = settingsConfig["productVersion"]?.ToString();
+            if (!string.IsNullOrEmpty(productGuid))
+            {
+                CheckProductUpdate(productGuid, productVersion, productName, productNumber);
+            }
+
             return InitializationResult.Success;
         }
 
