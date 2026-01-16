@@ -98,6 +98,14 @@ namespace StreamUP
             return ShowDialog(DialogType.Success, title, message, productName);
         }
 
+        /// <summary>
+        /// Show an update available dialog with three options: Download, Later, Don't Remind Me
+        /// </summary>
+        public static UpdatePromptResult ShowUpdatePrompt(string title, string message, string productName)
+        {
+            return ShowUpdateDialog(title, message, productName);
+        }
+
         #endregion
 
         private static ModernDialogResult ShowDialog(DialogType type, string title, string message, string productName, string yesText = "OK", string noText = "Cancel")
@@ -674,6 +682,387 @@ namespace StreamUP
                       d=""M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z""/>
             </svg>";
         }
+
+        private static string GetUpdateIcon()
+        {
+            return @"<svg fill=""none"" stroke=""currentColor"" viewBox=""0 0 24 24"">
+                <path stroke-linecap=""round"" stroke-linejoin=""round"" stroke-width=""2""
+                      d=""M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4""/>
+            </svg>";
+        }
+
+        #region Update Dialog (Three Buttons)
+
+        private static UpdatePromptResult _updateResult;
+
+        private static UpdatePromptResult ShowUpdateDialog(string title, string message, string productName)
+        {
+            // Prevent multiple dialogs
+            if (_dialogWindow != null && !_dialogWindow.IsDisposed)
+            {
+                try
+                {
+                    _dialogWindow.Invoke((MethodInvoker)delegate
+                    {
+                        _dialogWindow.Activate();
+                        _dialogWindow.BringToFront();
+                    });
+                }
+                catch { }
+
+                return new UpdatePromptResult { Action = UpdateAction.Later };
+            }
+
+            _updateResult = new UpdatePromptResult { Action = UpdateAction.Later };
+            _dialogComplete = new ManualResetEventSlim(false);
+
+            Thread thread = new Thread(() =>
+            {
+                try
+                {
+                    CreateUpdateDialogWindow(title, message, productName);
+                    Application.Run(_dialogWindow);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[StreamUP Update Dialog Error] {ex.Message}");
+                    _updateResult.Action = UpdateAction.Later;
+                    _dialogComplete.Set();
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+
+            _dialogComplete.Wait(TimeSpan.FromMinutes(5));
+
+            return _updateResult;
+        }
+
+        private static void CreateUpdateDialogWindow(string title, string message, string productName)
+        {
+            int lineCount = message.Split('\n').Length;
+            int charCount = message.Length;
+            bool hasProductName = !string.IsNullOrEmpty(productName);
+
+            int contentHeight = Math.Max(60, 40 + (lineCount * 22) + (charCount / 40 * 5));
+            int estimatedHeight = 56 + (hasProductName ? 32 : 0) + contentHeight + 60;
+            estimatedHeight = Math.Max(200, Math.Min(450, estimatedHeight));
+
+            _dialogWindow = new BorderlessForm
+            {
+                Text = "StreamUP",
+                Width = 450,
+                Height = estimatedHeight,
+                MinimumSize = new Size(400, 180),
+                MaximumSize = new Size(550, 500),
+                StartPosition = FormStartPosition.CenterScreen,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(15, 23, 42),
+                ShowInTaskbar = true,
+                TopMost = true
+            };
+
+            _dialogWebView = new WebView2
+            {
+                Dock = DockStyle.Fill,
+                DefaultBackgroundColor = Color.FromArgb(15, 23, 42)
+            };
+            _dialogWindow.Controls.Add(_dialogWebView);
+
+            ApplyRoundedCorners(_dialogWindow.Handle);
+
+            _dialogWindow.Shown += async (s, e) =>
+            {
+                try
+                {
+                    await InitializeUpdateDialogWebView(title, message, productName);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[StreamUP Update Dialog Error] {ex.Message}");
+                    _updateResult.Action = UpdateAction.Later;
+                    _dialogWindow.Close();
+                }
+            };
+
+            _dialogWindow.FormClosed += (s, e) =>
+            {
+                _dialogComplete?.Set();
+                _dialogWebView?.Dispose();
+                _dialogWebView = null;
+                _dialogWindow = null;
+            };
+        }
+
+        private static async Task InitializeUpdateDialogWebView(string title, string message, string productName)
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var cachePath = Path.Combine(appData, "StreamUP", "DialogCache");
+            Directory.CreateDirectory(cachePath);
+
+            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: cachePath);
+            await _dialogWebView.EnsureCoreWebView2Async(env);
+
+            _dialogWebView.CoreWebView2.Settings.IsStatusBarEnabled = false;
+            _dialogWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+            _dialogWebView.CoreWebView2.Settings.IsZoomControlEnabled = false;
+            _dialogWebView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
+
+            _dialogWebView.CoreWebView2.WebMessageReceived += OnUpdateDialogMessageReceived;
+
+            string html = GenerateUpdateDialogHtml(title, message, productName);
+            _dialogWebView.CoreWebView2.NavigateToString(html);
+        }
+
+        private static void OnUpdateDialogMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                var messageString = e.TryGetWebMessageAsString();
+                if (string.IsNullOrEmpty(messageString))
+                    return;
+
+                var json = JObject.Parse(messageString);
+                var action = json["action"]?.ToString();
+
+                switch (action)
+                {
+                    case "download":
+                        _updateResult.Action = UpdateAction.Download;
+                        _dialogWindow?.Invoke((MethodInvoker)delegate { _dialogWindow?.Close(); });
+                        break;
+
+                    case "dontremind":
+                        _updateResult.Action = UpdateAction.DontRemind;
+                        _dialogWindow?.Invoke((MethodInvoker)delegate { _dialogWindow?.Close(); });
+                        break;
+
+                    case "later":
+                    case "close":
+                        _updateResult.Action = UpdateAction.Later;
+                        _dialogWindow?.Invoke((MethodInvoker)delegate { _dialogWindow?.Close(); });
+                        break;
+
+                    case "resize":
+                        int height = json["height"]?.Value<int>() ?? 200;
+                        _dialogWindow?.Invoke((MethodInvoker)delegate
+                        {
+                            if (_dialogWindow != null)
+                            {
+                                int newHeight = Math.Max(180, Math.Min(500, height + 20));
+                                _dialogWindow.Height = newHeight;
+                            }
+                        });
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[StreamUP Update Dialog Message Error] {ex.Message}");
+            }
+        }
+
+        private static string GenerateUpdateDialogHtml(string title, string message, string productName)
+        {
+            string accentColorDark = "#22c55e";  // Green for updates
+            string accentColorLight = "#16a34a";
+            string iconSvg = GetUpdateIcon();
+
+            string productSection = "";
+            if (!string.IsNullOrEmpty(productName))
+            {
+                productSection = $@"
+                <div class=""product-bar"">
+                    <span class=""product-label"">Product:</span>
+                    <span class=""product-name"">{EscapeHtml(productName)}</span>
+                </div>";
+            }
+
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <style>
+        :root {{
+            --accent-dark: {accentColorDark};
+            --accent-light: {accentColorLight};
+        }}
+
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            line-height: 1.5;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }}
+
+        .container {{
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }}
+
+        .header {{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            background-color: #0f172a;
+            border-bottom: 1px solid #334155;
+            user-select: none;
+            flex-shrink: 0;
+        }}
+
+        .logo {{ width: 28px; height: 28px; flex-shrink: 0; }}
+        .logo img {{ width: 100%; height: 100%; object-fit: contain; }}
+        .icon {{ width: 20px; height: 20px; flex-shrink: 0; color: var(--accent-dark); }}
+        .title {{ flex: 1; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+
+        .close-btn {{
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; background: #334155; color: #f1f5f9;
+            cursor: pointer; border-radius: 6px;
+            transition: all 0.15s; flex-shrink: 0;
+            font-size: 18px; font-weight: 400; line-height: 1;
+        }}
+        .close-btn:hover {{ background-color: #ef4444; color: white; }}
+
+        .product-bar {{
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px;
+            background-color: rgba(30, 41, 59, 0.5);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            font-size: 12px; flex-shrink: 0;
+        }}
+        .product-label {{ color: #64748b; }}
+        .product-name {{ color: #cbd5e1; font-weight: 500; }}
+
+        .content {{
+            flex: 1; padding: 16px 14px;
+            overflow-y: auto; font-size: 13px;
+            color: #cbd5e1; line-height: 1.6;
+        }}
+
+        .footer {{
+            display: flex; justify-content: flex-end; gap: 8px;
+            padding: 12px 14px;
+            background-color: #0f172a;
+            border-top: 1px solid #334155;
+            flex-shrink: 0;
+        }}
+
+        button {{
+            font-size: 13px; font-weight: 500;
+            padding: 8px 14px; border-radius: 6px;
+            border: none; cursor: pointer;
+            transition: all 0.15s;
+        }}
+
+        .btn-primary {{
+            background-color: var(--accent-dark);
+            color: #0f172a;
+        }}
+        .btn-primary:hover {{ filter: brightness(1.1); }}
+
+        .btn-secondary {{
+            background-color: #334155;
+            color: #f1f5f9;
+            border: 1px solid #475569;
+        }}
+        .btn-secondary:hover {{ background-color: #475569; }}
+
+        .btn-tertiary {{
+            background-color: transparent;
+            color: #64748b;
+            font-size: 12px;
+            padding: 8px 10px;
+        }}
+        .btn-tertiary:hover {{ color: #94a3b8; text-decoration: underline; }}
+
+        ::-webkit-scrollbar {{ width: 6px; }}
+        ::-webkit-scrollbar-track {{ background: transparent; }}
+        ::-webkit-scrollbar-thumb {{ background: #475569; border-radius: 3px; }}
+
+        /* Light mode */
+        body.light {{
+            background-color: #f8fafc;
+            color: #0f172a;
+        }}
+        body.light .header {{ background-color: #ffffff; border-bottom-color: #e2e8f0; }}
+        body.light .footer {{ background-color: #ffffff; border-top-color: #e2e8f0; }}
+        body.light .product-bar {{ background-color: #f1f5f9; border-bottom-color: #e2e8f0; }}
+        body.light .product-name {{ color: #334155; }}
+        body.light .content {{ color: #475569; }}
+        body.light .title {{ color: #0f172a; }}
+        body.light .icon {{ color: var(--accent-light); }}
+        body.light .btn-primary {{ background-color: var(--accent-light); color: #ffffff; }}
+        body.light .btn-secondary {{ background-color: #e2e8f0; color: #0f172a; border-color: #cbd5e1; }}
+        body.light .btn-secondary:hover {{ background-color: #cbd5e1; }}
+        body.light .btn-tertiary {{ color: #64748b; }}
+        body.light .btn-tertiary:hover {{ color: #475569; }}
+        body.light .close-btn {{ background: #e2e8f0; color: #334155; }}
+        body.light .close-btn:hover {{ background-color: #ef4444; color: white; }}
+    </style>
+</head>
+<body>
+    <div class=""container"" id=""container"">
+        <div class=""header"" id=""header"">
+            <div class=""logo"">
+                <img src=""data:image/png;base64,{STREAMUP_LOGO_BASE64}"" alt=""StreamUP"">
+            </div>
+            <div class=""icon"">{iconSvg}</div>
+            <div class=""title"">{EscapeHtml(title)}</div>
+            <button class=""close-btn"" onclick=""later()"" title=""Close"">&#215;</button>
+        </div>
+
+        {productSection}
+
+        <div class=""content"" id=""content"">{EscapeHtml(message)}</div>
+
+        <div class=""footer"">
+            <button onclick=""dontRemind()"" class=""btn-tertiary"">Don't remind me</button>
+            <button onclick=""later()"" class=""btn-secondary"">Later</button>
+            <button onclick=""download()"" class=""btn-primary"">Download</button>
+        </div>
+    </div>
+
+    <script>
+        const theme = localStorage.getItem('{THEME_STORAGE_KEY}') || 'dark';
+        if (theme === 'light') document.body.classList.add('light');
+
+        function sendMessage(msg) {{
+            window.chrome.webview.postMessage(JSON.stringify(msg));
+        }}
+
+        function download() {{ sendMessage({{ action: 'download' }}); }}
+        function later() {{ sendMessage({{ action: 'later' }}); }}
+        function dontRemind() {{ sendMessage({{ action: 'dontremind' }}); }}
+
+        document.addEventListener('keydown', function(e) {{
+            if (e.key === 'Escape') later();
+            if (e.key === 'Enter') download();
+        }});
+
+        window.addEventListener('load', function() {{
+            setTimeout(function() {{
+                const container = document.getElementById('container');
+                const height = container.scrollHeight;
+                sendMessage({{ action: 'resize', height: height }});
+            }}, 100);
+        }});
+    </script>
+</body>
+</html>
+";
+        }
+
+        #endregion
     }
 
 }
