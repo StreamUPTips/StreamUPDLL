@@ -97,13 +97,15 @@ namespace StreamUP
         /// <summary>
         /// Opens the WebView2 settings menu using a JSON string
         /// </summary>
-        /// <param name="settingsConfigJson">JSON string containing the settings menu configuration</param>
+        /// <param name="settingsConfigJson">JSON string containing the settings menu configuration (supports LZ-String compressed data)</param>
         /// <returns>True if settings window opened successfully</returns>
         public bool OpenSettingsMenu(string settingsConfigJson)
         {
             try
             {
-                var config = JObject.Parse(settingsConfigJson);
+                // Decompress if needed (handles LZSC: prefix)
+                string jsonString = LZString.Decompress(settingsConfigJson);
+                var config = JObject.Parse(jsonString);
                 return OpenSettingsMenu(config);
             }
             catch (Exception ex)

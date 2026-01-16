@@ -83,13 +83,15 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Initialize a product using the V2 system with a JSON string
+        /// Initialize a product using the V2 system with a JSON string (supports LZ-String compressed data)
         /// </summary>
         public InitializationResult InitializeProductV2(string settingsConfigJson)
         {
             try
             {
-                var config = JObject.Parse(settingsConfigJson);
+                // Decompress if needed (handles LZSC: prefix)
+                string jsonString = LZString.Decompress(settingsConfigJson);
+                var config = JObject.Parse(jsonString);
                 return InitializeProductV2(config);
             }
             catch (Exception ex)

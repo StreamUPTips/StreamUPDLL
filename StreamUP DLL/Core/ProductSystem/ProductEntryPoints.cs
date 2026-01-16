@@ -221,13 +221,27 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Overload accepting JSON string
+        /// Overload accepting JSON string (supports LZ-String compressed data)
         /// </summary>
         public bool IsSettingsReady(string configJson)
         {
             try
             {
-                var config = JObject.Parse(configJson);
+                // Check if compressed
+                bool wasCompressed = LZString.IsCompressed(configJson);
+                LogDebug($"[EntryPoint] Config is compressed: {wasCompressed}");
+
+                // Decompress if needed (handles LZSC: prefix)
+                string jsonString = LZString.Decompress(configJson);
+
+                if (wasCompressed)
+                {
+                    // Log first 100 chars of decompressed string for debugging
+                    string preview = jsonString?.Length > 100 ? jsonString.Substring(0, 100) + "..." : jsonString;
+                    LogDebug($"[EntryPoint] Decompressed preview: {preview}");
+                }
+
+                var config = JObject.Parse(jsonString);
                 return IsSettingsReady(config);
             }
             catch (Exception ex)
@@ -281,13 +295,15 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Overload accepting JSON string
+        /// Overload accepting JSON string (supports LZ-String compressed data)
         /// </summary>
         public bool OpenProductSettings(string configJson)
         {
             try
             {
-                var config = JObject.Parse(configJson);
+                // Decompress if needed (handles LZSC: prefix)
+                string jsonString = LZString.Decompress(configJson);
+                var config = JObject.Parse(jsonString);
                 return OpenProductSettings(config);
             }
             catch (Exception ex)
