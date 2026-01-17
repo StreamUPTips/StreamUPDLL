@@ -29,7 +29,7 @@ namespace StreamUP
             triggerData.TotalAmount = 420;
 
             // Create list to get random StreamUP member
-            List<string> usernames = new List<string> { "Andilippi", "WaldoAndFriends", "Silverlink", "TerrierDarts"};
+            List<string> usernames = new List<string> { "Andilippi", "Silverlink", "TerrierDarts"};
             Random random = new Random();
 
             // Get random member for User data

@@ -62,6 +62,14 @@ namespace StreamUP
 
             LogInfo($"Processing event: {eventType.ToString()}");
 
+
+            if (eventType == 0)
+            {
+                // Use GeneralHandler for eventType 0
+                var generalHandler = new GeneralHandler();
+                return generalHandler.HandleEvent(sbArgs, this);
+            }
+
             if (EventHandlers.TryGetValue(eventType, out IEventHandler handler))
             {
                 return handler.HandleEvent(sbArgs, this);
