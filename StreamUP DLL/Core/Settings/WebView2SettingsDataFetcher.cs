@@ -319,7 +319,7 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Fetch all scenes from an OBS connection
+        /// Fetch all scenes from an OBS connection using Core OBS methods
         /// </summary>
         private JArray FetchObsScenes(int obsConnection)
         {
@@ -327,18 +327,17 @@ namespace StreamUP
 
             try
             {
-                if (GetObsSceneList(obsConnection, out JObject sceneList))
+                // Use Core OBS method: ObsGetSceneList returns JArray directly
+                var sceneArray = ObsGetSceneList(obsConnection);
+                if (sceneArray != null)
                 {
-                    if (sceneList["scenes"] is JArray sceneArray)
+                    foreach (var scene in sceneArray)
                     {
-                        foreach (var scene in sceneArray)
+                        scenes.Add(new JObject
                         {
-                            scenes.Add(new JObject
-                            {
-                                ["name"] = scene["sceneName"]?.ToString() ?? "",
-                                ["uuid"] = scene["sceneUuid"]?.ToString() ?? ""
-                            });
-                        }
+                            ["name"] = scene["sceneName"]?.ToString() ?? "",
+                            ["uuid"] = scene["sceneUuid"]?.ToString() ?? ""
+                        });
                     }
                 }
 
@@ -353,7 +352,7 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Fetch all unique sources from an OBS connection (across all scenes)
+        /// Fetch all unique sources from an OBS connection (across all scenes) using Core OBS methods
         /// </summary>
         private JArray FetchObsSources(int obsConnection)
         {
@@ -362,39 +361,38 @@ namespace StreamUP
 
             try
             {
-                // Get scene list first
-                if (!GetObsSceneList(obsConnection, out JObject sceneList))
+                // Get scene list first using Core OBS method
+                var sceneArray = ObsGetSceneList(obsConnection);
+                if (sceneArray == null)
                 {
                     return sources;
                 }
 
-                if (sceneList["scenes"] is JArray sceneArray)
+                foreach (var scene in sceneArray)
                 {
-                    foreach (var scene in sceneArray)
+                    var sceneName = scene["sceneName"]?.ToString();
+                    if (string.IsNullOrEmpty(sceneName)) continue;
+
+                    // Get scene items using Core OBS method
+                    var sceneItems = ObsGetSceneItemList(sceneName, obsConnection);
+                    if (sceneItems != null)
                     {
-                        var sceneName = scene["sceneName"]?.ToString();
-                        if (string.IsNullOrEmpty(sceneName)) continue;
-
-                        // Get scene items
-                        if (GetObsSceneItemsArray(sceneName, OBSSceneType.Scene, obsConnection, out JArray sceneItems))
+                        foreach (JObject item in sceneItems)
                         {
-                            foreach (JObject item in sceneItems)
+                            var sourceName = item["sourceName"]?.ToString();
+                            if (string.IsNullOrEmpty(sourceName) || seenSources.Contains(sourceName))
                             {
-                                var sourceName = item["sourceName"]?.ToString();
-                                if (string.IsNullOrEmpty(sourceName) || seenSources.Contains(sourceName))
-                                {
-                                    continue;
-                                }
-
-                                seenSources.Add(sourceName);
-
-                                sources.Add(new JObject
-                                {
-                                    ["name"] = sourceName,
-                                    ["type"] = item["inputKind"]?.ToString() ?? "",
-                                    ["isGroup"] = item["isGroup"] != null && item["isGroup"].Type != JTokenType.Null && item["isGroup"].Value<bool>()
-                                });
+                                continue;
                             }
+
+                            seenSources.Add(sourceName);
+
+                            sources.Add(new JObject
+                            {
+                                ["name"] = sourceName,
+                                ["type"] = item["inputKind"]?.ToString() ?? "",
+                                ["isGroup"] = item["isGroup"] != null && item["isGroup"].Type != JTokenType.Null && item["isGroup"].Value<bool>()
+                            });
                         }
                     }
                 }
@@ -410,7 +408,7 @@ namespace StreamUP
         }
 
         /// <summary>
-        /// Fetch all filters from an OBS connection (across all sources)
+        /// Fetch all filters from an OBS connection (across all sources) using Core OBS methods
         /// </summary>
         private JArray FetchObsFilters(int obsConnection)
         {
@@ -419,45 +417,45 @@ namespace StreamUP
 
             try
             {
-                // Get scene list
-                if (!GetObsSceneList(obsConnection, out JObject sceneList))
+                // Get scene list using Core OBS method
+                var sceneArray = ObsGetSceneList(obsConnection);
+                if (sceneArray == null)
                 {
                     return filters;
                 }
 
-                if (sceneList["scenes"] is JArray sceneArray)
+                foreach (var scene in sceneArray)
                 {
-                    foreach (var scene in sceneArray)
+                    var sceneName = scene["sceneName"]?.ToString();
+                    if (string.IsNullOrEmpty(sceneName)) continue;
+
+                    // Get scene items using Core OBS method
+                    var sceneItems = ObsGetSceneItemList(sceneName, obsConnection);
+                    if (sceneItems != null)
                     {
-                        var sceneName = scene["sceneName"]?.ToString();
-                        if (string.IsNullOrEmpty(sceneName)) continue;
-
-                        // Get scene items
-                        if (GetObsSceneItemsArray(sceneName, OBSSceneType.Scene, obsConnection, out JArray sceneItems))
+                        foreach (JObject item in sceneItems)
                         {
-                            foreach (JObject item in sceneItems)
+                            var sourceName = item["sourceName"]?.ToString();
+                            if (string.IsNullOrEmpty(sourceName) || processedSources.Contains(sourceName))
                             {
-                                var sourceName = item["sourceName"]?.ToString();
-                                if (string.IsNullOrEmpty(sourceName) || processedSources.Contains(sourceName))
-                                {
-                                    continue;
-                                }
+                                continue;
+                            }
 
-                                processedSources.Add(sourceName);
+                            processedSources.Add(sourceName);
 
-                                // Get filters for this source
-                                if (GetObsSourceFilterList(sourceName, obsConnection, out JArray sourceFilters))
+                            // Get filters for this source using Core OBS method
+                            var sourceFilters = ObsGetSourceFilterList(sourceName, obsConnection);
+                            if (sourceFilters != null)
+                            {
+                                foreach (JObject filter in sourceFilters)
                                 {
-                                    foreach (JObject filter in sourceFilters)
+                                    filters.Add(new JObject
                                     {
-                                        filters.Add(new JObject
-                                        {
-                                            ["sourceName"] = sourceName,
-                                            ["filterName"] = filter["filterName"]?.ToString() ?? "",
-                                            ["filterKind"] = filter["filterKind"]?.ToString() ?? "",
-                                            ["filterEnabled"] = filter["filterEnabled"]?.Value<bool>() ?? true
-                                        });
-                                    }
+                                        ["sourceName"] = sourceName,
+                                        ["filterName"] = filter["filterName"]?.ToString() ?? "",
+                                        ["filterKind"] = filter["filterKind"]?.ToString() ?? "",
+                                        ["filterEnabled"] = filter["filterEnabled"]?.Value<bool>() ?? true
+                                    });
                                 }
                             }
                         }
