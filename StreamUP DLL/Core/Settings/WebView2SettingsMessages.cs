@@ -2,6 +2,10 @@ using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace StreamUP
@@ -85,6 +89,10 @@ namespace StreamUP
 
                     case "openExternalUrl":
                         HandleOpenExternalUrlMessage(message);
+                        break;
+
+                    case "sendFeedback":
+                        HandleSendFeedbackMessage(message);
                         break;
 
                     default:
@@ -432,6 +440,200 @@ namespace StreamUP
             {
                 LogError($"Failed to open external URL: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Handle feedback submission from viewer - sends to Notion database
+        /// </summary>
+        private async void HandleSendFeedbackMessage(JObject message)
+        {
+            const string NOTION_API_KEY = "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";
+            const string NOTION_DATABASE_ID = "2efb0adc23a8803ab96ad1e10b24d902";
+
+            LogInfo("Processing feedback submission from viewer");
+
+            try
+            {
+                var data = message["data"] as JObject;
+                if (data == null)
+                {
+                    LogError("Feedback message contains no data");
+                    SendToViewer(new { action = "feedbackResponse", success = false, error = "No feedback data provided" });
+                    return;
+                }
+
+                var title = data["title"]?.ToString() ?? "No Title";
+                var type = data["type"]?.ToString() ?? "General Feedback";
+                var description = data["description"]?.ToString() ?? "";
+                var tags = data["tags"]?.ToObject<List<string>>() ?? new List<string>();
+                var productName = data["productName"]?.ToString() ?? "Unknown";
+                var productNumber = data["productNumber"]?.ToString() ?? "Unknown";
+                var productVersion = data["productVersion"]?.ToString() ?? "Unknown";
+
+                // Build Notion API payload
+                var notionPayload = BuildNotionFeedbackPayload(
+                    title, type, description, tags,
+                    productName, productNumber, productVersion,
+                    NOTION_DATABASE_ID
+                );
+
+                LogDebug($"Sending feedback to Notion: {title}");
+
+                // POST to Notion API
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {NOTION_API_KEY}");
+                    client.DefaultRequestHeaders.Add("Notion-Version", "2022-06-28");
+
+                    var content = new StringContent(notionPayload, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("https://api.notion.com/v1/pages", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        LogInfo("Feedback submitted successfully to Notion");
+                        SendToViewer(new { action = "feedbackResponse", success = true, message = "Feedback submitted successfully" });
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        LogError($"Notion API error ({response.StatusCode}): {errorContent}");
+                        SendToViewer(new { action = "feedbackResponse", success = false, error = "Failed to submit feedback. Please try again." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError($"Feedback submission error: {ex.Message}");
+                SendToViewer(new { action = "feedbackResponse", success = false, error = "An error occurred. Please try again." });
+            }
+        }
+
+        /// <summary>
+        /// Build the Notion API payload for feedback submission
+        /// </summary>
+        private string BuildNotionFeedbackPayload(
+            string title, string type, string description, List<string> tags,
+            string productName, string productNumber, string productVersion,
+            string databaseId)
+        {
+            // Build tags array for multi_select
+            var tagsArray = new JArray();
+            foreach (var tag in tags)
+            {
+                tagsArray.Add(new JObject { ["name"] = tag });
+            }
+
+            var payload = new JObject
+            {
+                ["parent"] = new JObject
+                {
+                    ["database_id"] = databaseId
+                },
+                ["properties"] = new JObject
+                {
+                    // Name (title type - Notion's default title field)
+                    ["Name"] = new JObject
+                    {
+                        ["title"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["text"] = new JObject
+                                {
+                                    ["content"] = title
+                                }
+                            }
+                        }
+                    },
+                    // Type (select type)
+                    ["Type"] = new JObject
+                    {
+                        ["select"] = new JObject
+                        {
+                            ["name"] = type
+                        }
+                    },
+                    // Description (rich_text type)
+                    ["Description"] = new JObject
+                    {
+                        ["rich_text"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["text"] = new JObject
+                                {
+                                    ["content"] = description.Length > 2000 ? description.Substring(0, 2000) : description
+                                }
+                            }
+                        }
+                    },
+                    // Product Name (rich_text type)
+                    ["Product Name"] = new JObject
+                    {
+                        ["rich_text"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["text"] = new JObject
+                                {
+                                    ["content"] = productName
+                                }
+                            }
+                        }
+                    },
+                    // Product Number (rich_text type)
+                    ["Product Number"] = new JObject
+                    {
+                        ["rich_text"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["text"] = new JObject
+                                {
+                                    ["content"] = productNumber
+                                }
+                            }
+                        }
+                    },
+                    // Product Version (rich_text type)
+                    ["Product Version"] = new JObject
+                    {
+                        ["rich_text"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["text"] = new JObject
+                                {
+                                    ["content"] = productVersion
+                                }
+                            }
+                        }
+                    },
+                    // Status (select type) - default to "New"
+                    ["Status"] = new JObject
+                    {
+                        ["select"] = new JObject
+                        {
+                            ["name"] = "New"
+                        }
+                    },
+                    // Submitted (date type)
+                    ["Submitted"] = new JObject
+                    {
+                        ["date"] = new JObject
+                        {
+                            ["start"] = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                        }
+                    },
+                    // Tags (multi_select type)
+                    ["Tags"] = new JObject
+                    {
+                        ["multi_select"] = tagsArray
+                    }
+                }
+            };
+
+            return payload.ToString(Formatting.None);
         }
 
         #endregion
