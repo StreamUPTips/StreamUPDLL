@@ -447,7 +447,7 @@ namespace StreamUP
         /// </summary>
         private async void HandleSendFeedbackMessage(JObject message)
         {
-            const string NOTION_API_KEY = "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";
+            const string NOTION_API_KEY = "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";
             const string NOTION_DATABASE_ID = "2efb0adc23a8803ab96ad1e10b24d902";
 
             LogInfo("Processing feedback submission from viewer");
