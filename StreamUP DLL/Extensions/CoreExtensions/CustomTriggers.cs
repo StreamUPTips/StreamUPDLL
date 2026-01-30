@@ -29,6 +29,16 @@ namespace StreamUP
                 LogInfo($"[Custom Triggers] {customTrigger.Name}, {customTrigger.Code}");
             }
         }
+
+        public void SetGeneralSUPTriggers()
+        {
+            string[] categories = { "StreamUP", "Admin" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("StreamUP Settings - Right Click this and click 'Test Trigger' to open settings", "supRightClickToOpen", categories),
+            };
+            SetCustomTriggers(customTriggers);
+        }
         /*
         public void SetTriggersForXXXXX()
         {
