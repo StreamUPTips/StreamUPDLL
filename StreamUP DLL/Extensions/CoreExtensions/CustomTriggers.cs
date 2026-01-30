@@ -35,7 +35,7 @@ namespace StreamUP
             string[] categories = { "StreamUP", "Admin" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
-                new("StreamUP Settings - Right Click this and click 'Test Trigger' to open settings", "supRightClickToOpen", categories),
+                new("StreamUP Settings - Right Click and click 'Test Trigger' to open settings", "supRightClickToOpen", categories),
             };
             SetCustomTriggers(customTriggers);
         }
@@ -45,6 +45,7 @@ namespace StreamUP
             string[] categories = { "StreamUP", "XXXX" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
+            
                 new("NAME", "event", categories),
             };
             SetCustomTriggers(customTriggers);
