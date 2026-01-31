@@ -17,11 +17,12 @@ using System.Data.Common;
 
 namespace StreamUP
 {
-    public partial class StreamUPExtensions
+    public partial class StreamUpLib
     {
         public bool MethodName (Dictionary<string, object> parameters, out string varName)
         {
             varName = "Whatever";
+            _CPH.LogError(varName);
             return true;
         }
     }

@@ -1,10 +1,22 @@
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace StreamUP
 {
     partial class StreamUpLib
     {
+        
+        public JObject ReadJsonFromFile(string path)
+        {
+            if (!File.Exists(path))
+            {
+                File.WriteAllText(path, "{}\n");
+            }
+            string json = File.ReadAllText(path);
+            return JObject.Parse(json);
+        }
+
         public bool ParseJsonToArguments(string jsonString, string prefix = "parse")
         {
             //? Heavily Inspired by the Work done by Happy Plotter!

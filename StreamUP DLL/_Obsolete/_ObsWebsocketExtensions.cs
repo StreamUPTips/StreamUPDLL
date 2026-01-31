@@ -148,7 +148,7 @@ namespace StreamUP
         public static string SUObsGetOutputFilePath(this IInlineInvokeProxy CPH, int obsConnection)
         {
             StreamUpLib sup = new StreamUpLib(CPH);
-            if (!sup.GetObsOutputFilePath(obsConnection, out string filePath))
+            if (!sup.ObsGetOutputFilePath(obsConnection, out string filePath))
             {
                 return null;
             }

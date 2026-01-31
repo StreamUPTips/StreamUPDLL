@@ -26,8 +26,18 @@ namespace StreamUP
             foreach (var customTrigger in customTriggers)
             {
                 _CPH.RegisterCustomTrigger(customTrigger.Name, customTrigger.Code, customTrigger.TriggerCategory);
-                LogInfo($"[Custom Triggers] {customTrigger.Name}, {customTrigger.Code} = [{customTrigger.TriggerCategory}]");
+                LogInfo($"[Custom Triggers] {customTrigger.Name}, {customTrigger.Code}");
             }
+        }
+
+        public void SetGeneralSUPTriggers()
+        {
+            string[] categories = { "StreamUP", "Admin" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+                new("StreamUP Settings - Right Click and click 'Test Trigger' to open settings", "supRightClickToOpen", categories),
+            };
+            SetCustomTriggers(customTriggers);
         }
         /*
         public void SetTriggersForXXXXX()
@@ -35,6 +45,7 @@ namespace StreamUP
             string[] categories = { "StreamUP", "XXXX" };
             List<CustomTrigger> customTriggers = new List<CustomTrigger>
             {
+            
                 new("NAME", "event", categories),
             };
             SetCustomTriggers(customTriggers);

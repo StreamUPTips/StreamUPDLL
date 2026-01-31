@@ -7,7 +7,6 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-
         public bool DSILoader(int obsConnection)
         {
             var dsiInfo = DSILoadInfo();
@@ -30,24 +29,25 @@ namespace StreamUP
 
             ResetWidget(dsiInfo, obsConnection);
 
-
             return true;
         }
 
-        public class ProductSettings
+        public class DSIProductData
         {
             public bool TimeWidgetRotatorEnable { get; set; }
             public bool DateWidgetRotatorEnable { get; set; }
             public bool UptimeWidgetRotatorEnable { get; set; }
             public bool TwitchViewerCountWidgetRotatorEnable { get; set; }
         }
-        
+
         private void SetRotatorSettings(DSIInfo dsiInfo)
         {
             // Get list of rotator widgets
             List<string> rotatorWidgets = dsiInfo.RotatorWidgets;
 
-            ProductSettings productSettings = JsonConvert.DeserializeObject<ProductSettings>(_CPH.GetGlobalVar<string>("sup069_ProductSettings", true));
+            DSIProductData productSettings = JsonConvert.DeserializeObject<DSIProductData>(
+                _CPH.GetGlobalVar<string>("sup069_ProductSettings", true)
+            );
 
             // Remove widgets from the list if they are disabled
             if (!productSettings.TimeWidgetRotatorEnable)
@@ -61,9 +61,7 @@ namespace StreamUP
 
             // Save the updated list
             dsiInfo.RotatorWidgets = rotatorWidgets;
-
         }
-
 
         private void ResetWidget(DSIInfo dsiInfo, int obsConnection)
         {
@@ -71,7 +69,11 @@ namespace StreamUP
             _CPH.ResumeActionQueue("StreamUP Widgets • DSI Triggers");
             _CPH.ResumeActionQueue("StreamUP Widgets • DSI Non-Blocking");
             _CPH.EnableTimerById("27f9dd60-c81c-434f-a11a-ffc5bd578785");
-            _CPH.ObsShowSource("StreamUP Widgets • Dynamic Stream-Island", "DSI • Alerts • Group", obsConnection);
+            _CPH.ObsShowSource(
+                "StreamUP Widgets • Dynamic Stream-Island",
+                "DSI • Alerts • Group",
+                obsConnection
+            );
 
             dsiInfo.CurrentState = DSIInfo.DSIState.Default;
             dsiInfo.ActiveWidget = string.Empty;
@@ -85,7 +87,12 @@ namespace StreamUP
         private void SetBackgroundToLowestLayer(int obsConnection)
         {
             // Set the background to the lowest layer
-            SetObsSceneItemIndex("StreamUP Widgets • Dynamic Stream-Island", "DSI • BG", 0, obsConnection);
+            SetObsSceneItemIndex(
+                "StreamUP Widgets • Dynamic Stream-Island",
+                "DSI • BG",
+                0,
+                obsConnection
+            );
         }
 
         private bool LoadExtensionsFromAPI()
@@ -103,7 +110,9 @@ namespace StreamUP
                 // Check if the response was successful
                 if (!result.IsSuccessStatusCode)
                 {
-                    throw new HttpRequestException($"Request failed with status code: {(int)result.StatusCode} - {result.ReasonPhrase}");
+                    throw new HttpRequestException(
+                        $"Request failed with status code: {(int)result.StatusCode} - {result.ReasonPhrase}"
+                    );
                 }
 
                 // Read the response content
@@ -113,7 +122,9 @@ namespace StreamUP
                 LogDebug($"API Response: {content}");
 
                 // Deserialize the JSON into a list of Extension objects
-                List<DSIExtensions> apiResponseList = JsonConvert.DeserializeObject<List<DSIExtensions>>(content);
+                List<DSIExtensions> apiResponseList = JsonConvert.DeserializeObject<
+                    List<DSIExtensions>
+                >(content);
 
                 // Log the deserialized data (optional, for debugging)
                 foreach (var extension in apiResponseList)
@@ -144,7 +155,6 @@ namespace StreamUP
                 LogError($"Unexpected Error: {error.Message}");
                 return false;
             }
-
         }
 
         private bool GetInstalledExtensions(DSIInfo dsiInfo)
@@ -163,7 +173,9 @@ namespace StreamUP
                         dsiInfo.RotatorWidgets.Add(extension.Name);
                     }
 
-                    LogDebug($"Installed Extension: {extension.Name}, IsRotatorEnabled: {extension.IsRotatorEnabled}");
+                    LogDebug(
+                        $"Installed Extension: {extension.Name}, IsRotatorEnabled: {extension.IsRotatorEnabled}"
+                    );
                 }
                 else
                 {
@@ -185,10 +197,12 @@ namespace StreamUP
 
                 LogDebug($"Loaded Extensions from API: {extension.ToString()}");
             }
-
         }
 
-        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(30)
+        };
 
         public void DSIDisposeClient()
         {
@@ -197,6 +211,7 @@ namespace StreamUP
         }
 
         public List<DSIExtensions> dsiAvailableExtensions = new List<DSIExtensions>();
+
         public class DSIExtensions
         {
             public string Name { get; set; }

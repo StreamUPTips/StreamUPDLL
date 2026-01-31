@@ -754,8 +754,6 @@ namespace StreamUP
             string dir = Path.Combine(programDirectory, "StreamUP", "Data");
             Directory.CreateDirectory(dir);
             filePath = Path.Combine(dir, $"{saveFile}_ProductSettings.json");
-            UIResources.streamUpSettingsProgress++;
-
             Initialize(filePath);
         }
 

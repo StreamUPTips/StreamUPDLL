@@ -143,7 +143,10 @@ namespace StreamUP
             return input;
         }
 
-
+        public string FetchURL(string url)
+        {
+            return _httpClient.GetStringAsync(url).Result;
+        }
 
     }
 

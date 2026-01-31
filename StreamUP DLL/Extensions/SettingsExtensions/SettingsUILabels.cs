@@ -9,110 +9,177 @@ namespace StreamUP
 
     public static class SettingsUILabels
     {
-        //# Misc
-        public static string Donation = "%amountCurrency% = Donation Amount\n" +
-                                        "%message% = Donation Message\n" +
-                                        "%user% = Donators Name";
-
-
+        //# General
+        public static string Donation = CreateSettingsLabel(new Dictionary<string, string>
+                                        {
+                                            {"amountCurrency", "Donation Amount"},
+                                            {"message", "Donation Message"},
+                                            {"user", "Donators Name"}
+                                        });
 
         //# Twitch
-        public static string TwitchCheer = "%amount% = Cheer Amount\n" +
-                                            "%message% = Cheer Message\n" +
-                                            "%user% = Cheerers Name";
+        public static string TwitchCheer = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"amount", "Cheer Amount"},
+                                                {"message", "Cheer Message"},
+                                                {"user", "Cheerers Name"}
+                                            });
 
-        public static string TwitchFollow = "%user% = Followers Name";
+        public static string TwitchFollow = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"user", "Followers Name"}
+                                            });
 
-        public static string TwitchRaid = "%amount% = Viewer Amount\n" +
-                                            "%user% = Raiders Name";
+        public static string TwitchRaid = CreateSettingsLabel(new Dictionary<string, string>
+                                        {
+                                            {"amount", "Viewer Amount"},
+                                            {"user", "Raiders Name"}
+                                        });
 
-        public static string TwitchSub = "%message% = Subscribers Message\n" +
-                                            "%tier% = Sub Tier\n" +
-                                            "%user% = Subscribers Name";
+        public static string TwitchSub = CreateSettingsLabel(new Dictionary<string, string>
+                                        {
+                                            {"message", "Subscribers Message"},
+                                            {"tier", "Sub Tier"},
+                                            {"user", "Subscribers Name"}
+                                        });
 
-        public static string TwitchReSub = "%message% = Sub Message\n" +
-                                            "%monthsTotal% = Total Months Subscribed\n" +
-                                            "%monthsStreak% = Current Sub Streak\n" +
-                                            "%tier% = Sub Tier\n" +
-                                            "%user% = Subscribers Name";
+        public static string TwitchReSub = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"message", "Sub Message"},
+                                                {"monthsTotal", "Total Months Subscribed"},
+                                                {"monthsStreak", "Current Sub Streak"},
+                                                {"tier", "Sub Tier"},
+                                                {"user", "Subscribers Name"}
+                                            });
 
-        public static string TwitchGiftSub = "%monthsTotal% = Total Months Subbed\n" +
-                                                "%monthsGifted% = Amount Of Months Gifted\n" +
-                                                "%receiver% = Sub Receiver\n" +
-                                                "%tier% = Sub Tier\n" +
-                                                "%totalAmount% = Total Subs Gifted\n" +
-                                                "%user% = Gifters Name";
+        public static string TwitchGiftSub = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"monthsTotal", "Total Months Subbed"},
+                                                {"monthsGifted", "Amount Of Months Gifted"},
+                                                {"receiver", "Sub Receiver"},
+                                                {"tier", "Sub Tier"},
+                                                {"totalAmount", "Total Subs Gifted"},
+                                                {"user", "Gifters Name"}
+                                            });
 
-        public static string TwitchGiftBomb = "%amount% = Amount Of Subs Gifted\n" +
-                                                "%tier% = Sub Tier\n" +
-                                                "%totalAmount% = Total Subs Gifted\n" +
-                                                "%user% = Gifters Name";
+        public static string TwitchGiftBomb = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"amount", "Amount Of Subs Gifted"},
+                                                {"tier", "Sub Tier"},
+                                                {"totalAmount", "Total Subs Gifted"},
+                                                {"user", "Gifters Name"}
+                                            });
 
-        public static string TwitchFirstWords = "%message% = Chat Message\n" +
-                                                "%user% = Chatters Name";
+        public static string TwitchFirstWords = CreateSettingsLabel(new Dictionary<string, string>
+                                            {
+                                                {"message", "Chat Message"},
+                                                {"user", "Chatters Name"}
+                                            });
 
+        public static string TwitchRewardRedemption = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"message", "Chat Message"},
+                                                        {"user", "Chatters Name"}
+                                                    });
 
-        public static string TwitchRewardRedemption = "%message% = Chat Message\n" +
-                                                        "%user% = Chatters Name";
+        public static string TwitchShoutoutCreated = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"receiver", "User Being Shoutout"},
+                                                        {"user", "User Executing Shoutout"}
+                                                    });
 
-        public static string TwitchShoutoutCreated = "%receiver% = User Being Shoutout\n" +
-                                                        "%user% = User Executing Shoutout";
+        public static string TwitchUserBanned = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"reason", "Reason For Ban"},
+                                                    {"receiver", "User That Is Banned"},
+                                                    {"user", "User Executing The Ban"}
+                                                });
 
-        public static string TwitchUserBanned = "%reason% = Reason For Ban\n" +
-                                                "%receiver% = User That Is Banned\n" +
-                                                "%user% = User Executing The Ban";
+        public static string TwitchUserTimedOut = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"duration", "Duration Of Time Out"},
+                                                    {"reason", "Reason For Time Out"},
+                                                    {"receiver", "User That Is Banned"},
+                                                    {"user", "User Executing The Timeout"}
+                                                });
 
-        public static string TwitchUserTimedOut = "%duration% = Duration Of Time Out\n" +
-                                                    "%reason% = Reason For Time Out\n" +
-                                                    "%receiver% = User That Is Banned\n" +
-                                                    "%user% = User Executing The Timeout";
+        public static string TwitchWatchStreak = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"user", "User with streak streak"},
+                                                    {"amount", "Current stream streak amount"}
+                                                });
 
-        public static string TwitchWatchStreak = "%user% = User with streak streak\n" +
-                                                    "%amount% = Current stream streak amount";
+        public static string TwitchHypeTrainLevelUp = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"contributors", "Amount of contributors"},
+                                                        {"level", "Hype Train level"},
+                                                        {"top.bits.user", "Highest Cheerer Username"},
+                                                        {"top.bits.total", "Highest Cheerer Amount"}
+                                                    });
 
-        public static string TwitchHypeTrainLevelUp = "%contributors% = Amount of contributors\n" +
-                                                        "%level% = Hype Train level\n" +
-                                                        "%top.bits.user% = Highest Cheerer Username\n" +
-                                                        "%top.bits.total% = Highest Cheerer Amount";
+        public static string TwitchHypeTrainEnd = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"contributors", "Amount of contributors"},
+                                                        {"level", "Hype Train level"},
+                                                        {"percent", "percent"},
+                                                        {"top.bits.user", "Highest Cheerer Username"},
+                                                        {"top.bits.total", "Highest Cheerer Amount"},
+                                                        {"top.subscription.user", "Highest Sub Gifter"},
+                                                        {"top.subscription.total", "Highest Sub Amount (in point value) [T1 = 500, T2 = 1000, T3 = 2500]"}
+                                                    });
 
-        public static string TwitchHypeTrainEnd = "%contributors% = Amount of contributors\n" +
-                                                    "%level% = Hype Train level\n" +
-                                                    "%percent% = percent\n" +
-                                                    "%top.bits.user% = Highest Cheerer Username\n" +
-                                                    "%top.bits.total% = Highest Cheerer Amount\n" +
-                                                    "%top.subscription.user% = Highest Sub Gifter\n" +
-                                                    "%top.subscription.total% = Highest Sub Amount (in point value) [T1 = 500, T2 = 1000, T3 = 2500]";
+        //# YouTube
+        public static string YouTubeFirstWords = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"message", "Chat Message"},
+                                                    {"user", "Chatters Name"}
+                                                });
 
+        public static string YouTubeNewSubscriber = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"user", "Username"}
+                                                    });
 
+        public static string YouTubeNewSponsor = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"tier", "Membership tier"},
+                                                    {"user", "Username"}
+                                                });
 
-        //# YouTube                                    
-        public static string YouTubeFirstWords = "%message% = Chat Message\n" +
-                                                    "%user% = Chatters Name";
+        public static string YouTubeMemberMileStone = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"message", "Chat Message"},
+                                                        {"monthsTotal", "Total Months Being A Member"},
+                                                        {"tier", "Membership Tier"},
+                                                        {"user", "Username"}
+                                                    });
 
-        public static string YouTubeNewSubscriber = "%user% = Username";
+        public static string YouTubeMembershipGift = CreateSettingsLabel(new Dictionary<string, string>
+                                                    {
+                                                        {"amount", "Amount Of Memberships Gifted"},
+                                                        {"tier", "Membership Tier"},
+                                                        {"user", "Username"}
+                                                    });
 
-        public static string YouTubeNewSponsor = "%tier% = Membership tier\n" +
-                                                    "%user% = Username";
+        public static string YouTubeSuperChat = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"amountCurrency", "SuperChat Amount"},
+                                                    {"message", "Chat Message"},
+                                                    {"user", "Username"}
+                                                });
 
-        public static string YouTubeMemberMileStone = "%message% = Chat Message\n" +
-                                                        "%monthsTotal% = Total Months Being A Member\n" +
-                                                        "%tier% = Membership Tier\n" +
-                                                        "%user% = Username";
+        public static string YouTubeSuperSticker = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"amountCurrency", "SuperSticker Amount"},
+                                                    {"user", "Username"}
+                                                });
 
-        public static string YouTubeMembershipGift = "%amount% = Amount Of Memberships Gifted\n" +
-                                                        "%tier% = Membership Tier\n" +
-                                                        "%user% = Username";
-
-        public static string YouTubeSuperChat = "%amountCurrency% = SuperChat Amount\n" +
-                                                "%message% = Chat Message\n" +
-                                                "%user% = Username";
-
-        public static string YouTubeSuperSticker = "%amountCurrency% = SuperSticker Amount\n" +
-                                                    "%user% = Username";
-
-        public static string YouTubeUserBanned = "%duration% = Duration Of Ban\n" +
-                                                    "%banType% = Ban Type\n" +
-                                                    "%user% = Username";
+        public static string YouTubeUserBanned = CreateSettingsLabel(new Dictionary<string, string>
+                                                {
+                                                    {"duration", "Duration Of Ban"},
+                                                    {"banType", "Ban Type"},
+                                                    {"user", "Username"}
+                                                });
 
         //# Products
 

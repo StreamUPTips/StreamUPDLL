@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -12,7 +13,7 @@ namespace StreamUP
     {
         public string _filePath;
         public string _saveName;
-        public Dictionary<string, object> _data = new Dictionary<string, object>();
+        public JObject _data = new JObject();
 
         public bool _initialized = false;
 
@@ -21,19 +22,20 @@ namespace StreamUP
         {
             _filePath = filePath;
             _saveName = Path.GetFileNameWithoutExtension(_filePath);
-            _data = StreamUpInternalLoad(_saveName);
+            _data = StreamUpInternalLoad(_filePath);
             _initialized = true;
             UIResources.streamUpSettingsProgress++;
         }
 
-        public Dictionary<string, object> StreamUpInternalLoad(string saveFile)
+        public JObject StreamUpInternalLoad(string saveFile)
         {
             // Initialize the dictionary safely
 
             //GetStreamerBotGlobalVar<Dictionary<string, object>>(saveFile, true, out Dictionary<string, object> json);
 
-            Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
-            string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
+            //Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(saveFile, true) ?? new Dictionary<string, object>();
+            JObject json = ReadJsonFromFile(_filePath);
+            //string jsonString = JsonConvert.SerializeObject(json, Formatting.Indented);
             //LogInfo($"Loaded JSON: {jsonString}");
             return json;
         }
@@ -59,7 +61,7 @@ namespace StreamUP
                 var tupleList = eArray.ToObject<List<(string Emote, int Payout, int Percentage)>>();
                 if (tupleList != null)
                 {
-                    _data[key] = tupleList;
+                    _data[key] = JToken.FromObject(tupleList);
 
                 }
             }
@@ -67,25 +69,26 @@ namespace StreamUP
             {
                 // Convert to a List<string>
                 List<string> serializedList = jArray.ToObject<List<string>>();
-                _data[key] = serializedList;
+                _data[key] = JToken.FromObject(serializedList);
             }
             // Convert JObject to a Dictionary<string, object> if needed
             else if (newValue is JObject jObject)
             {
                 // Convert to a Dictionary<string, object>
                 Dictionary<string, object> serializedDict = jObject.ToObject<Dictionary<string, object>>();
-                _data[key] = serializedDict;
+                _data[key] = JToken.FromObject(serializedDict);
             }
             // If it's a complex type, consider storing it as a JSON string
             else if (newValue is not string && !newValue.GetType().IsPrimitive)
             {
                 string jsonString = JsonConvert.SerializeObject(newValue);
-                _data[key] = jsonString;
+                // Parse back to a JToken so the stored value is JSON structure, not a quoted string
+                _data[key] = JToken.Parse(jsonString);
             }
             else
             {
-                // Store primitive types or strings directly
-                _data[key] = newValue;
+                // Store primitive types or strings directly as JToken
+                _data[key] = JToken.FromObject(newValue);
             }
 
             // Save the updated _data dictionary
@@ -145,11 +148,11 @@ namespace StreamUP
                 StreamUpInternalSave();
             }
         }
-
         public IEnumerable<string> StreamUpInternalGetAllKeys()
         {
-            return _data.Keys;
+            return _data.Properties().Select(p => p.Name);
         }
+        
 
 
         public Dictionary<string, object> DeserializeDictionary(string jsonString)
@@ -188,6 +191,7 @@ namespace StreamUP
         }
 
 
-
     }
 }
+    
+

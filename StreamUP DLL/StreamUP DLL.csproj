@@ -48,7 +48,16 @@
     <Reference Include="Streamer.bot.Common">
       <HintPath>..\StreamUP DLL\dlls\Streamer.bot.Common.dll</HintPath>
     </Reference>
-  
+    <Reference Include="Microsoft.Web.WebView2.Core">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Wpf">
+      <HintPath>..\StreamUP DLL\dlls\Microsoft.Web.WebView2.Wpf.dll</HintPath>
+    </Reference>
+    
 
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -62,29 +71,26 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <!--Compile Include="*.cs" /-->
+    <!-- Root-level files -->
     <Compile Include="StreamUP.cs" />
-    <Compile Include="_Obsolete\*.cs" />
-    <Compile Include="_ForTDToSort\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Extensions\*.cs" />
-    <Compile Include="Extensions\CoreExtensions\*.cs" />
-    <Compile Include="Extensions\EventTriggerExtensions\*.cs" />
-    <Compile Include="Extensions\EventTriggerExtensions\StreamerBotEventsHandlers\*.cs" />
-    <Compile Include="Extensions\ObsExtensions\*.cs" />
-    <Compile Include="Extensions\ObsExtensions\ObsRawExtensions\*.cs" />
-    <Compile Include="Extensions\SettingsExtensions\*.cs" />
-    <Compile Include="Extensions\UIExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\CurrencyExtensions\*.cs" />
-    <Compile Include="Extensions\TwitchExtensions\*.cs" />
-    <Compile Include="Extensions\YouTubeExtensions\*.cs" />
-    <Compile Include="Extensions\ValidationExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\TheRunExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\*.cs" />
-    <Compile Include="Extensions\ProductExtensions\DynamicStreamIslandExtensions\DynamicStreamIslandStateMachine\*.cs" />
-    <Compile Include="Extensions\AndiExtensions\*.cs" />
 
+    <!-- Main source folders (recursive) -->
+    <Compile Include="Core\**\*.cs" />
+    <Compile Include="Extensions\**\*.cs" />
+
+    <!-- Legacy/deprecated (recursive) -->
+    <Compile Include="_Obsolete\**\*.cs" />
+    <Compile Include="_LegacyExtensions\**\*.cs" />
+
+    <!-- Exclude test/example code -->
+    <Compile Remove="**\Tests\**\*.cs" />
+    <Compile Remove="**\TestProducts\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\StreamUp-icon.png">
+      <LogicalName>StreamUP.Resources.StreamUp-icon.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

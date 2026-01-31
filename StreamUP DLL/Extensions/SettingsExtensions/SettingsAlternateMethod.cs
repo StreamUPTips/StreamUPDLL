@@ -11,7 +11,7 @@ namespace StreamUP
        public T GetAlternateSetting<T>(string settingLocation, string key, T defaultValue)
         {
             //LogInfo($"Trying to Get {key} with default of {defaultValue}, Type = {typeof(T)}");
-            Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>?>(settingLocation, true) ?? new Dictionary<string, object>();
+            Dictionary<string, object> json = _CPH.GetGlobalVar<Dictionary<string, object>>(settingLocation, true) ?? new Dictionary<string, object>();
 
             if (json.TryGetValue(key, out var jsonValue))
             {
