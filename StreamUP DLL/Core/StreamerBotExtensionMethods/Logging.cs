@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -41,7 +42,11 @@ namespace StreamUP
             {
                 if (fileStream.Length == 0)
                 {
-                    writer.WriteLine("Ayoo duckies! New Day!");
+                    writer.WriteLine("Ayoo duckies! New Day!");                   
+                    writer.WriteLine($"Streamer.bot Version: {_CPH.GetVersion()}");
+                    writer.WriteLine($"StreamUP DLL Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}");
+                    writer.WriteLine($"Operating System: {GetFriendlyName()} [{GetWindowsVersionNumber()}]");
+
                 }
 
                 writer.WriteLine(logMessage);
