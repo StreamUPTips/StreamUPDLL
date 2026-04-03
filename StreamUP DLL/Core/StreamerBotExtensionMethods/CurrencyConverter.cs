@@ -1,98 +1,119 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using Newtonsoft.Json.Linq;
 
 namespace StreamUP
 {
     public partial class StreamUpLib
     {
+        private static string _cachedCurrencyApiVersion = null;
+        private static DateTime _cachedCurrencyApiVersionExpiry = DateTime.MinValue;
+        private static JObject _cachedExchangeRates = null;
+        private static string _cachedExchangeRateCurrency = null;
+        private static DateTime _cachedExchangeRatesExpiry = DateTime.MinValue;
+        private static readonly TimeSpan _currencyCacheDuration = TimeSpan.FromHours(1);
+
         public bool ConvertCurrency(decimal inputAmount, string fromCurrency, string toCurrency, out decimal convertedAmount)
         {
             LogInfo($"Converting {inputAmount} from {fromCurrency} to {toCurrency}");
 
-            // Check in fromCurrency is the same as toCurrency
-            if (fromCurrency == toCurrency)
+            convertedAmount = inputAmount;
+
+            if (fromCurrency.Equals(toCurrency, StringComparison.OrdinalIgnoreCase))
             {
                 LogInfo("Skipping converting currency. fromCurrency is the same as toCurrency");
-                convertedAmount = inputAmount;
                 return true;
             }
 
-            // Get the exchange rate
-            LogInfo($"Getting currency exchange rate");
+            LogInfo("Getting currency exchange rate");
             if (!TryGetCurrencyExchangeRate(fromCurrency.ToLower(), toCurrency.ToLower(), out decimal exchangeRate))
             {
                 LogError("Unable to get exchange rate.");
-                convertedAmount = inputAmount;
                 return false;
             }
 
-            // Convert the amount
             convertedAmount = inputAmount / exchangeRate;
-            LogInfo($"Successfully retrieved converted amount");
+            LogInfo($"Successfully retrieved converted amount: {convertedAmount}");
             return true;
         }
 
         public bool TryGetCurrencyExchangeRate(string fromCurrency, string toCurrency, out decimal exchangeRate)
         {
-            LogInfo("Getting exchange rate");
-
-            exchangeRate = -1;  // Set default value for exchangeRate in case of failure
+            LogInfo($"Getting exchange rate for {fromCurrency} to {toCurrency}");
+            exchangeRate = -1;
 
             try
             {
-                // Fetch the latest version of the currency API
-                string latestVersion = "";
-                string versionUrl = "https://data.jsdelivr.com/v1/package/npm/@fawazahmed0/currency-api";
-
-                using (WebClient client = new WebClient())
+                // Use cached exchange rates if still valid and for the same toCurrency
+                if (_cachedExchangeRates == null ||
+                    _cachedExchangeRateCurrency != toCurrency ||
+                    DateTime.UtcNow > _cachedExchangeRatesExpiry)
                 {
-                    client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                    string rawJson = client.DownloadString(versionUrl);
-                    JObject json = JObject.Parse(rawJson);
-                    latestVersion = json["tags"]?["latest"]?.ToString();
+                    LogInfo("Cache miss for exchange rates, fetching from API");
+
+                    string apiVersion = GetCachedApiVersion();
+                    if (string.IsNullOrEmpty(apiVersion))
+                    {
+                        LogError("Failed to fetch the latest currency API version.");
+                        return false;
+                    }
+
+                    string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{apiVersion}/v1/currencies/{toCurrency}.json";
+                    LogInfo($"Fetching exchange rates from: {url}");
+
+                    string json = _httpClient.GetStringAsync(url).Result;
+                    _cachedExchangeRates = JObject.Parse(json);
+                    _cachedExchangeRateCurrency = toCurrency;
+                    _cachedExchangeRatesExpiry = DateTime.UtcNow.Add(_currencyCacheDuration);
+
+                    LogInfo($"Exchange rates cached for {toCurrency}, expires at {_cachedExchangeRatesExpiry}");
+                }
+                else
+                {
+                    LogDebug($"Using cached exchange rates for {toCurrency}");
                 }
 
-                // If the latest version is not found, log an error and return false
-                if (string.IsNullOrEmpty(latestVersion))
-                {
-                    LogError("Failed to fetch the latest version.");
-                    return false;
-                }
-
-                // Construct the URL using the latest version
-                string url = $"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{latestVersion}/v1/currencies/{toCurrency.ToLower()}.json";
-
-                string exchangeRateJson;
-
-                using (WebClient client = new WebClient())
-                {
-                    client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                    exchangeRateJson = client.DownloadString(url);
-                }
-
-                // Parse the JSON response for exchange rate
-                JObject exchangeRateData = JObject.Parse(exchangeRateJson);
-
-                // Ensure the necessary data exists in the JSON response
-                if (exchangeRateData[toCurrency] == null || exchangeRateData[toCurrency][fromCurrency] == null)
+                if (_cachedExchangeRates[toCurrency]?[fromCurrency] == null)
                 {
                     LogError($"Exchange rate for {fromCurrency} to {toCurrency} not found in the API response.");
                     return false;
                 }
 
-                // Get the exchange rate
-                exchangeRate = (decimal)exchangeRateData[toCurrency][fromCurrency];
+                exchangeRate = (decimal)_cachedExchangeRates[toCurrency][fromCurrency];
                 LogInfo($"Successfully retrieved exchange rate: {fromCurrency} to {toCurrency} = {exchangeRate}");
-
                 return true;
             }
             catch (Exception ex)
             {
                 LogError($"Error occurred while fetching exchange rate: {ex.Message}");
                 return false;
+            }
+        }
+
+        private string GetCachedApiVersion()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_cachedCurrencyApiVersion) &&
+                    DateTime.UtcNow < _cachedCurrencyApiVersionExpiry)
+                {
+                    LogDebug($"Using cached API version: {_cachedCurrencyApiVersion}");
+                    return _cachedCurrencyApiVersion;
+                }
+
+                LogInfo("Cache miss for API version, fetching from jsdelivr");
+                string json = _httpClient.GetStringAsync("https://data.jsdelivr.com/v1/package/npm/@fawazahmed0/currency-api").Result;
+                _cachedCurrencyApiVersion = JObject.Parse(json)["tags"]?["latest"]?.ToString();
+                _cachedCurrencyApiVersionExpiry = DateTime.UtcNow.Add(_currencyCacheDuration);
+
+                LogInfo($"API version cached: {_cachedCurrencyApiVersion}, expires at {_cachedCurrencyApiVersionExpiry}");
+                return _cachedCurrencyApiVersion;
+            }
+            catch (Exception ex)
+            {
+                LogError($"Error fetching API version: {ex.Message}");
+                return null;
             }
         }
 
@@ -116,36 +137,33 @@ namespace StreamUP
         {
             LogInfo($"Getting currency symbol for currency [{inputCurrencyCode}]");
 
-            // Find the region info matching the currency code
             RegionInfo region = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
                 .Select(ci => new RegionInfo(ci.LCID))
                 .FirstOrDefault(ri => ri.ISOCurrencySymbol.Equals(inputCurrencyCode, StringComparison.OrdinalIgnoreCase));
 
-            // If region is found, assign the currency symbol, otherwise fallback to the inputCurrencyCode
             if (region != null)
             {
                 currencySymbol = region.CurrencySymbol;
                 LogInfo($"Successfully retrieved currency symbol: {currencySymbol}");
                 return true;
             }
-            else
-            {
-                currencySymbol = inputCurrencyCode; // Fallback to the currency code itself
-                LogError($"Currency symbol for {inputCurrencyCode} not found, defaulting to currency code.");
-                return false;
-            }
+
+            currencySymbol = inputCurrencyCode;
+            LogError($"Currency symbol for {inputCurrencyCode} not found, defaulting to currency code.");
+            return false;
         }
 
         public string StringifyCurrencyWithSymbol(decimal amount, string currencyCode)
         {
             LogInfo("Adding symbol to currency amount and outputting as string");
+
             if (!GetCurrencySymbol(currencyCode, out string currencySymbol))
             {
                 LogError($"Unable to get currency symbol for {currencyCode}. Using currency code as symbol.");
                 currencySymbol = currencyCode;
             }
 
-            return $"{currencySymbol}{amount.ToString("F2")}";
+            return $"{currencySymbol}{amount:F2}";
         }
     }
 }

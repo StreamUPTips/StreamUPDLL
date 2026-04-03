@@ -44,15 +44,7 @@ namespace StreamUP
             int pointsPerKickSub = GetSetting<int>("pointsPerKickSub", 300);
             int pointsPerKickMonth = GetSetting<int>("pointsPerKickSubMonth", 10);
             int pointsPerKickGift = GetSetting<int>("pointsPerKickGift", 300);
-            //! Trovo Event Settings
-            //Follow
-            //Raid
-            //Sub
-            //Resub
-            //Gift
-            //MassGift
-            //Todo Spells?
-
+  
             //! Pre-declared Vars
             string tier;
             string membershipName;
@@ -186,16 +178,6 @@ namespace StreamUP
                     gifts = TryGetArgOrDefault("gifts", 1);
                     returnValue = pointsPerKickGift * gifts;
                     break;
-
-                //? Trovo Events
-                case EventType.TrovoFollow:
-                case EventType.TrovoSpellCast:
-                case EventType.TrovoCustomSpellCast:
-                case EventType.TrovoRaid:
-                case EventType.TrovoSubscription:
-                case EventType.TrovoResubscription:
-                case EventType.TrovoGiftSubscription:
-                case EventType.TrovoMassGiftSubscription:
 
                 default:
                     break;
