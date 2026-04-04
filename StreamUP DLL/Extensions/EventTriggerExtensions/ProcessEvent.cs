@@ -53,9 +53,21 @@ namespace StreamUP
             { EventType.YouTubeStatisticsUpdated, new YouTubeStatisticsUpdatedHandler() },
             { EventType.YouTubeSuperChat, new YouTubeSuperChatHandler() },
             { EventType.YouTubeSuperSticker, new YouTubeSuperStickerHandler() },
-            { EventType.YouTubeUserBanned, new YouTubeUserBannedHandler() }
+            { EventType.YouTubeUserBanned, new YouTubeUserBannedHandler() },
+
+            { EventType.KickFirstWords, new KickFirstWordsHandler() },
+            { EventType.KickPresentViewers, new KickPresentViewersHandler() },
+            { EventType.KickChatMessage, new KickChatMessageHandler() },
+            { EventType.KickFollow, new KickFollowHandler() },
+            { EventType.KickSubscription, new KickSubscriptionHandler() },
+            { EventType.KickResubscription, new KickResubscriptionHandler() },
+            { EventType.KickGiftSubscription, new KickGiftSubscriptionHandler() },
+            { EventType.KickMassGiftSubscription, new KickMassGiftSubscriptionHandler() },
+            { EventType.KickUserTimedOut, new KickUserTimedOutHandler() },
+            { EventType.KickUserBanned, new KickUserBannedHandler() },
+            { EventType.KickViewerCountUpdate, new KickViewerCountUpdateHandler() }
         };
- 
+
         public TriggerData ProcessEvent(IDictionary<string, object> sbArgs)
         {
             var eventType = _CPH.GetEventType();
@@ -80,27 +92,27 @@ namespace StreamUP
 
         public void LogTriggerData(TriggerData triggerData, bool skipNullOrEmpty)
         {
-        // Use reflection to log all properties of TriggerData, skipping null, -1, and 0 values
-        foreach (var property in triggerData.GetType().GetProperties())
-        {
-            var value = property.GetValue(triggerData, null);
-
-            if (skipNullOrEmpty)
+            // Use reflection to log all properties of TriggerData, skipping null, -1, and 0 values
+            foreach (var property in triggerData.GetType().GetProperties())
             {
-                // Skip properties that are null
-                if (value == null)
-                {
-                    continue;
-                }
+                var value = property.GetValue(triggerData, null);
 
-                // Check for numeric types and skip if value is -1 or 0
-                if ((value is decimal decValue && (decValue == -1)) || (value is double doubleValue && (doubleValue == -1)) || (value is int intValue && (intValue == -1)) || (value is long longValue && (longValue == -1)))
+                if (skipNullOrEmpty)
                 {
-                    continue;
+                    // Skip properties that are null
+                    if (value == null)
+                    {
+                        continue;
+                    }
+
+                    // Check for numeric types and skip if value is -1 or 0
+                    if ((value is decimal decValue && (decValue == -1)) || (value is double doubleValue && (doubleValue == -1)) || (value is int intValue && (intValue == -1)) || (value is long longValue && (longValue == -1)))
+                    {
+                        continue;
+                    }
                 }
+                LogInfo($"{property.Name}: {value}");
             }
-            LogInfo($"{property.Name}: {value}");
-        }
         }
     }
 
@@ -108,7 +120,8 @@ namespace StreamUP
     {
         All = 0,
         Twitch = 1,
-        YouTube = 2
+        YouTube = 2,
+        Kick = 3
     }
 
     public class TriggerData
@@ -135,11 +148,11 @@ namespace StreamUP
         public string User { get; set; } = null;
         public string UserImage { get; set; } = null;
 
-        public bool IsMultiMonth {get; set;} = false;
+        public bool IsMultiMonth { get; set; } = false;
         public int MonthDuration { get; set; } = -1;
         public int MonthTenure { get; set; } = -1;
 
-        public string FromCode {get; set;} = null;
-        public double AmountRaw {get; set;} = -1;
+        public string FromCode { get; set; } = null;
+        public double AmountRaw { get; set; } = -1;
     }
 }
