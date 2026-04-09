@@ -80,11 +80,7 @@ namespace StreamUP
                         var youtubePoints = CPH.GetYouTubeUserVarById<long?>(userId, "points", true);
                         points = youtubePoints ?? 0;
                         break;
-                    case Platform.Trovo:
-                        var trovoPoints = CPH.GetTrovoUserVarById<long?>(userId, "points", true);
-                        points = trovoPoints ?? 0;
-                        break;
-
+             
                 }
             }
             catch (Exception e)
@@ -117,10 +113,7 @@ namespace StreamUP
                         var youtubePoints = CPH.GetYouTubeUserVar<long?>(user, "points", true);
                         points = youtubePoints ?? 0;
                         break;
-                    case Platform.Trovo:
-                        var trovoPoints = CPH.GetTrovoUserVar<long?>(user, "points", true);
-                        points = trovoPoints ?? 0;
-                        break;
+           ;
 
                 }
             }
@@ -147,10 +140,7 @@ namespace StreamUP
                 case Platform.YouTube:
                     CPH.SetYouTubeUserVarById(userId, "points", points, true);
                     break;
-                case Platform.Trovo:
-                    CPH.SetTrovoUserVarById(userId, "points", points, true);
-                    break;
-
+          
             }
             CPH.SetArgument("oldPoints", oldPoints);
             CPH.SetArgument("newPoints", points);
@@ -171,9 +161,7 @@ namespace StreamUP
                 case Platform.YouTube:
                     CPH.SetYouTubeUserVar(user, "points", points, true);
                     break;
-                case Platform.Trovo:
-                    CPH.SetTrovoUserVar(user, "points", points, true);
-                    break;
+           
 
             }
             CPH.SetArgument("oldPoints", oldPoints);
@@ -395,8 +383,8 @@ namespace StreamUP
                     
                 userScores.AddRange(CPH.GetTwitchUsersVar<long>("points", true));
                 userScores.AddRange(CPH.GetYouTubeUsersVar<long>("points", true));
-                //.. CPH.GetTrovoUsersVar<long>("points", true),
-            
+                userScores.AddRange(CPH.GetKickUsersVar<long>("points", true));
+
             return userScores;
         }
        

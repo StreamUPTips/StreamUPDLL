@@ -72,7 +72,7 @@ namespace StreamUP {
             {
                 CPH.SendYouTubeMessage(message, botAccount);
             }
-            //CPH.SendTrovoMessage(message, botAccount);
+            
         }
         
 
