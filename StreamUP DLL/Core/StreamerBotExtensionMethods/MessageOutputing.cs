@@ -48,7 +48,7 @@ namespace StreamUP
             _CPH.SendYouTubeMessage(msg, bot, true, id);
             return true;
         }
-}
+
         private bool SendToKick(string msg, bool bot)
         {
             _CPH.SendKickMessage(msg, bot, true);
