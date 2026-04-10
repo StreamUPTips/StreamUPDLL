@@ -10,54 +10,47 @@ namespace StreamUP
     public partial class StreamUpLib
     {
 
-        public long GetEventPoints(EventType eventType, Platform platform)
+        public long GetEventPoints(EventType eventType, Platform platform, CurrencySettings settings)
         {
             //# Load Event Settings
             long returnValue = 0;
+            
             //! Generic Events Settings
-            int minChatPoints = GetSetting<int>("minChatPoints", 10);
-            int maxChatPoints = GetSetting<int>("maxChatPoints", 15);
-            int cooldownChatPoints = GetSetting<int>("cooldownChatPoints", 15);
-            int pointsFirstWords = GetSetting<int>("pointsFirstWords", 50);
-            int pointsPresentViewers = GetSetting<int>("pointsPresentViewers", 50);
-            int pointsPerDollarTipped = GetSetting<int>("pointsPerDollarTipped", 200);
+            int minChatPoints = settings.Generic_MinChat;
+            int maxChatPoints = settings.Generic_MaxChat;
+            int cooldownChatPoints = settings.Generic_ChatCooldown;
+            int pointsFirstWords = settings.Generic_FirstWords;
+            int pointsPresentViewers = settings.Generic_PresentViewers;
+            int pointsPerDollarTipped = settings.Generic_DollarTipped;
             //! Twitch Events Settings
-            int pointsPerBit = GetSetting<int>("pointsPerBit", 1);
-            int pointsPerT1 = GetSetting<int>("pointsPerT1", 300);
-            int pointsPerT2 = GetSetting<int>("pointsPerT2", 700);
-            int pointsPerT3 = GetSetting<int>("pointsPerT3", 1900);
-            int pointsPerMonth = GetSetting<int>("pointsPerMonth", 10);
-            int pointsPerRaid = GetSetting<int>("pointsPerRaid", 250);
-            int pointsPerViewer = GetSetting<int>("pointsPerViewer", 5);
-            int pointsPerFollow = GetSetting<int>("pointsPerFollow", 100);
-            int pointsPerGiftSub = GetSetting<int>("pointsPerGiftSub", 200);
-            bool pointsPerGiftBoost = GetSetting<bool>("pointsPerGiftBoost", false);
+            int pointsPerBit = settings.Twitch_Bits;
+            int pointsPerT1 = settings.Twitch_T1;
+            int pointsPerT2 = settings.Twitch_T2;
+            int pointsPerT3 = settings.Twitch_T3;
+            int pointsPerMonth = settings.Twitch_Month;
+            int pointsPerRaid = settings.Twitch_Raid;
+            int pointsPerViewer = settings.Twitch_Viewer;
+            int pointsPerFollow = settings.Twitch_Follow;
+            int pointsPerGiftSub = settings.Twitch_Gift;
+            bool pointsPerGiftBoost = settings.Twitch_BoostGifts;
             //! Youtube Event Settings
-            int pointsPerSub = GetSetting<int>("pointsPerSub", 100);
-            Dictionary<string, int> pointsYouTubeMembers = GetSetting<Dictionary<string, int>>("pointsYouTubeMembers", new Dictionary<string, int>());
-            int pointsPerMember = GetSetting<int>("pointsPerMember", 500);
-            int pointsPerMemberMonth = GetSetting<int>("pointsPerMemberMonth", 10);
-            int pointsPerGiftedMember = GetSetting<int>("pointsPerGiftedMember", 500);
-            bool pointsPerMemberBoost = GetSetting<bool>("pointsPerMemberBoost", false);
+            int pointsPerSub = settings.YouTube_Sub;
+            Dictionary<string, string> pointsYouTubeMembers = settings.Youtube_Memberships;
+            int pointsPerMember = settings.YouTube_Months;
+            int pointsPerMemberMonth = settings.YouTube_Months;
+            int pointsPerGiftedMember = settings.YouTube_Gift;
+            bool pointsPerMemberBoost = settings.YouTube_BoostGifts;
             //! Kick Event Settings
-            int pointsPerKickFollow = GetSetting<int>("pointsPerKickFollow", 100);
-            int pointsPerKickSub = GetSetting<int>("pointsPerKickSub", 300);
-            int pointsPerKickMonth = GetSetting<int>("pointsPerKickSubMonth", 10);
-            int pointsPerKickGift = GetSetting<int>("pointsPerKickGift", 300);
-            //! Trovo Event Settings
-            //Follow
-            //Raid
-            //Sub
-            //Resub
-            //Gift
-            //MassGift
-            //Todo Spells?
+            int pointsPerKickFollow = settings.Kick_Follower;
+            int pointsPerKickSub = settings.Kick_Sub;
+            int pointsPerKickMonth = settings.Kick_Month;
+            int pointsPerKickGift = settings.Kick_Gift;
 
             //! Pre-declared Vars
             string tier;
             string membershipName;
-            int points;
-            int memberPoints;
+            long points;
+            long memberPoints;
             int monthsSubbed;
             int gifts;
 
@@ -66,14 +59,12 @@ namespace StreamUP
                 //? Generic Events
                 case EventType.TwitchPresentViewers:
                 case EventType.YouTubePresentViewers:
-                case EventType.TrovoPresentViewers:
                 case EventType.KickPresentViewers:
                     returnValue = pointsPresentViewers;
                     break;
                 case EventType.TwitchChatMessage:
                 case EventType.YouTubeMessage:
-                case EventType.KickChatMessage:
-                case EventType.TrovoChatMessage:
+                case EventType.KickChatMessage:    
                     int min = minChatPoints;
                     int max = maxChatPoints;
                     returnValue = _CPH.Between(min, max);
@@ -81,7 +72,6 @@ namespace StreamUP
                 case EventType.TwitchFirstWord:
                 case EventType.YouTubeFirstWords:
                 case EventType.KickFirstWords:
-                case EventType.TrovoFirstWords:
                     returnValue = pointsFirstWords;
                     break;
                 //? Twitch Events
@@ -147,7 +137,14 @@ namespace StreamUP
                     points = 0;
                     if (pointsPerMemberBoost)
                     {
-                        points = pointsYouTubeMembers.TryGetValue(membershipName, out memberPoints) ? memberPoints : pointsPerMember;
+                        if (pointsYouTubeMembers.TryGetValue(membershipName, out string memberPointsString2) && long.TryParse(memberPointsString2, out long memberPointsValue2))
+                        {
+                            points = memberPointsValue2;
+                        }
+                        else
+                        {
+                            points = pointsPerMember;
+                        }
                     }
 
                     returnValue = (pointsPerGiftedMember + points) * gifts;
@@ -157,7 +154,14 @@ namespace StreamUP
                     int months = TryGetArgOrDefault("months", 1);
                     membershipName = TryGetArgOrDefault("levelName", "notFoundErrorXYZ123");
                     // Get points from dictionary or default to setting
-                    points = pointsYouTubeMembers.TryGetValue(membershipName, out memberPoints) ? memberPoints : pointsPerMember;
+                    if (pointsYouTubeMembers.TryGetValue(membershipName, out string memberPointsString) && long.TryParse(memberPointsString, out long memberPointsValue))
+                    {
+                        points = memberPointsValue;
+                    }
+                    else
+                    {
+                        points = pointsPerMember;
+                    }
                     // Calculate points to add
                     returnValue = points + (pointsPerMemberMonth * months);
                     break;
@@ -186,16 +190,6 @@ namespace StreamUP
                     gifts = TryGetArgOrDefault("gifts", 1);
                     returnValue = pointsPerKickGift * gifts;
                     break;
-
-                //? Trovo Events
-                case EventType.TrovoFollow:
-                case EventType.TrovoSpellCast:
-                case EventType.TrovoCustomSpellCast:
-                case EventType.TrovoRaid:
-                case EventType.TrovoSubscription:
-                case EventType.TrovoResubscription:
-                case EventType.TrovoGiftSubscription:
-                case EventType.TrovoMassGiftSubscription:
 
                 default:
                     break;

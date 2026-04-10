@@ -189,5 +189,37 @@ namespace StreamUP
             }
         }
 
+        public bool IsUserPaidMember(string userId, Platform platform)
+        {
+
+            if (platform == Platform.Twitch || platform == Platform.Kick)
+            {
+                _CPH.TryGetArg("isSubscribed", out bool isSubscriber);
+
+                if (isSubscriber)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            else if (platform == Platform.YouTube)
+            {
+                _CPH.TryGetArg("userIsSponser", out bool isMemeber);
+
+
+                if (isMemeber)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
+
     }
+
+
 }

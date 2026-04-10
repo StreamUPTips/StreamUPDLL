@@ -10,6 +10,31 @@ namespace StreamUP
     public partial class StreamUpLib
     {
 
+        // Kick stores booleans as "True"/"False" (C# default) instead of valid JSON "true"/"false",
+        // causing Newtonsoft to throw when deserialising. This helper safely converts the raw result.
+        private T SafeConvertUserVar<T>(object result, T defaultValue)
+        {
+            if (result is null)
+                return defaultValue;
+
+            try
+            {
+                // Handle Kick's "True"/"False" boolean quirk
+                if (typeof(T) == typeof(bool) && result is string strResult)
+                {
+                    if (bool.TryParse(strResult, out bool boolValue))
+                        return (T)(object)boolValue;
+                }
+
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+            catch (Exception ex)
+            {
+                _CPH.LogError($"Failed to convert user variable value '{result}' to type {typeof(T)}: {ex.Message}. Returning default.");
+                return defaultValue;
+            }
+        }
+
         public T GetUserVariable<T>(string userName, string varName, Platform platform, bool persisted, T defaultValue)
         {
             _CPH.LogDebug($"Getting User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Default Value: {defaultValue} of Type: {typeof(T)}");
@@ -17,21 +42,20 @@ namespace StreamUP
             {
                 Platform.Twitch => _CPH.GetTwitchUserVar<object>(userName, varName, persisted),
                 Platform.YouTube => _CPH.GetYouTubeUserVar<object>(userName, varName, persisted),
-                Platform.Trovo => _CPH.GetTrovoUserVar<object>(userName, varName, persisted),
                 Platform.Kick => _CPH.GetKickUserVar<object>(userName, varName, persisted),
-
                 _ => null
             };
 
             if (result is not null)
             {
                 _CPH.LogDebug($"Retrieved User Variable: {result}");
-                return (T)Convert.ChangeType(result, typeof(T));
+                return SafeConvertUserVar<T>(result, defaultValue);
             }
 
             _CPH.LogError($"Could not retrieve or cast user variable for {platform}, returning default.");
             return defaultValue;
         }
+
         public T GetUserVariableById<T>(string userId, string varName, Platform platform, bool persisted, T defaultValue)
         {
             _CPH.LogDebug($"Getting User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted} And Default Value: {defaultValue} of Type: {typeof(T)}");
@@ -39,7 +63,6 @@ namespace StreamUP
             {
                 Platform.Twitch => _CPH.GetTwitchUserVarById<object>(userId, varName, persisted),
                 Platform.YouTube => _CPH.GetYouTubeUserVarById<object>(userId, varName, persisted),
-                Platform.Trovo => _CPH.GetTrovoUserVarById<object>(userId, varName, persisted),
                 Platform.Kick => _CPH.GetKickUserVarById<object>(userId, varName, persisted),
                 _ => null
             };
@@ -47,7 +70,7 @@ namespace StreamUP
             if (result is not null)
             {
                 _CPH.LogDebug($"Retrieved User Variable: {result}");
-                return (T)Convert.ChangeType(result, typeof(T));
+                return SafeConvertUserVar<T>(result, defaultValue);
             }
 
             _CPH.LogError($"Could not retrieve or cast user variable for {platform}, returning default.");
@@ -68,11 +91,6 @@ namespace StreamUP
             {
                 _CPH.SetYouTubeUserVar(userName, varName, value, persisted);
             }
-                if (platform == Platform.Trovo)
-            {
-                _CPH.SetTrovoUserVar(userName,varName,value,persisted);
-            }
-
             if (platform == Platform.Kick)
             {
                 _CPH.SetKickUserVar(userName,varName,value,persisted);
@@ -93,11 +111,7 @@ namespace StreamUP
                 _CPH.SetYouTubeUserVarById(userId, varName, value, persisted);
             }
 
-            if (platform == Platform.Trovo)
-            {
-                _CPH.SetTrovoUserVarById(userId,varName,value,persisted);
-            }
-
+       
             if (platform == Platform.Kick)
             {
                 _CPH.SetKickUserVarById(userId,varName,value,persisted);
@@ -118,10 +132,7 @@ namespace StreamUP
             {
                 _CPH.UnsetYouTubeUserVar(username, varName, persisted);
             }
-                if (platform == Platform.Trovo)
-            {
-                _CPH.UnsetTrovoUserVar(username,varName,persisted);
-            }
+      
 
             if (platform == Platform.Kick)
             {
@@ -142,10 +153,7 @@ namespace StreamUP
             {
                 _CPH.UnsetYouTubeUserVarById(userId, varName, persisted);
             }
-                if (platform == Platform.Trovo)
-            {
-                _CPH.UnsetTrovoUserVarById(userId,varName,persisted);
-            }
+
 
             if (platform == Platform.Kick)
             {
