@@ -31,15 +31,14 @@ namespace StreamUP
                 new("Pokémon Captured", "pafCaptured", commands),
                 new("Pokémon Fled", "pafFled", commands),
                 new("Any Ball Thrown", "pafAnyBallThrown", commands),
-                //new("Pokeball Thrown", "pafPokeballThrown", commands),
-                //new("Greatball Thrown", "pafGreatballThrown", commands),
-                //new("Ultraball Thrown", "pafUltraballThrown", commands),
-                //new("Masterball Thrown", "pafMasterballThrown", commands),
+                new("Pokeball Thrown", "pafPokeballThrown", commands),
+                new("Greatball Thrown", "pafGreatballThrown", commands),
+                new("Ultraball Thrown", "pafUltraballThrown", commands),
+                new("Masterball Thrown", "pafMasterballThrown", commands),
                 new("Catch Failed/Escaped", "pafCatchFailed", commands),
                 new("Pokémon Error", "pafError", commands),
                 new("Pokedex Checked", "pafPokedexChecked", commands)
-                //Inventory?
-                //CatchModifier?
+                
 
 
             };
@@ -81,10 +80,12 @@ namespace StreamUP
             // Implementation to retrieve Pokémon data from screen
         }
 
-        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, double multiplier = 1.0)
+        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, double multiplier = 1.0, double ball = 0.0)
         {
             var data = new StringContent(catchInfo.ToString(), Encoding.UTF8, "application/json");
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.streamup.tips/pokemon/catch?language=en&multiplier={multiplier}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.streamup.tips/pokemon/catch?language=en&multiplier={multiplier}&ball={ball}");
+            LogInfo($"Attempting to catch Pokémon with multiplier {multiplier} and ball {ball}");
+            LogInfo($"Catch Info: {catchInfo}");
             request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             request.Content = data;
             var catchResult = _httpClient.SendAsync(request).Result;
@@ -154,6 +155,31 @@ namespace StreamUP
             //1 - No Valid Input or Pokemon on screen. Please check and try again later.
             //2 - A catch is already in progress. Please wait for it to complete before trying again.
             //3 - No Pokemon on screen.
+            //4 - Ball is not Available.
+        }
+
+        public string GetBallName(string ballType)
+        {
+            return ballType switch
+            {
+                "poke" => "PokéBall",
+                "great" => "Great Ball",
+                "ultra" => "Ultra Ball",
+                "master" => "Master Ball",
+                _ => "Unknown Ball"
+            };
+        }
+
+        public string GetBallURL(string ball)
+        {
+            return ball switch
+            {
+                "poke" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png",
+                "great" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png",
+                "ultra" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png",
+                "master" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+                _ => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+            };
         }
     }
 }

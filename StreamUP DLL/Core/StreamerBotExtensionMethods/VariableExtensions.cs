@@ -9,7 +9,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-        private readonly Random _random;
+        private readonly Random _random = new Random();
         // Kick stores booleans as "True"/"False" (C# default) instead of valid JSON "true"/"false",
         // causing Newtonsoft to throw when deserialising. This helper safely converts the raw result.
         private T SafeConvertUserVar<T>(object result, T defaultValue)
@@ -179,13 +179,43 @@ namespace StreamUP
 
         }
 
+        public TItem GetWeightedRandom<TItem>(Dictionary<TItem, int> items)
+        {
+            if (items == null || items.Count == 0)
+                throw new ArgumentException("Items collection is empty or null");
 
+            int totalWeight = 0;
+
+            foreach (var w in items.Values)
+            {
+                if (w < 0)
+                    throw new ArgumentException("Weights cannot be negative");
+
+                totalWeight += w;
+            }
+
+            if (totalWeight <= 0)
+                throw new InvalidOperationException("Total weight must be greater than zero");
+
+            int roll = _random.Next(totalWeight);
+            int cumulative = 0;
+
+            foreach (var kvp in items)
+            {
+                cumulative += kvp.Value;
+                if (roll < cumulative)
+                    return kvp.Key;
+            }
+
+            return items.Last().Key;
+        }
         public TItem GetWeightedRandom<TItem>(Dictionary<TItem, double> items)
         {
             if (items == null || items.Count == 0)
                 throw new ArgumentException("Items collection is empty or null");
 
             double totalWeight = 0;
+
             foreach (var w in items.Values)
             {
                 if (w < 0)
@@ -198,8 +228,8 @@ namespace StreamUP
                 throw new InvalidOperationException("Total weight must be greater than zero");
 
             double roll = _random.NextDouble() * totalWeight;
-
             double cumulative = 0;
+
             foreach (var kvp in items)
             {
                 cumulative += kvp.Value;
@@ -207,7 +237,6 @@ namespace StreamUP
                     return kvp.Key;
             }
 
-            // fallback for floating point edge cases
             return items.Last().Key;
         }
 

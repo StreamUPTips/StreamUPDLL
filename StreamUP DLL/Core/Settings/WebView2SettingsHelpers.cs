@@ -585,5 +585,33 @@ namespace StreamUP
         }
 
         #endregion
+
+        public T GetAltSettingValue<T>(string id, string key, T defaultValue)
+        {
+
+            var filePath = GetProductSettingsFilePath(id);
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(filePath, Encoding.UTF8);
+                    var data = JObject.Parse(json);
+                    var token = data[key];
+
+                    if (token == null)
+                    {
+                        return defaultValue;
+                    }
+                    return token.ToObject<T>();
+                }
+                catch (Exception ex)
+                {
+                    LogError($"Failed to load settings file: {ex.Message}");
+                    return defaultValue;
+                }
+
+            }
+            return defaultValue;
+        }
     }
 }
