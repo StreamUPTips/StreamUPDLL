@@ -9,7 +9,7 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
-
+        private readonly Random _random = new Random();
         // Kick stores booleans as "True"/"False" (C# default) instead of valid JSON "true"/"false",
         // causing Newtonsoft to throw when deserialising. This helper safely converts the raw result.
         private T SafeConvertUserVar<T>(object result, T defaultValue)
@@ -82,7 +82,7 @@ namespace StreamUP
         public bool SetUserVariable(string userName, string varName, object value, Platform platform, bool persisted)
         {
             _CPH.LogDebug($"Setting User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
-        
+
             if (platform == Platform.Twitch)
             {
                 _CPH.SetTwitchUserVar(userName, varName, value, persisted);
@@ -93,7 +93,7 @@ namespace StreamUP
             }
             if (platform == Platform.Kick)
             {
-                _CPH.SetKickUserVar(userName,varName,value,persisted);
+                _CPH.SetKickUserVar(userName, varName, value, persisted);
             }
 
             _CPH.LogDebug($"Set User Variable: {varName} for UserId: {userName} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
@@ -111,10 +111,10 @@ namespace StreamUP
                 _CPH.SetYouTubeUserVarById(userId, varName, value, persisted);
             }
 
-       
+
             if (platform == Platform.Kick)
             {
-                _CPH.SetKickUserVarById(userId,varName,value,persisted);
+                _CPH.SetKickUserVarById(userId, varName, value, persisted);
             }
 
             _CPH.LogDebug($"Setting User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted} And Value: {value}");
@@ -132,11 +132,11 @@ namespace StreamUP
             {
                 _CPH.UnsetYouTubeUserVar(username, varName, persisted);
             }
-      
+
 
             if (platform == Platform.Kick)
             {
-                _CPH.UnsetKickUserVar(username,varName,persisted);
+                _CPH.UnsetKickUserVar(username, varName, persisted);
             }
             _CPH.LogDebug($"Unset User Variable: {varName} for UserId: {username} on Platform: {platform} with Persisted: {persisted}");
             return true;
@@ -157,7 +157,7 @@ namespace StreamUP
 
             if (platform == Platform.Kick)
             {
-                _CPH.UnsetKickUserVarById(userId,varName,persisted);
+                _CPH.UnsetKickUserVarById(userId, varName, persisted);
             }
             _CPH.LogDebug($"Unset User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted}");
             return true;
@@ -179,8 +179,66 @@ namespace StreamUP
 
         }
 
+        public TItem GetWeightedRandom<TItem>(Dictionary<TItem, int> items)
+        {
+            if (items == null || items.Count == 0)
+                throw new ArgumentException("Items collection is empty or null");
 
+            int totalWeight = 0;
 
+            foreach (var w in items.Values)
+            {
+                if (w < 0)
+                    throw new ArgumentException("Weights cannot be negative");
+
+                totalWeight += w;
+            }
+
+            if (totalWeight <= 0)
+                throw new InvalidOperationException("Total weight must be greater than zero");
+
+            int roll = _random.Next(totalWeight);
+            int cumulative = 0;
+
+            foreach (var kvp in items)
+            {
+                cumulative += kvp.Value;
+                if (roll < cumulative)
+                    return kvp.Key;
+            }
+
+            return items.Last().Key;
+        }
+        public TItem GetWeightedRandom<TItem>(Dictionary<TItem, double> items)
+        {
+            if (items == null || items.Count == 0)
+                throw new ArgumentException("Items collection is empty or null");
+
+            double totalWeight = 0;
+
+            foreach (var w in items.Values)
+            {
+                if (w < 0)
+                    throw new ArgumentException("Weights cannot be negative");
+
+                totalWeight += w;
+            }
+
+            if (totalWeight <= 0)
+                throw new InvalidOperationException("Total weight must be greater than zero");
+
+            double roll = _random.NextDouble() * totalWeight;
+            double cumulative = 0;
+
+            foreach (var kvp in items)
+            {
+                cumulative += kvp.Value;
+                if (roll < cumulative)
+                    return kvp.Key;
+            }
+
+            return items.Last().Key;
+        }
 
 
         public T TryGetValueOrRandom<T>(IEnumerable<T> collection, int index = -1)
