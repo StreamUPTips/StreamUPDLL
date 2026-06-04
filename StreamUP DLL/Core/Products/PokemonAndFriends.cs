@@ -30,6 +30,8 @@ namespace StreamUP
                 new("Pokémon Shiny Spawned", "pafShinySpawned", commands),
                 new("Pokémon Captured", "pafCaptured", commands),
                 new("Pokémon Fled", "pafFled", commands),
+                new("Pokémon Status Applied", "pafStatusApplied", commands),
+                new("Pokémon Status Wore Off", "pafStatusWoreOff", commands),
                 new("Any Ball Thrown", "pafAnyBallThrown", commands),
                 new("Pokeball Thrown", "pafPokeballThrown", commands),
                 new("Greatball Thrown", "pafGreatballThrown", commands),
@@ -38,7 +40,7 @@ namespace StreamUP
                 new("Catch Failed/Escaped", "pafCatchFailed", commands),
                 new("Pokémon Error", "pafError", commands),
                 new("Pokedex Checked", "pafPokedexChecked", commands)
-                
+
 
 
             };
@@ -80,12 +82,13 @@ namespace StreamUP
             // Implementation to retrieve Pokémon data from screen
         }
 
-        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, double multiplier = 1.0, double ball = 0.0)
+        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, int multiplier = 1, int ball = 0, int status = 0)
         {
             var data = new StringContent(catchInfo.ToString(), Encoding.UTF8, "application/json");
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.streamup.tips/pokemon/catch?language=en&multiplier={multiplier}&ball={ball}");
-            LogInfo($"Attempting to catch Pokémon with multiplier {multiplier} and ball {ball}");
+            double catchValue = (multiplier + ball + status) / 100;
+            LogInfo($"Attempting to catch Pokémon with multiplier {multiplier}, ball {ball} and status {status} = catchValue {catchValue}");
             LogInfo($"Catch Info: {catchInfo}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.streamup.tips/pokemon/catch?language=en&catchValue={catchValue}");
             request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             request.Content = data;
             var catchResult = _httpClient.SendAsync(request).Result;
@@ -108,7 +111,7 @@ namespace StreamUP
             }
             return catchResult.StatusCode.ToString();
         }
-        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage, double shinyChance = 0.00390625)
+        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage,  int shinyChance = 256)
         {
             string pokeURI = $"https://api.streamup.tips/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}&shinyChance={shinyChance}";
             if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
@@ -181,5 +184,60 @@ namespace StreamUP
                 _ => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
             };
         }
+    }
+
+
+
+
+    public class PokemonSettings
+    {
+        [JsonProperty("poke_af_api_key")]
+        public string Poke_af_api_key { get; set; } = "";
+        [JsonProperty("poke_af_gens")]
+        public string Poke_af_gens { get; set; } = "2";
+        [JsonProperty("poke_af_lang_select")]
+        public string Poke_af_lang_select { get; set; } = "en";
+        [JsonProperty("poke_af_catch_multi")]
+        public int Poke_af_catch_multi { get; set; } = 1;
+        [JsonProperty("poke_af_sprite_type")]
+        public string Poke_af_sprite_type { get; set; } = "Default";
+        [JsonProperty("poke_af_shiny_chance")]
+        public int Poke_af_shiny_chance { get; set; } = 265;
+        [JsonProperty("poke_af_flee_chance")]
+        public double Poke_af_flee_chance { get; set; } = 50.0;
+        [JsonProperty("poke_af_seasonal")]
+        public bool Poke_af_seasonal { get; set; } = false;
+        [JsonProperty("poke_af_channel_redeem")]
+        public string Poke_af_channel_redeem { get; set; } = "";
+        [JsonProperty("poke_af_status_boost")]
+        public int Poke_af_status_boost { get; set; } = 20;
+        [JsonProperty("poke_af_status_effects")]
+        public List<string> Poke_af_status_effects { get; set; } = new List<string>();
+        [JsonProperty("poke_af_effect_off")]
+        public int Poke_af_effect_off { get; set; } = 50;
+        [JsonProperty("poke_af_enable_poke")]
+        public bool Poke_af_enable_poke { get; set; } = true;
+        [JsonProperty("poke_af_pokeball")]
+        public int Poke_af_pokeball { get; set; } = 0;
+        [JsonProperty("poke_af_pokeball_use")]
+        public int Poke_af_pokeball_use { get; set; } = 65;
+        [JsonProperty("poke_af_enable_great")]
+        public bool Poke_af_enable_great { get; set; } = true;
+        [JsonProperty("poke_af_great_ball")]
+        public int Poke_af_great_ball { get; set; } = 0;
+        [JsonProperty("poke_af_greatball_use")]
+        public int Poke_af_greatball_use { get; set; } = 20;
+        [JsonProperty("poke_af_enable_ultra")]
+        public bool Poke_af_enable_ultra { get; set; } = true;
+        [JsonProperty("poke_af_ultra_ball")]
+        public int Poke_af_ultra_ball { get; set; } = 0;
+        [JsonProperty("poke_af_ultraball_use")]
+        public int Poke_af_ultraball_use { get; set; } = 10;
+        [JsonProperty("poke_af_enable_master")]
+        public bool Poke_af_enable_master { get; set; } = true;
+        [JsonProperty("poke_af_master_ball")]
+        public int Poke_af_master_ball { get; set; } = 100;
+        [JsonProperty("poke_af_masterball_use")]
+        public int Poke_af_masterball_use { get; set; } = 5;
     }
 }
