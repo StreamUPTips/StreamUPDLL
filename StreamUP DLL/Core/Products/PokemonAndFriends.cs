@@ -20,6 +20,8 @@ namespace StreamUP
 {
     public partial class StreamUpLib
     {
+        private string Poke_api_link = "https://api.streamup.tips";
+        //private string Poke_api_link = "https://localhost:5001";
         public void SetTriggersForPokemon()
         {
             string[] commands = { "StreamUP", "Pokemon and Friends" };
@@ -49,7 +51,7 @@ namespace StreamUP
 
         public string GetPokemonDataById(int id, string streamUPStreamerKey)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.streamup.tips/pokemon/index/{id}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Poke_api_link}/pokemon/index/{id}");
             request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             var response = _httpClient.SendAsync(request).Result;
             if (!response.IsSuccessStatusCode)
@@ -63,7 +65,7 @@ namespace StreamUP
 
         public string GetPokemonDataByName(string name, string streamUPStreamerKey)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.streamup.tips/pokemon/name/{name}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Poke_api_link}/pokemon/name/{name}");
             request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             var response = _httpClient.SendAsync(request).Result;
             if (!response.IsSuccessStatusCode)
@@ -82,13 +84,14 @@ namespace StreamUP
             // Implementation to retrieve Pokémon data from screen
         }
 
-        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, int multiplier = 1, int ball = 0, int status = 0)
+        public string CatchPokemon(JObject catchInfo, string streamUPStreamerKey, int multiplier = 1, int ball = 0, int status = 0, string language = "en")
         {
             var data = new StringContent(catchInfo.ToString(), Encoding.UTF8, "application/json");
-            double catchValue = (multiplier + ball + status) / 100;
+            int catchChance = multiplier + ball + status;
+            double catchValue = (double)catchChance;
             LogInfo($"Attempting to catch Pokémon with multiplier {multiplier}, ball {ball} and status {status} = catchValue {catchValue}");
             LogInfo($"Catch Info: {catchInfo}");
-            var request = new HttpRequestMessage(HttpMethod.Post, $"https://api.streamup.tips/pokemon/catch?language=en&catchValue={catchValue}");
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{Poke_api_link}/pokemon/catch?language={language}&catchValue={catchValue}");
             request.Headers.Add("X-StreamUP-Streamer-Key", streamUPStreamerKey);
             request.Content = data;
             var catchResult = _httpClient.SendAsync(request).Result;
@@ -113,16 +116,16 @@ namespace StreamUP
         }
         public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage,  int shinyChance = 256)
         {
-            string pokeURI = $"https://api.streamup.tips/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}&shinyChance={shinyChance}";
+            string pokeURI = $"{Poke_api_link}/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}&shinyChance={shinyChance}";
             if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
             {
                 if (int.TryParse(selectedPokemon, out int pokeId))
                 {
-                    pokeURI = $"https://api.streamup.tips/pokemon/index/{pokeId}?shinyChance={shinyChance}";
+                    pokeURI = $"{Poke_api_link}/pokemon/index/{pokeId}?shinyChance={shinyChance}";
                 }
                 else
                 {
-                    pokeURI = $"https://api.streamup.tips/pokemon/name/{selectedPokemon}?shinyChance={shinyChance}";
+                    pokeURI = $"{Poke_api_link}/pokemon/name/{selectedPokemon}?shinyChance={shinyChance}";
                 }
             }
             var request = new HttpRequestMessage(HttpMethod.Get, pokeURI);
