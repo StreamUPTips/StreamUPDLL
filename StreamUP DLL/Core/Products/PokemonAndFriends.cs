@@ -21,7 +21,7 @@ namespace StreamUP
     public partial class StreamUpLib
     {
         private string Poke_api_link = "https://api.streamup.tips";
-        //private string Poke_api_link = "https://localhost:5001";
+        //private string Poke_api_link = "https://localhost:5000";
         public void SetTriggersForPokemon()
         {
             string[] commands = { "StreamUP", "Pokemon and Friends" };
