@@ -78,7 +78,7 @@ namespace StreamUP
         public bool AddTimedPoints(long pointsToAdd, string platformString, string varName = "points")
         {
             Enum.TryParse(platformString, true, out Platform platform);
-            LogDebug($"[Points Admin] [Present Viewers] Starting Present Viewers from {platform}");
+            LogInfo($"[Points Admin] [Present Viewers] Starting Present Viewers from {platform}");
             _CPH.TryGetArg("users", out List<Dictionary<string, object>> users);
             string userId;
             for (int i = 0; i < users.Count; i++)

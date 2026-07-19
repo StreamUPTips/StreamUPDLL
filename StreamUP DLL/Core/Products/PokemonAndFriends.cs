@@ -114,9 +114,9 @@ namespace StreamUP
             }
             return catchResult.StatusCode.ToString();
         }
-        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool pafSpecial, string pafLanguage,  int shinyChance = 256)
+        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, string pafLanguage,  int shinyChance = 256)
         {
-            string pokeURI = $"{Poke_api_link}/pokemon/random?generation={pafGenerations}&special={pafSpecial}&language={pafLanguage}&shinyChance={shinyChance}";
+            string pokeURI = $"{Poke_api_link}/pokemon/random?generation={pafGenerations}&language={pafLanguage}&shinyChance={shinyChance}";
             if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
             {
                 if (int.TryParse(selectedPokemon, out int pokeId))
@@ -178,13 +178,14 @@ namespace StreamUP
 
         public string GetBallURL(string ball)
         {
+            var root = GetStreamerBotFolder();
             return ball switch
             {
-                "poke" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png",
-                "great" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png",
-                "ultra" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png",
-                "master" => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
-                _ => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"
+                "poke" => Path.Combine(root, "StreamUP", "Assets", "poke.png"),
+                "great" => Path.Combine(root, "StreamUP", "Assets", "great.png"),
+                "ultra" => Path.Combine(root, "StreamUP", "Assets", "ultra.png"),
+                "master" => Path.Combine(root, "StreamUP", "Assets", "master.png"),
+                _ => "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke.png"
             };
         }
     }
@@ -208,8 +209,6 @@ namespace StreamUP
         public int Poke_af_shiny_chance { get; set; } = 265;
         [JsonProperty("poke_af_flee_chance")]
         public double Poke_af_flee_chance { get; set; } = 50.0;
-        [JsonProperty("poke_af_seasonal")]
-        public bool Poke_af_seasonal { get; set; } = false;
         [JsonProperty("poke_af_channel_redeem")]
         public string Poke_af_channel_redeem { get; set; } = "";
         [JsonProperty("poke_af_status_boost")]
