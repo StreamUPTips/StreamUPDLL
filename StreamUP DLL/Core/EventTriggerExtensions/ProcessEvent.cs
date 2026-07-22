@@ -65,7 +65,12 @@ namespace StreamUP
             { EventType.KickMassGiftSubscription, new KickMassGiftSubscriptionHandler() },
             { EventType.KickUserTimedOut, new KickUserTimedOutHandler() },
             { EventType.KickUserBanned, new KickUserBannedHandler() },
-            { EventType.KickViewerCountUpdate, new KickViewerCountUpdateHandler() }
+            { EventType.KickViewerCountUpdate, new KickViewerCountUpdateHandler() },
+
+            { EventType.ObsConnected, new ObsConnectedHandler() },
+            { EventType.ObsDisconnected, new ObsDisconnectedHandler() }
+
+
         };
 
         public TriggerData ProcessEvent(IDictionary<string, object> sbArgs)
