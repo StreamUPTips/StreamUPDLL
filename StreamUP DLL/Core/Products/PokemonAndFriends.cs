@@ -121,11 +121,11 @@ namespace StreamUP
             {
                 if (int.TryParse(selectedPokemon, out int pokeId))
                 {
-                    pokeURI = $"{Poke_api_link}/pokemon/index/{pokeId}?shinyChance={shinyChance}";
+                    pokeURI = $"{Poke_api_link}/pokemon/index/{pokeId}?shinyChance={shinyChance}&language={pafLanguage}";
                 }
                 else
                 {
-                    pokeURI = $"{Poke_api_link}/pokemon/name/{selectedPokemon}?shinyChance={shinyChance}";
+                    pokeURI = $"{Poke_api_link}/pokemon/name/{selectedPokemon}?shinyChance={shinyChance}&language={pafLanguage}";
                 }
             }
             var request = new HttpRequestMessage(HttpMethod.Get, pokeURI);
@@ -241,5 +241,8 @@ namespace StreamUP
         public int Poke_af_master_ball { get; set; } = 100;
         [JsonProperty("poke_af_masterball_use")]
         public int Poke_af_masterball_use { get; set; } = 5;
+//Unused Properties
+        [JsonProperty("poke_af_seasonal")]
+        public bool Poke_af_seasonal { get; set; } = false;
     }
 }
