@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -23,12 +24,12 @@ namespace StreamUP
 
 
 
-public class ModAddedCommand
-{
+  public class ModAddedCommand
+  {
     [JsonProperty("command")]
     public string Command { get; set; } = string.Empty;
     [JsonProperty("output")]
-    public int Output { get; set; } = 0;
+    public string Output { get; set; } = string.Empty;
     [JsonProperty("user_cooldown")]
     public int User_cooldown { get; set; } = 0;
     [JsonProperty("global_cooldown")]
@@ -37,11 +38,11 @@ public class ModAddedCommand
     public int Permission { get; set; } = 0;
     [JsonProperty("volume")]
     public int Volume { get; set; } = 0;
-}
+  }
 
 
-public class ModAddedCommandSettings
-{
+  public class ModAddedCommandSettings
+  {
     [JsonProperty("mac_command_table")]
     public List<ModAddedCommand> Mac_command_table { get; set; } = new List<ModAddedCommand>();
     [JsonProperty("mac_allow_globals")]
@@ -62,7 +63,7 @@ public class ModAddedCommandSettings
     public int Mac_volume { get; set; } = 0;
     [JsonProperty("mac_counts_table")]
     public Dictionary<string, int> Mac_counts_table { get; set; } = new Dictionary<string, int>();
-}
+  }
 
 
 
@@ -115,14 +116,31 @@ public class ModAddedCommandSettings
       return banned.Exists(c => c.Equals(command, StringComparison.OrdinalIgnoreCase));
     }
 
-    public async Task<string> GetSound(string command, string message, bool allow)
+
+    public int GetIntTag(ref string stringCommandInfo, string prefix, int defaultValue, int minValue, int maxValue)
+    {
+      Match match = Regex.Match(stringCommandInfo, $@"{Regex.Escape(prefix)}\{{(-?\d+)\}}");
+      if (match.Success && int.TryParse(match.Groups[1].Value, out int value) && value >= minValue && value <= maxValue)
+      {
+        stringCommandInfo = Regex.Replace(stringCommandInfo, $@"\s*{Regex.Escape(match.Value)}\s*", " ").Trim();
+        return value;
+      }
+
+      return defaultValue;
+    }
+
+
+    public async Task<string> GetSound(string stringCommandInfo, string command, bool allow)
     {
       if (allow)
       {
         string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "StreamUP", "Sounds", $"{command}.mp3");
         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
         Regex regex = new Regex(@"sound{([^}]+)}");
-        var matches = regex.Matches(message);
+        var matches = regex.Matches(stringCommandInfo);
+        LogInfo($"START stringCommandInfo: {stringCommandInfo}");
+        LogInfo($"COMMAND: {command}");
+
         foreach (Match match in matches)
         {
           string url = match.Groups[1].Value;
@@ -130,7 +148,7 @@ public class ModAddedCommandSettings
           {
             if (response.IsSuccessStatusCode)
             {
-              using (var stream = await _httpClient.GetStreamAsync(url))
+              using (var stream = await response.Content.ReadAsStreamAsync())
               using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
               {
                 await stream.CopyToAsync(fs);
@@ -141,13 +159,17 @@ public class ModAddedCommandSettings
               LogError($"Failed to download: {url} (Status: {response.StatusCode})");
             }
           }
-
-          message = message.Replace(url, command);
+          LogInfo($"URL VALUE: {url}");
+          stringCommandInfo = stringCommandInfo.Replace(url, command);
+          LogInfo($"AFTER REPLACE: {stringCommandInfo}");
         }
       }
-
-      return message;
+      LogInfo($"RETURNING: {stringCommandInfo}");
+      return stringCommandInfo;
     }
+
+
+
 
   }
 }
