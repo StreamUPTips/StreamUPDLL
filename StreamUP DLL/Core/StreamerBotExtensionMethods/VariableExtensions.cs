@@ -56,25 +56,59 @@ namespace StreamUP
             return defaultValue;
         }
 
-        public T GetUserVariableById<T>(string userId, string varName, Platform platform, bool persisted, T defaultValue)
+        public T GetUserVariableById<T>(
+            string userId,
+            string varName,
+            Platform platform,
+            bool persisted,
+            T defaultValue)
         {
-            _CPH.LogDebug($"Getting User Variable: {varName} for UserId: {userId} on Platform: {platform} with Persisted: {persisted} And Default Value: {defaultValue} of Type: {typeof(T)}");
-            object result = platform switch
-            {
-                Platform.Twitch => _CPH.GetTwitchUserVarById<object>(userId, varName, persisted),
-                Platform.YouTube => _CPH.GetYouTubeUserVarById<object>(userId, varName, persisted),
-                Platform.Kick => _CPH.GetKickUserVarById<object>(userId, varName, persisted),
-                _ => null
-            };
+            _CPH.LogDebug(
+                $"Getting User Variable: {varName} for UserId: {userId} " +
+                $"on Platform: {platform} with Persisted: {persisted} " +
+                $"And Default Value: {defaultValue} of Type: {typeof(T)}"
+            );
 
-            if (result is not null)
+            try
             {
-                _CPH.LogDebug($"Retrieved User Variable: {result}");
-                return SafeConvertUserVar<T>(result, defaultValue);
+                switch (platform)
+                {
+                    case Platform.Twitch:
+                        return _CPH.GetTwitchUserVarById<T>(
+                            userId,
+                            varName,
+                            persisted
+                        );
+
+                    case Platform.YouTube:
+                        return _CPH.GetYouTubeUserVarById<T>(
+                            userId,
+                            varName,
+                            persisted
+                        );
+
+                    case Platform.Kick:
+                        object result = _CPH.GetKickUserVarById<object>(
+                            userId,
+                            varName,
+                            persisted
+                        );
+
+                        return SafeConvertUserVar<T>(result, defaultValue);
+
+                    default:
+                        return defaultValue;
+                }
             }
+            catch (Exception ex)
+            {
+                _CPH.LogError(
+                    $"Failed to retrieve user variable '{varName}' " +
+                    $"for {platform}: {ex.Message}. Returning default."
+                );
 
-            _CPH.LogError($"Could not retrieve or cast user variable for {platform}, returning default.");
-            return defaultValue;
+                return defaultValue;
+            }
         }
 
 
@@ -166,7 +200,7 @@ namespace StreamUP
 
         public T GetGlobal<T>(string varName, bool persisted, T defaultValue)
         {
-            object result = _CPH.GetGlobalVar<object>(varName, persisted);
+            T result = _CPH.GetGlobalVar<T>(varName, persisted);
             if (result is not null)
             {
                 _CPH.LogDebug($"Retrieved Global Variable: {result} for VarName: {varName} with Persisted: {persisted} And Default Value: {defaultValue} of Type: {typeof(T)}");
