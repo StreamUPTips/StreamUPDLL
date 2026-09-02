@@ -114,7 +114,7 @@ namespace StreamUP
             }
             return catchResult.StatusCode.ToString();
         }
-        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, string pafLanguage,  int shinyChance = 256)
+        public string PokemonSpawn(string streamUPStreamerKey, int pafGenerations, bool special = false, string pafLanguage = "en",  int shinyChance = 256)
         {
             string pokeURI = $"{Poke_api_link}/pokemon/random?generation={pafGenerations}&language={pafLanguage}&shinyChance={shinyChance}";
             if (_CPH.TryGetArg<string>("rawInput", out string selectedPokemon) && !string.IsNullOrEmpty(selectedPokemon))
