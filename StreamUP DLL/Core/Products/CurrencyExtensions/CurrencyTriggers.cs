@@ -97,6 +97,22 @@ namespace StreamUP
 
         }
 
+        public void SetTriggersForCurrencyBets()
+        {
+            string[] categories = { "StreamUP", "Currency", "Bets" };
+            List<CustomTrigger> customTriggers = new List<CustomTrigger>
+            {
+            new("Bets Start", "betsStart",categories),
+            new("Option Added", "betsOptionAdded",categories),
+            new("Bets Open", "betsWon",categories),
+            new("Bets Closed", "betsClosed",categories),
+            new("Bet Resolved", "betsResolved",categories),
+            new("Bet Failed", "betsFailed",categories),
+
+             };
+            SetCustomTriggers(customTriggers);
+
+        }
 
 
     }

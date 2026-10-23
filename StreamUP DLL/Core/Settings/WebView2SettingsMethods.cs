@@ -63,8 +63,9 @@ namespace StreamUP
                 // Update window title with product name
                 var productName = settingsConfig["productName"]?.ToString() ?? "Settings";
                 var productVersion = settingsConfig["productVersion"]?.ToString();
+    
 
-                LogInfo($"Opening settings for: {productName} ({_currentProductNumber})");
+                LogInfo($"Opening settings for: {productName} ({_currentProductNumber}) Version: {productVersion}");
 
                 // Load saved settings from cache/file
                 _currentSavedSettings = LoadProductSettingsInternal(_currentProductNumber);

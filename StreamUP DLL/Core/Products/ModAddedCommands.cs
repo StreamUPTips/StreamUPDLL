@@ -144,7 +144,7 @@ namespace StreamUP
         foreach (Match match in matches)
         {
           string url = match.Groups[1].Value;
-          using (var response = _httpClient.GetAsync(url).Result)
+          using (var response = await _httpClient.GetAsync(url))
           {
             if (response.IsSuccessStatusCode)
             {
@@ -157,6 +157,10 @@ namespace StreamUP
             else
             {
               LogError($"Failed to download: {url} (Status: {response.StatusCode})");
+              if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+              {
+                LogError($"The host refused direct access to the sound file: {url}. Try downloading it directly from your browser and using discord as a middle man. Or place the sound directly in your StreamUP/Sounds folder. Ensure the file is named correctly.");
+              }
             }
           }
           LogInfo($"URL VALUE: {url}");
